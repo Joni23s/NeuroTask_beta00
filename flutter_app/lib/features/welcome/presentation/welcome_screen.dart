@@ -189,20 +189,16 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
                                 ],
                               ),
                               child: Center(
-                                child: ShaderMask(
-                                  shaderCallback: (Rect bounds) {
-                                    return LinearGradient(
-                                      colors: isDark
-                                          ? [AppColors.brandGlowCyan, const Color(0xFF6366F1)]
-                                          : [const Color(0xFF0284C7), AppColors.primaryIndigo],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ).createShader(bounds);
-                                  },
-                                  child: const Icon(
-                                    Icons.psychology_rounded,
-                                    size: 108,
-                                    color: Colors.white,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(28.0),
+                                  child: Image.asset(
+                                    'assets/images/brain_logo_transparent.png',
+                                    fit: BoxFit.contain,
+                                    errorBuilder: (_, __, ___) => const Icon(
+                                      Icons.psychology_rounded,
+                                      size: 108,
+                                      color: AppColors.primaryIndigo,
+                                    ),
                                   ),
                                 ),
                               ),
