@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+import 'web_speech_bridge.dart';
 
 class SpeechState {
   final bool isInitialized;
@@ -52,6 +53,17 @@ class SpeechNotifier extends StateNotifier<SpeechState> {
   }
 
   Future<bool> initSpeech() async {
+    if (kIsWeb) {
+      final webOk = isWebSpeechSupported();
+      state = state.copyWith(
+        isInitialized: true,
+        isAvailable: webOk,
+        currentLocale: 'es-ES',
+        errorMessage: webOk ? null : 'Web Speech API no disponible en este navegador.',
+      );
+      return webOk;
+    }
+
     try {
       final available = await _speechToText.initialize(
         onError: _onError,
@@ -61,10 +73,11 @@ class SpeechNotifier extends StateNotifier<SpeechState> {
 
       String? selectedLocale;
       if (available) {
-        final locales = await _speechToText.locales();
-        // Look for Spanish locale if available
-        final esLocale = locales.where((l) => l.localeId.startsWith('es')).firstOrNull;
-        selectedLocale = esLocale?.localeId ?? (locales.isNotEmpty ? locales.first.localeId : null);
+        try {
+          final locales = await _speechToText.locales();
+          final esLocale = locales.where((l) => l.localeId.startsWith('es')).firstOrNull;
+          selectedLocale = esLocale?.localeId ?? (locales.isNotEmpty ? locales.first.localeId : null);
+        } catch (_) {}
       }
 
       state = state.copyWith(
@@ -114,6 +127,27 @@ class SpeechNotifier extends StateNotifier<SpeechState> {
 
     state = state.copyWith(isListening: true, recognizedWords: '', errorMessage: null);
 
+    if (kIsWeb) {
+      startWebSpeech(
+        onResult: (text) {
+          state = state.copyWith(recognizedWords: text);
+          onResult(text);
+        },
+        onSoundLevel: (level) {
+          state = state.copyWith(soundLevel: level);
+          onSoundLevel?.call(level);
+        },
+        onError: (err) {
+          debugPrint('Web Speech error: $err');
+          state = state.copyWith(isListening: false, soundLevel: 0.0, errorMessage: err);
+        },
+        onEnd: () {
+          state = state.copyWith(isListening: false, soundLevel: 0.0);
+        },
+      );
+      return;
+    }
+
     try {
       await _speechToText.listen(
         onResult: (SpeechRecognitionResult result) {
@@ -122,7 +156,6 @@ class SpeechNotifier extends StateNotifier<SpeechState> {
           onResult(words);
         },
         onSoundLevelChange: (level) {
-          // Normalize decibel level between 0.0 and 1.0
           final normalized = ((level + 2.0) / 12.0).clamp(0.0, 1.0);
           state = state.copyWith(soundLevel: normalized);
           onSoundLevel?.call(normalized);
@@ -141,7 +174,9 @@ class SpeechNotifier extends StateNotifier<SpeechState> {
   }
 
   Future<void> stopListening() async {
-    if (_speechToText.isListening) {
+    if (kIsWeb) {
+      stopWebSpeech();
+    } else if (_speechToText.isListening) {
       await _speechToText.stop();
     }
     state = state.copyWith(isListening: false, soundLevel: 0.0);

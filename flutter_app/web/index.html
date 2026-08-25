@@ -41,6 +41,107 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
+  <script>
+    window.NeuroTaskVoice = {
+      recognition: null,
+      isListening: false,
+      
+      isSupported: function() {
+        return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+      },
+
+      start: function(onResult, onSoundLevel, onError, onEnd) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+          if (onError) onError("Tu navegador no soporta Web Speech API");
+          return;
+        }
+
+        try {
+          if (window.NeuroTaskVoice.recognition) {
+            try { window.NeuroTaskVoice.recognition.abort(); } catch(e) {}
+          }
+
+          const rec = new SpeechRecognition();
+          rec.continuous = true;
+          rec.interimResults = true;
+          rec.lang = 'es-ES';
+
+          rec.onresult = function(event) {
+            let fullTranscript = '';
+            for (let i = 0; i < event.results.length; ++i) {
+              fullTranscript += event.results[i][0].transcript;
+            }
+            if (onResult) onResult(fullTranscript);
+          };
+
+          rec.onerror = function(event) {
+            console.warn("Web Speech error:", event.error);
+            if (onError) onError(event.error);
+          };
+
+          rec.onend = function() {
+            window.NeuroTaskVoice.isListening = false;
+            if (onEnd) onEnd();
+          };
+
+          rec.start();
+          window.NeuroTaskVoice.recognition = rec;
+          window.NeuroTaskVoice.isListening = true;
+
+          // Microphone sound level meter using Web Audio API
+          if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
+              try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                const ctx = new AudioContext();
+                const src = ctx.createMediaStreamSource(stream);
+                const analyser = ctx.createAnalyser();
+                analyser.fftSize = 64;
+                src.connect(analyser);
+                const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+                function checkAudio() {
+                  if (!window.NeuroTaskVoice.isListening) {
+                    try {
+                      stream.getTracks().forEach(function(t) { t.stop(); });
+                      ctx.close();
+                    } catch(e) {}
+                    return;
+                  }
+                  analyser.getByteFrequencyData(dataArray);
+                  let sum = 0;
+                  for (let i = 0; i < dataArray.length; i++) {
+                    sum += dataArray[i];
+                  }
+                  const avg = (sum / dataArray.length) / 255.0; // 0.0 to 1.0
+                  if (onSoundLevel) onSoundLevel(avg);
+                  requestAnimationFrame(checkAudio);
+                }
+                checkAudio();
+              } catch (e) {
+                console.warn("Audio meter context error:", e);
+              }
+            }).catch(function(err) {
+              console.warn("Microphone stream error:", err);
+            });
+          }
+        } catch (err) {
+          console.error("SpeechRecognition start error:", err);
+          if (onError) onError(err.toString());
+        }
+      },
+
+      stop: function() {
+        window.NeuroTaskVoice.isListening = false;
+        if (window.NeuroTaskVoice.recognition) {
+          try {
+            window.NeuroTaskVoice.recognition.stop();
+          } catch(e) {}
+        }
+      }
+    };
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
