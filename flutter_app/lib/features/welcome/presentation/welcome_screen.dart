@@ -29,12 +29,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
       duration: const Duration(milliseconds: 3200),
     )..repeat(reverse: true);
 
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.06).animate(
-      CurvedAnimation(parent: _breatheController, curve: Curves.easeInOut),
+    _scaleAnimation = Tween<double>(begin: 0.96, end: 1.04).animate(
+      CurvedAnimation(parent: _breatheController, curve: Curves.easeInOutSine),
     );
 
-    _glowAnimation = Tween<double>(begin: 0.25, end: 0.65).animate(
-      CurvedAnimation(parent: _breatheController, curve: Curves.easeInOut),
+    _glowAnimation = Tween<double>(begin: 0.2, end: 0.55).animate(
+      CurvedAnimation(parent: _breatheController, curve: Curves.easeInOutSine),
     );
   }
 
@@ -45,36 +45,27 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
   }
 
   void _onBrainTapped() {
-    HapticHelper.success();
-    Navigator.pushReplacement(
+    HapticHelper.lightTap();
+    Navigator.push(
       context,
       PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 500),
-        pageBuilder: (_, __, ___) => const BrainDumpScreen(),
-        transitionsBuilder: (_, animation, __, child) {
+        pageBuilder: (context, animation, secondaryAnimation) => const BrainDumpScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
           return FadeTransition(
-            opacity: animation,
+            opacity: CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
             child: child,
           );
         },
+        transitionDuration: const Duration(milliseconds: 400),
       ),
     );
   }
 
   void _onResumeSession() {
-    HapticHelper.success();
-    Navigator.pushReplacement(
+    HapticHelper.lightTap();
+    Navigator.push(
       context,
-      PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 500),
-        pageBuilder: (_, __, ___) => const SingleTaskScreen(),
-        transitionsBuilder: (_, animation, __, child) {
-          return FadeTransition(
-            opacity: animation,
-            child: child,
-          );
-        },
-      ),
+      MaterialPageRoute(builder: (_) => const SingleTaskScreen()),
     );
   }
 
@@ -92,7 +83,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Top University & Subject Header + Theme Toggle
+              // Top University Badge + Trophy Vault & Theme Toggle
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -104,17 +95,20 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
                       boxShadow: context.subtleElevation,
                       border: Border.all(color: context.borderLight),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        CircleAvatar(radius: 3.5, backgroundColor: AppColors.primaryIndigo),
-                        SizedBox(width: 8),
+                        CircleAvatar(
+                          radius: 3.5,
+                          backgroundColor: isDark ? AppColors.brandGlowCyan : AppColors.primaryIndigo,
+                        ),
+                        const SizedBox(width: 8),
                         Text(
                           'DAM — ITU UNCuyo',
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.primaryIndigo,
+                            color: isDark ? AppColors.brandGlowCyan : AppColors.primaryIndigo,
                           ),
                         ),
                       ],
@@ -156,7 +150,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
                 ],
               ),
 
-              // Central Hero Branding: Interactive Brain Logo
+              // Central Hero Branding: Glowing Transparent Neural Brain Icon
               Column(
                 children: [
                   Semantics(
@@ -177,7 +171,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: AppColors.brandGlowCyan.withValues(alpha: _glowAnimation.value),
+                                    color: (isDark ? AppColors.brandGlowCyan : AppColors.primaryIndigo)
+                                        .withValues(alpha: _glowAnimation.value),
                                     blurRadius: 36,
                                     spreadRadius: 6,
                                   ),
@@ -193,15 +188,21 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
                                   ),
                                 ],
                               ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(26.0),
-                                child: Image.asset(
-                                  'assets/images/logo.jpg',
-                                  fit: BoxFit.contain,
-                                  errorBuilder: (_, __, ___) => const Icon(
-                                    Icons.psychology_alt_rounded,
-                                    size: 100,
-                                    color: AppColors.brandDeepBlue,
+                              child: Center(
+                                child: ShaderMask(
+                                  shaderCallback: (Rect bounds) {
+                                    return LinearGradient(
+                                      colors: isDark
+                                          ? [AppColors.brandGlowCyan, const Color(0xFF6366F1)]
+                                          : [const Color(0xFF0284C7), AppColors.primaryIndigo],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ).createShader(bounds);
+                                  },
+                                  child: const Icon(
+                                    Icons.psychology_rounded,
+                                    size: 108,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ),
@@ -211,7 +212,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
                       ),
                     ),
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 28),
 
                   // Brand Typography
                   Text(
@@ -246,7 +247,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
                 ],
               ),
 
-              // Bottom Actions (Resume Session if available + Main Button)
+              // Bottom Actions: Resume Session or Tap Hint Prompt
               Column(
                 children: [
                   if (hasActiveTask) ...[
@@ -257,7 +258,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
                         onTap: _onResumeSession,
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                          margin: const EdgeInsets.only(bottom: 12),
+                          margin: const EdgeInsets.only(bottom: 14),
                           decoration: BoxDecoration(
                             color: AppColors.successEmerald.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(16),
@@ -273,10 +274,10 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
                                   'Reanudar paso ${focusState.currentStepNumber}: ${focusState.currentTask!.title}',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
-                                    color: AppColors.successEmeraldDark,
+                                    color: isDark ? AppColors.successEmerald : AppColors.successEmeraldDark,
                                   ),
                                 ),
                               ),
@@ -287,57 +288,38 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
                     ),
                   ],
 
-                  Semantics(
-                    button: true,
-                    label: 'Tocar para Descomprimir e iniciar nuevo volcado',
-                    child: GestureDetector(
-                      onTap: _onBrainTapped,
-                      child: Container(
-                        width: double.infinity,
-                        height: 56,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF4A89B4), AppColors.brandDeepBlue],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
+                  // Subtle Interactive Prompt Pill
+                  InkWell(
+                    onTap: _onBrainTapped,
+                    borderRadius: BorderRadius.circular(20),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                      decoration: BoxDecoration(
+                        color: context.cardSurface,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: context.subtleElevation,
+                        border: Border.all(color: context.borderLight),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.touch_app_rounded,
+                            size: 18,
+                            color: isDark ? AppColors.brandGlowCyan : AppColors.primaryIndigo,
                           ),
-                          borderRadius: BorderRadius.circular(22),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.brandDeepBlue.withValues(alpha: 0.35),
-                              offset: const Offset(4, 6),
-                              blurRadius: 16,
+                          const SizedBox(width: 8),
+                          Text(
+                            'Tocá el cerebro para descomprimir tu mente',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? AppColors.darkTextMain : AppColors.textMain,
                             ),
-                            BoxShadow(
-                              color: isDark ? Colors.white12 : Colors.white,
-                              offset: const Offset(-3, -3),
-                              blurRadius: 8,
-                            ),
-                          ],
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.touch_app_rounded, color: Colors.white, size: 20),
-                            SizedBox(width: 10),
-                            Text(
-                              'Tocar para Descomprimir',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Tocá el cerebro o el botón para comenzar',
-                    style: TextStyle(fontSize: 11, color: context.textMuted),
                   ),
                 ],
               ),

@@ -64,7 +64,7 @@ void main() {
 
       expect(find.text('NEUROTASK'), findsOneWidget);
       expect(find.text('MOTOR DE FOCO'), findsOneWidget);
-      expect(find.text('Tocar para Descomprimir'), findsOneWidget);
+      expect(find.text('Tocá el cerebro para descomprimir tu mente'), findsOneWidget);
     });
   });
 }
