@@ -10,19 +10,33 @@ import '../../../core/widgets/theme_toggle_button.dart';
 import '../../brain_dump/presentation/brain_dump_screen.dart';
 import '../../unblock_mode/presentation/graph_overview_modal.dart';
 import '../controllers/focus_controller.dart';
+import 'cognitive_insight_card.dart';
 
 class SummaryCelebrationScreen extends ConsumerWidget {
   const SummaryCelebrationScreen({super.key});
 
   String _buildFormattedReport(FocusState state) {
     final totalNodes = state.executionQueue.length;
+    final elapsedSecs = state.elapsedSeconds;
+    final estimatedMins = state.totalEstimatedMinutes;
+    final realMins = (elapsedSecs / 60).ceil();
     final buffer = StringBuffer();
 
     buffer.writeln('🧠 *NeuroTask — Victoria de Foco Conquistada* ✨');
     buffer.writeln('━━━━━━━━━━━━━━━━━━━━━━━━━');
     buffer.writeln('🎯 *Nodos completados:* $totalNodes / $totalNodes (100%)');
-    buffer.writeln('⏳ *Tiempo real de foco:* ${state.formattedRealTime} (Estimado: ${state.totalEstimatedMinutes} min)');
+    buffer.writeln('⏳ *Tiempo real de foco:* ${state.formattedRealTime} (Estimado: $estimatedMins min)');
     buffer.writeln('🌿 *Calma mental:* 100% (Sin sobrecarga)');
+
+    if (realMins < estimatedMins && elapsedSecs < (estimatedMins * 60)) {
+      final saved = estimatedMins - (elapsedSecs ~/ 60);
+      buffer.writeln('⚡ *Logro:* ¡Modo Hiperfoco! Ahorraste ~$saved min de libertad mental.');
+    } else if (realMins > estimatedMins) {
+      buffer.writeln('🌱 *Logro:* ¡Victoria de Resiliencia! Empezaste y terminaste sin abandonar.');
+    } else {
+      buffer.writeln('🎯 *Logro:* Sincronía y ritmo perfecto entre estimación y ejecución.');
+    }
+
     buffer.writeln('');
     buffer.writeln('📋 *Camino Lógico Ejecutado:*');
 
@@ -300,7 +314,11 @@ class SummaryCelebrationScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 18),
+
+                // Empathetic Cognitive Insight Card (Dual outcome reward)
+                CognitiveInsightCard(focusState: focusState),
+                const SizedBox(height: 20),
 
                 // Report and Sharing Actions
                 NeumorphicButton(
