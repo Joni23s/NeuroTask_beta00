@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 
 /// Design System Color Palette for NeuroTask
-/// Light Soft Paper / Sensory-Calming Palette aligned with official branding
+/// Supports Light Soft Paper and Dark Soft Slate themes
 class AppColors {
-  // Base Paper Surfaces
+  // Base Paper Surfaces (Light Mode)
   static const Color background = Color(0xFFF4F6F9); // Light Soft Paper
   static const Color cardSurface = Color(0xFFF4F6F9);
   static const Color pressedSurface = Color(0xFFE9EDF4);
+
+  // Dark Soft Slate Surfaces (Dark Mode)
+  static const Color darkBackground = Color(0xFF131822); // Deep calming slate
+  static const Color darkCardSurface = Color(0xFF1C2331); // Elevated slate card
+  static const Color darkPressedSurface = Color(0xFF161C28); // Inset slate
 
   // Brand Logo Colors (from NeuroTask_logo.jpg)
   static const Color brandDeepBlue = Color(0xFF2B5B84); // Isotype deep blue
@@ -29,13 +34,22 @@ class AppColors {
   static const Color amberLight = Color(0xFFFEF3C7);
   static const Color amberDark = Color(0xFFD97706);
 
-  // Typography & Content
+  // Typography & Content (Light)
   static const Color textMain = Color(0xFF1E293B);
   static const Color textSecondary = Color(0xFF64748B);
   static const Color textMuted = Color(0xFF94A3B8);
 
-  // Shadows
+  // Typography & Content (Dark)
+  static const Color darkTextMain = Color(0xFFF8FAFC);
+  static const Color darkTextSecondary = Color(0xFF94A3B8);
+  static const Color darkTextMuted = Color(0xFF64748B);
+
+  // Shadows (Light)
   static const Color shadowDark = Color(0x73A6B2C4); // rgba(166, 178, 196, 0.45)
   static const Color shadowLight = Color(0xFFFFFFFF);
   static const Color borderLight = Color(0xB3FFFFFF); // 70% white
+
+  // Shadows (Dark)
+  static const Color darkShadowDark = Color(0x99000000); // 60% black
+  static const Color darkShadowLight = Color(0x14FFFFFF); // 8% white edge highlight
 }

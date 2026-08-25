@@ -22,15 +22,25 @@ void main() {
         isAtomicSubstep: false,
       );
 
-      final json = node.toJson();
-      final restored = TaskNode.fromJson(json);
+      final jsonNode = node.toJson();
+      final restoredNode = TaskNode.fromJson(jsonNode);
 
-      expect(restored.id, equals(node.id));
-      expect(restored.title, equals(node.title));
-      expect(restored.category, equals(node.category));
-      expect(restored.estimatedMinutes, equals(12));
-      expect(restored.energyLevel, equals(EnergyLevel.high));
-      expect(restored.isCompleted, isTrue);
+      expect(restoredNode.id, equals(node.id));
+      expect(restoredNode.title, equals(node.title));
+      expect(restoredNode.category, equals(node.category));
+      expect(restoredNode.estimatedMinutes, equals(12));
+      expect(restoredNode.energyLevel, equals(EnergyLevel.high));
+      expect(restoredNode.isCompleted, isTrue);
+
+      const graph = TaskGraph(
+        nodes: [node],
+        edges: [TaskEdge(fromId: 'dep_0', toId: 'test_node_1')],
+      );
+      final jsonGraph = graph.toJson();
+      final restoredGraph = TaskGraph.fromJson(jsonGraph);
+
+      expect(restoredGraph.nodes.length, equals(1));
+      expect(restoredGraph.edges.length, equals(1));
     });
 
     test('TopologicalSorter generates valid acyclic order', () {

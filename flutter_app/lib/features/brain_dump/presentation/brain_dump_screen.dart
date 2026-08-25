@@ -4,6 +4,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/neumorphic_theme.dart';
 import '../../../core/utils/haptic_helper.dart';
 import '../../../core/widgets/neumorphic_button.dart';
+import '../../../core/widgets/theme_toggle_button.dart';
 import '../../focus_viewport/controllers/focus_controller.dart';
 import '../../focus_viewport/presentation/single_task_screen.dart';
 import '../controllers/brain_dump_controller.dart';
@@ -136,7 +137,7 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Header Badge & Brand
+                          // Header Badge, Brand & Theme Toggle
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -162,9 +163,15 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                                   ),
                                 ),
                               ),
-                              const Text(
-                                'NEUROTASK',
-                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.brandDeepBlue, letterSpacing: 1.2),
+                              const Row(
+                                children: [
+                                  Text(
+                                    'NEUROTASK',
+                                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.brandDeepBlue, letterSpacing: 1.2),
+                                  ),
+                                  SizedBox(width: 10),
+                                  ThemeToggleButton(),
+                                ],
                               ),
                             ],
                           ),

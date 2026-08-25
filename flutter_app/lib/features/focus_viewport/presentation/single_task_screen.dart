@@ -6,6 +6,7 @@ import '../../../core/utils/haptic_helper.dart';
 import '../../../core/widgets/flow_indicator.dart';
 import '../../../core/widgets/neumorphic_button.dart';
 import '../../../core/widgets/swipe_to_complete_card.dart';
+import '../../../core/widgets/theme_toggle_button.dart';
 import '../../../core/widgets/zen_timer_widget.dart';
 import '../../unblock_mode/presentation/cognitive_rescue_sheet.dart';
 import '../../unblock_mode/presentation/graph_overview_modal.dart';
@@ -100,6 +101,8 @@ class SingleTaskScreen extends ConsumerWidget {
                         onPressed: () => _openRescueSheet(context),
                         tooltip: 'Rescate Cognitivo',
                       ),
+                      const SizedBox(width: 4),
+                      const ThemeToggleButton(),
                     ],
                   ),
                 ],

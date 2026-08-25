@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/neumorphic_theme.dart';
 import '../../../core/utils/haptic_helper.dart';
+import '../../../core/widgets/theme_toggle_button.dart';
 import '../../brain_dump/presentation/brain_dump_screen.dart';
 import '../../focus_viewport/controllers/focus_controller.dart';
 import '../../focus_viewport/presentation/single_task_screen.dart';
@@ -89,30 +90,36 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Top University & Subject Header
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppColors.cardSurface,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: NeumorphicTheme.subtleElevation,
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.8)),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CircleAvatar(radius: 3.5, backgroundColor: AppColors.primaryIndigo),
-                    SizedBox(width: 8),
-                    Text(
-                      'DAM — ITU UNCuyo',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primaryIndigo,
-                      ),
+              // Top University & Subject Header + Theme Toggle
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.cardSurface,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: NeumorphicTheme.subtleElevation,
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.8)),
                     ),
-                  ],
-                ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircleAvatar(radius: 3.5, backgroundColor: AppColors.primaryIndigo),
+                        SizedBox(width: 8),
+                        Text(
+                          'DAM — ITU UNCuyo',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primaryIndigo,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const ThemeToggleButton(),
+                ],
               ),
 
               // Central Hero Branding: Interactive Brain Logo
