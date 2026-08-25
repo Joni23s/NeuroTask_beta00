@@ -8,6 +8,7 @@ import '../../../core/widgets/theme_toggle_button.dart';
 import '../../focus_viewport/controllers/focus_controller.dart';
 import '../../focus_viewport/presentation/single_task_screen.dart';
 import '../controllers/brain_dump_controller.dart';
+import 'voice_dictation_sheet.dart';
 
 class BrainDumpScreen extends ConsumerStatefulWidget {
   const BrainDumpScreen({super.key});
@@ -292,7 +293,17 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                                     setState(() {
                                       _showEmptyHint = false;
                                     });
-                                    ref.read(brainDumpProvider.notifier).toggleVoiceSimulation();
+                                    showModalBottomSheet(
+                                      context: context,
+                                      backgroundColor: Colors.transparent,
+                                      isScrollControlled: true,
+                                      builder: (_) => VoiceDictationSheet(
+                                        textController: _textController,
+                                        onAppendText: (text) {
+                                          setState(() {});
+                                        },
+                                      ),
+                                    );
                                   },
                                   child: Container(
                                     width: 44,
@@ -303,7 +314,7 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                                       boxShadow: context.subtleElevation,
                                       border: Border.all(color: context.borderLight),
                                     ),
-                                    child: const Icon(Icons.mic_none_rounded, color: AppColors.primaryIndigo, size: 22),
+                                    child: const Icon(Icons.mic_rounded, color: AppColors.primaryIndigo, size: 22),
                                   ),
                                 ),
                               ),
