@@ -1,0 +1,249 @@
+/* NeuroTask Design System - Light Soft Paper & Soft Neumorphism */
+:root {
+  --bg-canvas: #E6ECF5;
+  --bg-phone: #F4F6F9;
+  --bg-pressed: #E9EDF4;
+  --surface-card: #F4F6F9;
+  
+  --primary-indigo: #4F46E5;
+  --primary-indigo-light: #6366F1;
+  --primary-indigo-glow: rgba(99, 102, 241, 0.25);
+  
+  --success-emerald: #10B981;
+  --success-emerald-dark: #059669;
+  --success-glow: rgba(16, 185, 129, 0.3);
+  
+  --amber-warning: #F59E0B;
+  --amber-glow: rgba(245, 158, 11, 0.25);
+  
+  --text-primary: #1E293B;
+  --text-secondary: #64748B;
+  --text-muted: #94A3B8;
+  
+  --shadow-light: #FFFFFF;
+  --shadow-dark: rgba(166, 178, 196, 0.45);
+  --shadow-dark-pressed: rgba(166, 178, 196, 0.5);
+  
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 26px;
+  --radius-xl: 34px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #DFE6EF 0%, #CCD7E6 100%);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 12px;
+  user-select: none;
+  overflow-x: hidden;
+}
+
+/* Background Soft Paper & Elevation Tokens */
+.bg-soft-paper {
+  background-color: var(--bg-phone);
+}
+
+.neu-flat {
+  background: var(--surface-card);
+  box-shadow: 7px 7px 16px var(--shadow-dark), -7px -7px 16px var(--shadow-light);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.neu-flat-sm {
+  background: var(--surface-card);
+  box-shadow: 4px 4px 10px var(--shadow-dark), -4px -4px 10px var(--shadow-light);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.neu-pressed {
+  background: var(--bg-pressed);
+  box-shadow: inset 4px 4px 8px var(--shadow-dark-pressed), inset -4px -4px 8px var(--shadow-light);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.neu-btn {
+  background: var(--surface-card);
+  box-shadow: 5px 5px 12px var(--shadow-dark), -5px -5px 12px var(--shadow-light);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.neu-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 6px 6px 14px var(--shadow-dark), -6px -6px 14px var(--shadow-light);
+}
+
+.neu-btn:active, .neu-btn.active {
+  box-shadow: inset 3px 3px 6px var(--shadow-dark-pressed), inset -3px -3px 6px var(--shadow-light);
+  transform: scale(0.97);
+}
+
+.neu-btn-primary {
+  background: linear-gradient(135deg, var(--primary-indigo-light), var(--primary-indigo));
+  box-shadow: 5px 5px 16px var(--primary-indigo-glow), -3px -3px 10px rgba(255, 255, 255, 0.9);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.neu-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 6px 6px 20px rgba(79, 70, 229, 0.45), -3px -3px 10px rgba(255, 255, 255, 0.9);
+}
+
+.neu-btn-primary:active {
+  transform: scale(0.97);
+  box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.neu-btn-success {
+  background: linear-gradient(135deg, var(--success-emerald), var(--success-emerald-dark));
+  box-shadow: 5px 5px 16px var(--success-glow), -3px -3px 10px rgba(255, 255, 255, 0.9);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.neu-btn-success:hover {
+  transform: translateY(-1px);
+  box-shadow: 6px 6px 20px rgba(16, 185, 129, 0.45);
+}
+
+.neu-btn-success:active {
+  transform: scale(0.97);
+}
+
+/* Zen Breathing Animations */
+@keyframes zenPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.3);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow: 0 0 24px 8px rgba(99, 102, 241, 0.2);
+  }
+}
+
+.animate-zen-breathe {
+  animation: zenPulse 4.5s ease-in-out infinite;
+}
+
+@keyframes gentleFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+}
+
+.animate-float {
+  animation: gentleFloat 3s ease-in-out infinite;
+}
+
+/* Smartphone Frame styling */
+.phone-frame {
+  width: 100%;
+  max-width: 410px;
+  height: 840px;
+  background-color: var(--bg-phone);
+  border-radius: 48px;
+  border: 10px solid #2B3342;
+  box-shadow: 0 25px 60px -12px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+/* Fullscreen mode on mobile viewport */
+body.fullscreen-app {
+  padding: 0;
+  background: var(--bg-phone);
+}
+body.fullscreen-app .phone-frame {
+  max-width: 100%;
+  height: 100vh;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+}
+body.fullscreen-app .external-controls {
+  display: none;
+}
+
+/* Notch & Dynamic Island */
+.dynamic-notch {
+  width: 120px;
+  height: 26px;
+  background-color: #2B3342;
+  border-radius: 20px;
+  margin: 0 auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.camera-lens {
+  width: 10px;
+  height: 10px;
+  background-color: #1a202c;
+  border-radius: 50%;
+  border: 1.5px solid #374151;
+  position: absolute;
+  right: 18px;
+}
+
+/* Scrollbar Customization */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 10px;
+}
+
+/* Custom transitions */
+.screen-transition {
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.screen-enter {
+  opacity: 0;
+  transform: translateY(12px) scale(0.98);
+}
+.screen-active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Graph Node Canvas */
+.dag-node {
+  transition: all 0.3s ease;
+}
+.dag-node.active-node {
+  border-color: var(--primary-indigo);
+  box-shadow: 0 0 12px var(--primary-indigo-glow);
+}
+.dag-node.completed-node {
+  border-color: var(--success-emerald);
+  opacity: 0.85;
+}

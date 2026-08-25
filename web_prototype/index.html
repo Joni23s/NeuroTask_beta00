@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>NeuroTask: Motor de Foco — Prototipo Interactivo Mobile</title>
+  
+  <!-- Tailwind CSS & Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  
+  <!-- Custom Design System Styles -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="relative">
+
+  <!-- Desktop Presentation Header & Controls Bar -->
+  <header class="external-controls mb-4 text-center max-w-xl">
+    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-white/70 backdrop-blur-sm border border-slate-300 text-xs text-slate-600 shadow-sm mb-2">
+      <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+      <span class="font-semibold">DAM — ITU Universidad Nacional de Cuyo</span>
+      <span class="text-slate-400">|</span>
+      <span>Tema 1: DCU</span>
+    </div>
+    <div class="flex items-center justify-center space-x-3 mt-1 text-xs">
+      <button onclick="toggleSimulatorFullscreen()" class="px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white text-slate-700 font-semibold shadow-sm border border-slate-300 transition-all flex items-center space-x-1.5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+        <span>Pantalla Completa</span>
+      </button>
+      <button onclick="toggleAmbientSound()" id="ambient-btn" class="px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white text-slate-700 font-semibold shadow-sm border border-slate-300 transition-all flex items-center space-x-1.5" title="Ruido Marrón para concentración">
+        <span>🌧️</span>
+        <span>Sonido Ambiente</span>
+      </button>
+      <button onclick="toggleMuteFX()" id="mute-fx-btn" class="px-2.5 py-1.5 rounded-xl bg-white/80 hover:bg-white text-slate-700 font-semibold shadow-sm border border-slate-300 transition-all" title="Sonido Zen">
+        🔔
+      </button>
+      <button onclick="resetToBeginning()" class="px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white text-slate-700 font-semibold shadow-sm border border-slate-300 transition-all flex items-center space-x-1.5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        <span>Reiniciar</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Smartphone Frame Simulation Container -->
+  <main class="phone-frame">
+    
+    <!-- Top Status Bar & Notch Mockup -->
+    <div class="w-full h-11 px-7 flex justify-between items-center text-xs font-semibold text-slate-500 pt-2 z-20 shrink-0 select-none">
+      <span id="status-clock" class="font-medium">9:41</span>
+      <div class="dynamic-notch">
+        <div class="camera-lens"></div>
+      </div>
+      <div class="flex items-center space-x-1.5">
+        <svg class="w-3.5 h-3.5 fill-current text-slate-600" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.28 19.57 10.59 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/></svg>
+        <div class="w-4 h-2.5 border border-slate-500 rounded-xs p-0.5"><div class="h-full bg-slate-600 rounded-2xs w-full"></div></div>
+      </div>
+    </div>
+
+    <!-- PANTALLA 1: BRAIN DUMP (INGESTA CRUDA) -->
+    <section id="screen-brain-dump" class="flex-1 flex flex-col p-6 overflow-y-auto screen-transition">
+      <!-- App Brand & Title -->
+      <div class="mt-1 mb-3">
+        <div class="flex items-center justify-between mb-2">
+          <div class="inline-flex items-center px-3 py-1 rounded-full neu-flat-sm text-[11px] font-bold text-indigo-600">
+            <span class="w-2 h-2 rounded-full bg-indigo-500 mr-1.5 animate-pulse"></span>
+            Descompresión Cognitiva
+          </div>
+          <img src="../NeuroTask_logo.jpg" alt="NeuroTask" class="h-6 w-auto object-contain opacity-90" onerror="this.style.display='none'">
+        </div>
+        <h1 class="text-2xl font-bold text-slate-800 tracking-tight leading-tight">¿Qué ronda por tu cabeza?</h1>
+        <p class="text-xs text-slate-500 mt-1">Escribí o dictá libremente. El sistema descompondrá el camino lógico.</p>
+      </div>
+
+      <!-- Presets de Demostración Rápida -->
+      <div class="mb-3">
+        <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Cargar ejemplo rápido:</span>
+        <div class="flex space-x-1.5 mt-1 overflow-x-auto pb-1">
+          <button onclick="loadPresetPrompt('dam')" class="neu-flat-sm px-2.5 py-1 rounded-xl text-[11px] font-semibold text-slate-600 hover:text-indigo-600 whitespace-nowrap">
+            🎓 Entrega DAM
+          </button>
+          <button onclick="loadPresetPrompt('flutter')" class="neu-flat-sm px-2.5 py-1 rounded-xl text-[11px] font-semibold text-slate-600 hover:text-indigo-600 whitespace-nowrap">
+            📱 Sprint Flutter
+          </button>
+          <button onclick="loadPresetPrompt('general')" class="neu-flat-sm px-2.5 py-1 rounded-xl text-[11px] font-semibold text-slate-600 hover:text-indigo-600 whitespace-nowrap">
+            💼 General
+          </button>
+        </div>
+      </div>
+
+      <!-- Textarea Neumórfica de Ingesta Libre -->
+      <div class="flex-1 neu-pressed rounded-3xl p-4 flex flex-col relative mb-4 min-h-[190px]">
+        <textarea id="brain-dump-input" class="w-full h-full bg-transparent resize-none border-none outline-none text-sm text-slate-700 leading-relaxed placeholder-slate-400 font-normal" placeholder="Ej: Tengo que testear los endpoints del backend en Postman, escribir el resumen ejecutivo del informe y armar las 7 diapositivas en Figma para la entrega de DAM..."></textarea>
+        
+        <!-- Voice Input Wave Effect -->
+        <div id="voice-wave-indicator" class="hidden absolute bottom-4 left-4 flex items-center space-x-1 text-indigo-600 text-xs font-semibold">
+          <span class="w-2 h-2 rounded-full bg-indigo-500 animate-ping"></span>
+          <span>Escuchando dictado...</span>
+        </div>
+
+        <!-- Voice Input Floating Button -->
+        <button onclick="toggleVoice()" id="voice-btn" class="absolute bottom-3 right-3 w-11 h-11 rounded-2xl neu-btn flex items-center justify-center text-slate-600 hover:text-indigo-600 transition-all" title="Dictar por voz">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+        </button>
+      </div>
+
+      <!-- Action Button: Secuenciar -->
+      <button onclick="startProcessing()" class="w-full py-4 rounded-2xl neu-btn-primary font-semibold text-sm tracking-wide flex items-center justify-center space-x-2 shadow-lg">
+        <span>Descomprimir y Secuenciar</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+      </button>
+    </section>
+
+    <!-- PANTALLA 2: MOTOR ALGORÍTMICO (TRANSICIÓN DE CALMA & RESPIRACIÓN) -->
+    <section id="screen-processing" class="hidden flex-1 flex flex-col items-center justify-center p-6 text-center screen-transition">
+      <!-- Glowing Concentric Breathing Rings -->
+      <div class="relative w-32 h-32 flex items-center justify-center mb-6">
+        <div class="absolute inset-0 rounded-full bg-indigo-200/40 animate-zen-breathe"></div>
+        <div class="w-24 h-24 rounded-full neu-flat flex items-center justify-center z-10">
+          <div class="w-16 h-16 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
+            <svg class="w-8 h-8 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+          </div>
+        </div>
+      </div>
+      <h2 class="text-lg font-bold text-slate-800">Construyendo Grafo Lógico...</h2>
+      <p id="processing-status-text" class="text-xs text-slate-500 mt-2 max-w-[260px] leading-relaxed">Eliminando ruido cognitivo y aislando dependencias críticas...</p>
+    </section>
+
+    <!-- PANTALLA 3: SINGLE-TASK FOCUS VIEWPORT (HOME PRINCIPAL DE FOCO 1-A-1) -->
+    <section id="screen-focus" class="hidden flex-1 flex flex-col p-6 justify-between screen-transition overflow-y-auto">
+      
+      <!-- Top Navigation & Minimal Status -->
+      <div>
+        <div class="flex justify-between items-center mb-3">
+          <div class="neu-flat px-3 py-1 rounded-xl text-xs font-semibold text-slate-700 flex items-center space-x-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span id="task-progress-indicator">Paso 1 de 3</span>
+          </div>
+
+          <div class="flex items-center space-x-2">
+            <button onclick="openGraphModal()" class="text-xs font-semibold text-slate-600 neu-btn px-2.5 py-1 rounded-xl flex items-center space-x-1" title="Ver Grafo DAG">
+              <span>🗺️</span>
+              <span>Grafo</span>
+            </button>
+            <button onclick="openRescueModal()" class="text-xs font-semibold text-slate-600 neu-btn px-2.5 py-1 rounded-xl flex items-center space-x-1" title="Modo Rescate">
+              <span>🌿</span>
+              <span>Rescate</span>
+            </button>
+          </div>
+        </div>
+        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Estás enfocado en esto ahora:</p>
+      </div>
+
+      <!-- Neumorphic Single-Task Hero Card (1 a 1) -->
+      <div id="focus-hero-card" class="neu-flat rounded-[32px] p-6 my-auto text-left relative overflow-hidden border border-white/80 transition-all">
+        <div class="w-9 h-1.5 bg-indigo-500 rounded-full mb-4"></div>
+        
+        <div class="flex items-center justify-between mb-1">
+          <span id="task-category" class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Backend & Integración</span>
+          <span id="task-energy-badge" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">🌊 Carga Moderada</span>
+        </div>
+
+        <h2 id="task-title" class="text-xl font-bold text-slate-800 mt-2 leading-snug">Testear los endpoints en Postman y verificar respuestas JSON</h2>
+        <p id="task-subtext" class="text-xs text-slate-500 mt-3 leading-relaxed">Paso 1 del camino crítico. Sin dependencias activas.</p>
+        
+        <!-- Zen Timer Indicator -->
+        <div class="mt-6 pt-4 border-t border-slate-200/80 flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <div class="w-3 h-3 rounded-full bg-indigo-500/20 flex items-center justify-center">
+              <div class="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-ping"></div>
+            </div>
+            <span id="task-time-estimate" class="text-xs font-mono font-medium text-slate-600">Tiempo de Flujo: 15 min</span>
+          </div>
+          <div class="flex items-center space-x-1.5">
+            <span class="text-[11px] font-mono text-indigo-600 font-semibold" id="zen-timer-count">00:00</span>
+            <span class="text-[10px] font-semibold text-slate-400">| Sin apuros</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Interactive Actions -->
+      <div class="space-y-3 mt-2">
+        <!-- Complete Action Button (Primary Emerald) -->
+        <button onclick="completeTask()" class="w-full py-4 rounded-2xl neu-btn-success font-semibold text-sm flex items-center justify-center space-x-2 shadow-lg">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+          <span>Paso Completado</span>
+        </button>
+
+        <!-- Cognitive Rescue Action (Secondary) -->
+        <button onclick="openRescueModal()" class="w-full py-3 rounded-2xl neu-btn text-slate-600 font-semibold text-xs flex items-center justify-center space-x-1.5">
+          <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          <span>Estoy Bloqueado / Dividir más</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- PANTALLA 4: CELEBRACIÓN DE FLUJO LOGRADO -->
+    <section id="screen-celebration" class="hidden flex-1 flex flex-col items-center justify-center p-6 text-center screen-transition">
+      <div class="w-24 h-24 rounded-3xl neu-flat flex items-center justify-center text-4xl mb-4 animate-float">
+        🏆
+      </div>
+      <h2 class="text-2xl font-bold text-slate-800">¡Objetivo Cumplido!</h2>
+      <p class="text-xs text-slate-500 mt-2 max-w-[260px] leading-relaxed">
+        Completaste todos los nodos del camino lógico sin sobrecarga sensorial ni parálisis por análisis.
+      </p>
+      <div class="mt-6 w-full space-y-3">
+        <button onclick="openGraphModal()" class="w-full py-3 rounded-2xl neu-btn text-xs font-bold text-slate-700">
+          Ver Resumen del Grafo
+        </button>
+        <button onclick="resetToBeginning()" class="w-full py-4 rounded-2xl neu-btn-primary font-bold text-sm">
+          Iniciar Nueva Ingesta (Brain Dump)
+        </button>
+      </div>
+    </section>
+
+    <!-- MODAL 1: RESCATE COGNITIVO (BOTTOM SHEET NEUMÓRFICO) -->
+    <div id="rescue-modal" class="hidden absolute inset-0 bg-slate-900/40 backdrop-blur-xs z-30 flex flex-col justify-end transition-all">
+      <div id="rescue-sheet-content" class="w-full bg-soft-paper rounded-t-[36px] p-6 neu-flat border-t border-white/80 space-y-4 max-h-[85%] overflow-y-auto">
+        <div class="w-12 h-1 bg-slate-300 rounded-full mx-auto mb-1"></div>
+        
+        <div>
+          <h3 class="text-base font-bold text-slate-800">Descompresión y Rescate Cognitivo</h3>
+          <p class="text-xs text-slate-500">Elegí cómo querés continuar sin culpas ni presiones.</p>
+        </div>
+
+        <div class="space-y-2.5">
+          <!-- Option 1: Split -->
+          <button onclick="executeRescueAction('split')" class="w-full p-3.5 rounded-2xl neu-btn text-left flex items-center space-x-3">
+            <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm shrink-0">1</div>
+            <div>
+              <div class="text-xs font-bold text-slate-700">Subdividir en micro-pasos de 3 min</div>
+              <div class="text-[11px] text-slate-500">Desarma la tarea en algo minúsculo para bajar fricción.</div>
+            </div>
+          </button>
+
+          <!-- Option 2: Switch -->
+          <button onclick="executeRescueAction('switch')" class="w-full p-3.5 rounded-2xl neu-btn text-left flex items-center space-x-3">
+            <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm shrink-0">2</div>
+            <div>
+              <div class="text-xs font-bold text-slate-700">Saltar a otra tarea desbloqueada</div>
+              <div class="text-[11px] text-slate-500">Avanzá por otra rama independiente del proyecto.</div>
+            </div>
+          </button>
+
+          <!-- Option 3: Low Energy -->
+          <button onclick="executeRescueAction('low-energy')" class="w-full p-3.5 rounded-2xl neu-btn text-left flex items-center space-x-3">
+            <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-sm shrink-0">3</div>
+            <div>
+              <div class="text-xs font-bold text-slate-700">Activar Modo Baja Energía</div>
+              <div class="text-[11px] text-slate-500">Reordenar para hacer únicamente lo menos demandante.</div>
+            </div>
+          </button>
+        </div>
+
+        <button onclick="closeRescueModal()" class="w-full py-3 text-xs font-bold text-slate-500 text-center hover:text-slate-700">
+          Volver a la tarea
+        </button>
+      </div>
+    </div>
+
+    <!-- MODAL 2: GRAFO COMPLETO & MAPA COGNITIVO (ALIVIO DE CAJA NEGRA) -->
+    <div id="graph-modal" class="hidden absolute inset-0 bg-slate-900/40 backdrop-blur-xs z-30 flex flex-col justify-end transition-all">
+      <div class="w-full bg-soft-paper rounded-t-[36px] p-6 neu-flat border-t border-white/80 space-y-4 max-h-[85%] overflow-y-auto">
+        <div class="w-12 h-1 bg-slate-300 rounded-full mx-auto mb-1"></div>
+        
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-bold text-slate-800">Mapa del Grafo (Tus ideas seguras)</h3>
+            <p class="text-xs text-slate-500">Secuencia topológica calculada para hoy.</p>
+          </div>
+          <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-xl">DAG Engine</span>
+        </div>
+
+        <!-- Node List Container -->
+        <div id="graph-nodes-list" class="space-y-2.5 max-h-[300px] overflow-y-auto pr-1">
+          <!-- Populated dynamically via app.js -->
+        </div>
+
+        <button onclick="closeGraphModal()" class="w-full py-3 text-xs font-bold text-slate-500 text-center hover:text-slate-700">
+          Cerrar Mapa
+        </button>
+      </div>
+    </div>
+
+    <!-- Toast Notification Badge -->
+    <div id="quick-toast" class="absolute top-14 left-6 right-6 p-3 rounded-2xl neu-flat bg-white/95 text-xs font-semibold text-slate-700 text-center shadow-xl opacity-0 pointer-events-none transform translate-y-4 transition-all duration-300 z-40 border border-slate-200">
+      Mensaje
+    </div>
+
+  </main>
+
+  <!-- Scripts -->
+  <script src="js/audio_engine.js"></script>
+  <script src="js/dag_engine.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
