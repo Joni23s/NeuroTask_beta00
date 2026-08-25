@@ -1,19 +1,63 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/services/audio_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/theme_context.dart';
 import '../../../core/utils/haptic_helper.dart';
 import '../../../core/widgets/neumorphic_button.dart';
 import '../../../core/widgets/neumorphic_card.dart';
 import '../../../core/widgets/theme_toggle_button.dart';
+import '../../achievements/controllers/achievements_controller.dart';
+import '../../achievements/presentation/achievements_vault_screen.dart';
 import '../../brain_dump/presentation/brain_dump_screen.dart';
 import '../../unblock_mode/presentation/graph_overview_modal.dart';
 import '../controllers/focus_controller.dart';
 import 'cognitive_insight_card.dart';
 
-class SummaryCelebrationScreen extends ConsumerWidget {
+class SummaryCelebrationScreen extends ConsumerStatefulWidget {
   const SummaryCelebrationScreen({super.key});
+
+  @override
+  ConsumerState<SummaryCelebrationScreen> createState() => _SummaryCelebrationScreenState();
+}
+
+class _SummaryCelebrationScreenState extends ConsumerState<SummaryCelebrationScreen> {
+  bool _achievementsProcessed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _processAchievements();
+    });
+  }
+
+  void _processAchievements() {
+    if (_achievementsProcessed) return;
+    _achievementsProcessed = true;
+
+    final focusState = ref.read(focusProvider);
+    final isDark = context.isDarkMode;
+    final isBrownNoise = ref.read(audioServiceProvider).ambientType == AmbientSoundType.brownNoise;
+
+    final elapsedSecs = focusState.elapsedSeconds;
+    final estimatedMins = focusState.totalEstimatedMinutes;
+    final realMins = (elapsedSecs / 60).ceil();
+
+    final isFaster = realMins < estimatedMins && elapsedSecs < (estimatedMins * 60);
+    final isLonger = realMins > estimatedMins;
+    final usedRescue = focusState.isLowEnergyMode ||
+        focusState.executionQueue.any((n) => n.isAtomicSubstep);
+
+    ref.read(achievementsProvider.notifier).recordFlowCompletion(
+          isFaster: isFaster,
+          isLonger: isLonger,
+          usedDarkMode: isDark,
+          usedBrownNoise: isBrownNoise,
+          usedRescue: usedRescue,
+        );
+  }
 
   String _buildFormattedReport(FocusState state) {
     final totalNodes = state.executionQueue.length;
@@ -149,7 +193,7 @@ class SummaryCelebrationScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final focusState = ref.watch(focusProvider);
     final totalNodes = focusState.executionQueue.length;
     final isDark = context.isDarkMode;
@@ -163,7 +207,7 @@ class SummaryCelebrationScreen extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
             child: Column(
               children: [
-                // Top Header Badge & Theme Toggle
+                // Top Header Badge & Theme Toggle & Trophy Vault Shortcut
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -191,7 +235,39 @@ class SummaryCelebrationScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
-                    const ThemeToggleButton(),
+                    Row(
+                      children: [
+                        Semantics(
+                          button: true,
+                          label: 'Abrir Baúl de Logros',
+                          child: InkWell(
+                            onTap: () {
+                              HapticHelper.lightTap();
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const AchievementsVaultScreen()),
+                              );
+                            },
+                            borderRadius: BorderRadius.circular(16),
+                            child: Container(
+                              width: 38,
+                              height: 38,
+                              decoration: BoxDecoration(
+                                color: context.cardSurface,
+                                shape: BoxShape.circle,
+                                boxShadow: context.subtleElevation,
+                                border: Border.all(color: context.borderLight),
+                              ),
+                              child: const Center(
+                                child: Text('🏆', style: TextStyle(fontSize: 16)),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const ThemeToggleButton(),
+                      ],
+                    ),
                   ],
                 ),
                 const SizedBox(height: 24),
@@ -377,6 +453,27 @@ class SummaryCelebrationScreen extends ConsumerWidget {
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 10),
+
+                // Direct Shortcut to Achievements Vault
+                NeumorphicButton(
+                  variant: NeumorphicButtonVariant.flat,
+                  height: 48,
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const AchievementsVaultScreen()),
+                    );
+                  },
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('🏆', style: TextStyle(fontSize: 16)),
+                      SizedBox(width: 8),
+                      Text('Revisar Baúl de Trofeos', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.primaryIndigo)),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 14),
 

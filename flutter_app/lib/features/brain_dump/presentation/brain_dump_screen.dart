@@ -5,6 +5,7 @@ import '../../../core/theme/theme_context.dart';
 import '../../../core/utils/haptic_helper.dart';
 import '../../../core/widgets/neumorphic_button.dart';
 import '../../../core/widgets/theme_toggle_button.dart';
+import '../../achievements/controllers/achievements_controller.dart';
 import '../../focus_viewport/controllers/focus_controller.dart';
 import '../../focus_viewport/presentation/single_task_screen.dart';
 import '../controllers/brain_dump_controller.dart';
@@ -54,6 +55,7 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
 
     HapticHelper.lightTap();
     ref.read(brainDumpProvider.notifier).setProcessing(true);
+    ref.read(achievementsProvider.notifier).recordBrainDump();
 
     // Show peaceful breathing processing modal
     showDialog(
@@ -300,6 +302,7 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                                       builder: (_) => VoiceDictationSheet(
                                         textController: _textController,
                                         onAppendText: (text) {
+                                          ref.read(achievementsProvider.notifier).recordVoiceDictation();
                                           setState(() {});
                                         },
                                       ),

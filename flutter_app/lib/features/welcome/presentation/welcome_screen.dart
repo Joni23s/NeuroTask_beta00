@@ -4,6 +4,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/theme_context.dart';
 import '../../../core/utils/haptic_helper.dart';
 import '../../../core/widgets/theme_toggle_button.dart';
+import '../../achievements/presentation/achievements_vault_screen.dart';
 import '../../brain_dump/presentation/brain_dump_screen.dart';
 import '../../focus_viewport/controllers/focus_controller.dart';
 import '../../focus_viewport/presentation/single_task_screen.dart';
@@ -119,7 +120,39 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
                       ],
                     ),
                   ),
-                  const ThemeToggleButton(),
+                  Row(
+                    children: [
+                      Semantics(
+                        button: true,
+                        label: 'Abrir Baúl de Logros Cognitivos',
+                        child: InkWell(
+                          onTap: () {
+                            HapticHelper.lightTap();
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const AchievementsVaultScreen()),
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(16),
+                          child: Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: context.cardSurface,
+                              shape: BoxShape.circle,
+                              boxShadow: context.subtleElevation,
+                              border: Border.all(color: context.borderLight),
+                            ),
+                            child: const Center(
+                              child: Text('🏆', style: TextStyle(fontSize: 16)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const ThemeToggleButton(),
+                    ],
+                  ),
                 ],
               ),
 

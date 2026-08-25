@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/theme_context.dart';
 import '../../../core/widgets/neumorphic_card.dart';
+import '../../achievements/controllers/achievements_controller.dart';
 import '../../focus_viewport/controllers/focus_controller.dart';
 
 class CognitiveRescueSheet extends ConsumerWidget {
@@ -61,6 +62,7 @@ class CognitiveRescueSheet extends ConsumerWidget {
             subtitle: 'Desarma la tarea en un paso mínimo para arrancar ya.',
             onTap: () {
               ref.read(focusProvider.notifier).splitCurrentTask();
+              ref.read(achievementsProvider.notifier).recordRescueUsed();
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -80,6 +82,7 @@ class CognitiveRescueSheet extends ConsumerWidget {
             subtitle: 'Reordena el grafo para hacer únicamente lo menos demandante.',
             onTap: () {
               ref.read(focusProvider.notifier).activateLowEnergyMode();
+              ref.read(achievementsProvider.notifier).recordRescueUsed();
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
