@@ -99,15 +99,14 @@ class _GraphOverviewModalState extends State<GraphOverviewModal> {
               ),
               const SizedBox(height: 16),
 
-              // Content Area (Vector Canvas or Structured List)
+              // Content Area (Tree DAG Canvas or Structured List)
               ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 360),
                 child: _showVectorCanvas
-                    ? SingleChildScrollView(
-                        child: DagCanvasWidget(
-                          nodes: queue,
-                          currentIndex: focusState.currentIndex,
-                        ),
+                    ? DagCanvasWidget(
+                        nodes: queue,
+                        currentIndex: focusState.currentIndex,
+                        graph: focusState.graph,
                       )
                     : ListView.separated(
                         shrinkWrap: true,
