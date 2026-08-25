@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
-import '../theme/neumorphic_theme.dart';
+import '../theme/theme_context.dart';
 import '../utils/haptic_helper.dart';
 
 class SwipeToCompleteCard extends StatefulWidget {
@@ -116,7 +116,7 @@ class _SwipeToCompleteCardState extends State<SwipeToCompleteCard> with SingleTi
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
-                        color: progress >= 0.95 ? AppColors.successEmeraldDark : AppColors.textMain,
+                        color: progress >= 0.95 ? AppColors.successEmeraldDark : context.textMain,
                       ),
                     ),
                   ],
@@ -131,11 +131,11 @@ class _SwipeToCompleteCardState extends State<SwipeToCompleteCard> with SingleTi
             child: Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: AppColors.cardSurface,
+                color: context.cardSurface,
                 borderRadius: BorderRadius.circular(32),
-                boxShadow: NeumorphicTheme.softElevation,
+                boxShadow: context.softElevation,
                 border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.8),
+                  color: context.borderLight,
                   width: 1.2,
                 ),
               ),

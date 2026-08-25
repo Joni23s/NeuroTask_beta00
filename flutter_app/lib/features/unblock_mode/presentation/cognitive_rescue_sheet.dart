@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_context.dart';
 import '../../../core/widgets/neumorphic_card.dart';
 import '../../focus_viewport/controllers/focus_controller.dart';
 
@@ -11,12 +12,12 @@ class CognitiveRescueSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-      decoration: const BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(36)),
-        boxShadow: [
+      decoration: BoxDecoration(
+        color: context.backgroundColor,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(36)),
+        boxShadow: const [
           BoxShadow(
-            color: Colors.black12,
+            color: Colors.black26,
             blurRadius: 20,
             offset: Offset(0, -6),
           ),
@@ -31,24 +32,24 @@ class CognitiveRescueSheet extends ConsumerWidget {
               width: 48,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.textMuted.withValues(alpha: 0.4),
+                color: context.textMuted.withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
           const SizedBox(height: 18),
-          const Text(
+          Text(
             'Descompresión y Rescate Cognitivo',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: AppColors.textMain,
+              color: context.textMain,
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             'Elegí cómo querés continuar sin culpas ni presiones.',
-            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            style: TextStyle(fontSize: 12, color: context.textSecondary),
           ),
           const SizedBox(height: 20),
 
@@ -112,9 +113,9 @@ class CognitiveRescueSheet extends ConsumerWidget {
           Center(
             child: TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text(
+              child: Text(
                 'Volver a la tarea',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: context.textSecondary),
               ),
             ),
           ),
@@ -168,12 +169,12 @@ class _RescueOptionCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textMain),
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: context.textMain),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                  style: TextStyle(fontSize: 11, color: context.textSecondary),
                 ),
               ],
             ),

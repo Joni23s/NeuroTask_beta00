@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/services/audio_service.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_context.dart';
 import '../../../core/utils/haptic_helper.dart';
 import '../../../core/widgets/flow_indicator.dart';
 import '../../../core/widgets/neumorphic_button.dart';
@@ -40,6 +41,7 @@ class SingleTaskScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final focusState = ref.watch(focusProvider);
     final audioState = ref.watch(audioServiceProvider);
+    final isDark = context.isDarkMode;
 
     // If completed all tasks, navigate to the celebratory summary screen
     if (focusState.isCompletedAll || focusState.currentTask == null) {
@@ -49,7 +51,7 @@ class SingleTaskScreen extends ConsumerWidget {
     final task = focusState.currentTask!;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.backgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
@@ -74,7 +76,7 @@ class SingleTaskScreen extends ConsumerWidget {
                               : Icons.cloud_outlined,
                           color: audioState.ambientType == AmbientSoundType.brownNoise
                               ? AppColors.primaryIndigo
-                              : AppColors.textSecondary,
+                              : context.textSecondary,
                         ),
                         onPressed: () {
                           ref.read(audioServiceProvider.notifier).toggleAmbient(AmbientSoundType.brownNoise);
@@ -92,7 +94,7 @@ class SingleTaskScreen extends ConsumerWidget {
                         tooltip: 'Sonido de Enfoque',
                       ),
                       IconButton(
-                        icon: const Icon(Icons.hub_outlined, color: AppColors.textSecondary),
+                        icon: Icon(Icons.hub_outlined, color: context.textSecondary),
                         onPressed: () => _openGraphModal(context),
                         tooltip: 'Ver Mapa del Grafo',
                       ),
@@ -109,13 +111,13 @@ class SingleTaskScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
 
-              const Text(
+              Text(
                 'ESTÁS ENFOCADO EN ESTO AHORA:',
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.9,
-                  color: AppColors.textMuted,
+                  color: context.textMuted,
                 ),
               ),
               const Spacer(),
@@ -134,7 +136,7 @@ class SingleTaskScreen extends ConsumerWidget {
                       width: 36,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: AppColors.brandDeepBlue,
+                        color: isDark ? AppColors.brandGlowCyan : AppColors.brandDeepBlue,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -144,10 +146,10 @@ class SingleTaskScreen extends ConsumerWidget {
                       children: [
                         Text(
                           task.category.toUpperCase(),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.brandDeepBlue,
+                            color: isDark ? AppColors.brandGlowCyan : AppColors.brandDeepBlue,
                             letterSpacing: 1.1,
                           ),
                         ),
@@ -168,24 +170,24 @@ class SingleTaskScreen extends ConsumerWidget {
                     const SizedBox(height: 10),
                     Text(
                       task.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textMain,
+                        color: context.textMain,
                         height: 1.3,
                       ),
                     ),
                     const SizedBox(height: 12),
                     Text(
                       task.subtext,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
-                        color: AppColors.textSecondary,
+                        color: context.textSecondary,
                         height: 1.4,
                       ),
                     ),
                     const SizedBox(height: 24),
-                    const Divider(color: Color(0xFFE2E8F0)),
+                    Divider(color: context.borderLight),
                     const SizedBox(height: 12),
 
                     // Organic Zen Timer
@@ -195,10 +197,10 @@ class SingleTaskScreen extends ConsumerWidget {
               ),
 
               const SizedBox(height: 12),
-              const Center(
+              Center(
                 child: Text(
                   '👉 Deslizá la tarjeta hacia la derecha para completar',
-                  style: TextStyle(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.w500),
+                  style: TextStyle(fontSize: 11, color: context.textMuted, fontWeight: FontWeight.w500),
                 ),
               ),
 
@@ -232,14 +234,14 @@ class SingleTaskScreen extends ConsumerWidget {
                 borderRadius: 18,
                 height: 48,
                 onPressed: () => _openRescueSheet(context),
-                child: const Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.help_outline_rounded, color: AppColors.amberWarning, size: 18),
-                    SizedBox(width: 6),
+                    const Icon(Icons.help_outline_rounded, color: AppColors.amberWarning, size: 18),
+                    const SizedBox(width: 6),
                     Text(
                       'Estoy Bloqueado / Dividir más',
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.bold),
+                      style: TextStyle(color: context.textSecondary, fontSize: 13, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),

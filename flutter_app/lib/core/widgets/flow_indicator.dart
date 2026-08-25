@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
-import '../theme/neumorphic_theme.dart';
+import '../theme/theme_context.dart';
 
 class FlowIndicator extends StatelessWidget {
   final int currentStep;
@@ -17,10 +17,10 @@ class FlowIndicator extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
       decoration: BoxDecoration(
-        color: AppColors.cardSurface,
+        color: context.cardSurface,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: NeumorphicTheme.subtleElevation,
-        border: Border.all(color: Colors.white.withValues(alpha: 0.8)),
+        boxShadow: context.subtleElevation,
+        border: Border.all(color: context.borderLight),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -36,10 +36,10 @@ class FlowIndicator extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             'Paso $currentStep de $totalSteps',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: AppColors.textMain,
+              color: context.textMain,
             ),
           ),
         ],

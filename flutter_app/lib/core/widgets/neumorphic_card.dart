@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
-import '../theme/neumorphic_theme.dart';
+import '../theme/theme_context.dart';
 
 class NeumorphicCard extends StatelessWidget {
   final Widget child;
@@ -25,10 +24,10 @@ class NeumorphicCard extends StatelessWidget {
     final cardContent = Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: backgroundColor ?? AppColors.cardSurface,
+        color: backgroundColor ?? context.cardSurface,
         borderRadius: BorderRadius.circular(borderRadius),
-        boxShadow: NeumorphicTheme.softElevation,
-        border: border ?? Border.all(color: AppColors.borderLight, width: 1.2),
+        boxShadow: context.softElevation,
+        border: border ?? Border.all(color: context.borderLight, width: 1.2),
       ),
       child: child,
     );

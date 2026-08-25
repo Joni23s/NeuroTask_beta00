@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/neumorphic_theme.dart';
+import '../../../core/theme/theme_context.dart';
 import '../../../core/utils/haptic_helper.dart';
 import '../../../core/widgets/theme_toggle_button.dart';
 import '../../brain_dump/presentation/brain_dump_screen.dart';
@@ -81,9 +81,10 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
   Widget build(BuildContext context) {
     final focusState = ref.watch(focusProvider);
     final hasActiveTask = focusState.hasActiveSession && focusState.currentTask != null;
+    final isDark = context.isDarkMode;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.backgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 20.0),
@@ -97,10 +98,10 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                     decoration: BoxDecoration(
-                      color: AppColors.cardSurface,
+                      color: context.cardSurface,
                       borderRadius: BorderRadius.circular(16),
-                      boxShadow: NeumorphicTheme.subtleElevation,
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.8)),
+                      boxShadow: context.subtleElevation,
+                      border: Border.all(color: context.borderLight),
                     ),
                     child: const Row(
                       mainAxisSize: MainAxisSize.min,
@@ -139,7 +140,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
                               width: 210,
                               height: 210,
                               decoration: BoxDecoration(
-                                color: AppColors.cardSurface,
+                                color: context.cardSurface,
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
@@ -147,14 +148,14 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
                                     blurRadius: 36,
                                     spreadRadius: 6,
                                   ),
-                                  const BoxShadow(
-                                    color: Colors.white,
-                                    offset: Offset(-8, -8),
+                                  BoxShadow(
+                                    color: isDark ? Colors.white10 : Colors.white,
+                                    offset: const Offset(-8, -8),
                                     blurRadius: 20,
                                   ),
-                                  const BoxShadow(
-                                    color: AppColors.shadowDark,
-                                    offset: Offset(8, 8),
+                                  BoxShadow(
+                                    color: isDark ? AppColors.darkShadowDark : AppColors.shadowDark,
+                                    offset: const Offset(8, 8),
                                     blurRadius: 20,
                                   ),
                                 ],
@@ -180,32 +181,32 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
                   const SizedBox(height: 30),
 
                   // Brand Typography
-                  const Text(
+                  Text(
                     'NEUROTASK',
                     style: TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 2.0,
-                      color: AppColors.brandDeepBlue,
+                      color: isDark ? AppColors.brandGlowCyan : AppColors.brandDeepBlue,
                     ),
                   ),
                   const SizedBox(height: 6),
-                  const Text(
+                  Text(
                     'MOTOR DE FOCO',
                     style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 3.5,
-                      color: AppColors.brandSteelBlue,
+                      color: isDark ? AppColors.darkTextSecondary : AppColors.brandSteelBlue,
                     ),
                   ),
                   const SizedBox(height: 14),
-                  const Text(
+                  Text(
                     'Transformá el caos de ideas en un camino lógico y sereno.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 13,
-                      color: AppColors.textSecondary,
+                      color: context.textSecondary,
                       height: 1.4,
                     ),
                   ),
@@ -274,9 +275,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
                               offset: const Offset(4, 6),
                               blurRadius: 16,
                             ),
-                            const BoxShadow(
-                              color: Colors.white,
-                              offset: Offset(-3, -3),
+                            BoxShadow(
+                              color: isDark ? Colors.white12 : Colors.white,
+                              offset: const Offset(-3, -3),
                               blurRadius: 8,
                             ),
                           ],
@@ -301,9 +302,9 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const Text(
+                  Text(
                     'Tocá el cerebro o el botón para comenzar',
-                    style: TextStyle(fontSize: 11, color: AppColors.textMuted),
+                    style: TextStyle(fontSize: 11, color: context.textMuted),
                   ),
                 ],
               ),

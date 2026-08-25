@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/neumorphic_theme.dart';
+import '../../../core/theme/theme_context.dart';
 import '../../../core/utils/haptic_helper.dart';
 import '../../../core/widgets/neumorphic_button.dart';
 import '../../../core/widgets/neumorphic_card.dart';
@@ -73,7 +73,7 @@ class SummaryCelebrationScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => Dialog(
-        backgroundColor: AppColors.cardSurface,
+        backgroundColor: context.cardSurface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -84,12 +84,12 @@ class SummaryCelebrationScreen extends ConsumerWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Reporte de Victoria 🏆',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textMain),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.textMain),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close_rounded, size: 20, color: AppColors.textMuted),
+                    icon: Icon(Icons.close_rounded, size: 20, color: context.textMuted),
                     onPressed: () => Navigator.pop(ctx),
                   ),
                 ],
@@ -99,14 +99,15 @@ class SummaryCelebrationScreen extends ConsumerWidget {
                 constraints: const BoxConstraints(maxHeight: 220),
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: AppColors.pressedSurface,
+                  color: context.pressedSurface,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: NeumorphicTheme.pressedElevation,
+                  boxShadow: context.pressedElevation,
+                  border: Border.all(color: context.borderLight),
                 ),
                 child: SingleChildScrollView(
                   child: Text(
                     report,
-                    style: const TextStyle(fontSize: 12, height: 1.4, color: AppColors.textMain, fontFamily: 'monospace'),
+                    style: TextStyle(fontSize: 12, height: 1.4, color: context.textMain, fontFamily: 'monospace'),
                   ),
                 ),
               ),
@@ -139,9 +140,10 @@ class SummaryCelebrationScreen extends ConsumerWidget {
     final focusState = ref.watch(focusProvider);
     final totalNodes = focusState.executionQueue.length;
     final totalMinutes = focusState.executionQueue.fold<int>(0, (sum, item) => sum + item.estimatedMinutes);
+    final isDark = context.isDarkMode;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.backgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -156,9 +158,10 @@ class SummaryCelebrationScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                       decoration: BoxDecoration(
-                        color: AppColors.cardSurface,
+                        color: context.cardSurface,
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: NeumorphicTheme.subtleElevation,
+                        boxShadow: context.subtleElevation,
+                        border: Border.all(color: context.borderLight),
                       ),
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
@@ -185,23 +188,23 @@ class SummaryCelebrationScreen extends ConsumerWidget {
                 Container(
                   width: 90,
                   height: 90,
-                  decoration: const BoxDecoration(
-                    color: AppColors.cardSurface,
-                    borderRadius: BorderRadius.all(Radius.circular(30)),
+                  decoration: BoxDecoration(
+                    color: context.cardSurface,
+                    borderRadius: const BorderRadius.all(Radius.circular(30)),
                     boxShadow: [
-                      BoxShadow(
+                      const BoxShadow(
                         color: AppColors.emeraldGlow,
                         blurRadius: 28,
                         spreadRadius: 4,
                       ),
                       BoxShadow(
-                        color: Colors.white,
-                        offset: Offset(-8, -8),
+                        color: isDark ? Colors.white10 : Colors.white,
+                        offset: const Offset(-8, -8),
                         blurRadius: 18,
                       ),
                       BoxShadow(
-                        color: AppColors.shadowDark,
-                        offset: Offset(8, 8),
+                        color: isDark ? AppColors.darkShadowDark : AppColors.shadowDark,
+                        offset: const Offset(8, 8),
                         blurRadius: 18,
                       ),
                     ],
@@ -212,21 +215,21 @@ class SummaryCelebrationScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 20),
 
-                const Text(
+                Text(
                   '¡Flujo Completado!',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textMain,
+                    color: context.textMain,
                   ),
                 ),
                 const SizedBox(height: 6),
-                const Text(
+                Text(
                   'Completaste todos los pasos del camino lógico sin sobrecarga sensorial ni parálisis ejecutiva.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 12,
-                    color: AppColors.textSecondary,
+                    color: context.textSecondary,
                     height: 1.4,
                   ),
                 ),
@@ -245,11 +248,11 @@ class SummaryCelebrationScreen extends ConsumerWidget {
                             const SizedBox(height: 4),
                             Text(
                               '$totalNodes / $totalNodes',
-                              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textMain),
+                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: context.textMain),
                             ),
-                            const Text(
+                            Text(
                               'Nodos Logrados',
-                              style: TextStyle(fontSize: 10, color: AppColors.textMuted, fontWeight: FontWeight.w600),
+                              style: TextStyle(fontSize: 10, color: context.textMuted, fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
@@ -268,30 +271,30 @@ class SummaryCelebrationScreen extends ConsumerWidget {
                               '${totalMinutes}m',
                               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.primaryIndigo),
                             ),
-                            const Text(
+                            Text(
                               'Tiempo Sereno',
-                              style: TextStyle(fontSize: 10, color: AppColors.textMuted, fontWeight: FontWeight.w600),
+                              style: TextStyle(fontSize: 10, color: context.textMuted, fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
                       ),
                     ),
                     const SizedBox(width: 10),
-                    const Expanded(
+                    Expanded(
                       child: NeumorphicCard(
-                        padding: EdgeInsets.symmetric(vertical: 14, horizontal: 10),
+                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
                         borderRadius: 20,
                         child: Column(
                           children: [
-                            Text('🌿', style: TextStyle(fontSize: 18)),
-                            SizedBox(height: 4),
-                            Text(
+                            const Text('🌿', style: TextStyle(fontSize: 18)),
+                            const SizedBox(height: 4),
+                            const Text(
                               '100%',
                               style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.successEmerald),
                             ),
                             Text(
                               'Calma Mental',
-                              style: TextStyle(fontSize: 10, color: AppColors.textMuted, fontWeight: FontWeight.w600),
+                              style: TextStyle(fontSize: 10, color: context.textMuted, fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
@@ -324,12 +327,12 @@ class SummaryCelebrationScreen extends ConsumerWidget {
                         variant: NeumorphicButtonVariant.flat,
                         height: 48,
                         onPressed: () => _showReportPreviewDialog(context, focusState),
-                        child: const Row(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.description_outlined, size: 16, color: AppColors.brandDeepBlue),
-                            SizedBox(width: 6),
-                            Text('Ver Reporte', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppColors.textMain)),
+                            Icon(Icons.description_outlined, size: 16, color: isDark ? AppColors.brandGlowCyan : AppColors.brandDeepBlue),
+                            const SizedBox(width: 6),
+                            Text('Ver Reporte', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: context.textMain)),
                           ],
                         ),
                       ),
@@ -347,12 +350,12 @@ class SummaryCelebrationScreen extends ConsumerWidget {
                             builder: (_) => const GraphOverviewModal(),
                           );
                         },
-                        child: const Row(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.hub_outlined, size: 16, color: AppColors.primaryIndigo),
-                            SizedBox(width: 6),
-                            Text('Mapa Grafo', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: AppColors.textMain)),
+                            const Icon(Icons.hub_outlined, size: 16, color: AppColors.primaryIndigo),
+                            const SizedBox(width: 6),
+                            Text('Mapa Grafo', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: context.textMain)),
                           ],
                         ),
                       ),

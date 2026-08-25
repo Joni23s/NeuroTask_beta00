@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../theme/theme_context.dart';
 
 class ZenTimerWidget extends StatefulWidget {
   final int initialMinutes;
@@ -82,10 +83,10 @@ class _ZenTimerWidgetState extends State<ZenTimerWidget> with SingleTickerProvid
             const SizedBox(width: 8),
             Text(
               'Tiempo de Flujo: ${widget.initialMinutes} min',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary,
+                color: context.textSecondary,
               ),
             ),
           ],
@@ -94,19 +95,19 @@ class _ZenTimerWidgetState extends State<ZenTimerWidget> with SingleTickerProvid
           children: [
             Text(
               _formattedTime,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Courier',
-                color: AppColors.primaryIndigo,
+                color: context.isDarkMode ? AppColors.brandGlowCyan : AppColors.primaryIndigo,
               ),
             ),
             const SizedBox(width: 4),
-            const Text(
+            Text(
               '| Sin apuros',
               style: TextStyle(
                 fontSize: 11,
-                color: AppColors.textMuted,
+                color: context.textMuted,
                 fontWeight: FontWeight.w500,
               ),
             ),

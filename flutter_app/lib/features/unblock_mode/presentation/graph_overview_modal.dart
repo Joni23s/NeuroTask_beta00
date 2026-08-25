@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_context.dart';
 import '../../../core/widgets/neumorphic_card.dart';
 import '../../focus_viewport/controllers/focus_controller.dart';
 import '../../graph_engine/presentation/dag_canvas_widget.dart';
@@ -24,12 +25,12 @@ class _GraphOverviewModalState extends State<GraphOverviewModal> {
 
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-          decoration: const BoxDecoration(
-            color: AppColors.background,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(36)),
-            boxShadow: [
+          decoration: BoxDecoration(
+            color: context.backgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(36)),
+            boxShadow: const [
               BoxShadow(
-                color: Colors.black12,
+                color: Colors.black26,
                 blurRadius: 20,
                 offset: Offset(0, -6),
               ),
@@ -44,7 +45,7 @@ class _GraphOverviewModalState extends State<GraphOverviewModal> {
                   width: 48,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.textMuted.withValues(alpha: 0.4),
+                    color: context.textMuted.withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -55,17 +56,17 @@ class _GraphOverviewModalState extends State<GraphOverviewModal> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Mapa del Grafo (Tus ideas)',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textMain),
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.textMain),
                       ),
-                      SizedBox(height: 2),
+                      const SizedBox(height: 2),
                       Text(
                         'Secuencia topológica calculada',
-                        style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                        style: TextStyle(fontSize: 12, color: context.textSecondary),
                       ),
                     ],
                   ),
@@ -120,7 +121,7 @@ class _GraphOverviewModalState extends State<GraphOverviewModal> {
                           return NeumorphicCard(
                             padding: const EdgeInsets.all(14),
                             borderRadius: 18,
-                            backgroundColor: isCurrent ? AppColors.primaryIndigoLight.withValues(alpha: 0.08) : AppColors.cardSurface,
+                            backgroundColor: isCurrent ? AppColors.primaryIndigoLight.withValues(alpha: 0.08) : context.cardSurface,
                             child: Row(
                               children: [
                                 Container(
@@ -131,14 +132,14 @@ class _GraphOverviewModalState extends State<GraphOverviewModal> {
                                         ? AppColors.successEmerald
                                         : isCurrent
                                             ? AppColors.primaryIndigo
-                                            : AppColors.pressedSurface,
+                                            : context.pressedSurface,
                                     borderRadius: BorderRadius.circular(9),
                                   ),
                                   child: Center(
                                     child: Text(
                                       isCompleted ? '✓' : '${index + 1}',
                                       style: TextStyle(
-                                        color: isCompleted || isCurrent ? Colors.white : AppColors.textSecondary,
+                                        color: isCompleted || isCurrent ? Colors.white : context.textSecondary,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 12,
                                       ),
@@ -162,13 +163,13 @@ class _GraphOverviewModalState extends State<GraphOverviewModal> {
                                                   ? AppColors.successEmerald
                                                   : isCurrent
                                                       ? AppColors.primaryIndigo
-                                                      : AppColors.textMuted,
+                                                      : context.textMuted,
                                               letterSpacing: 0.8,
                                             ),
                                           ),
                                           Text(
                                             '${node.estimatedMinutes}m',
-                                            style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
+                                            style: TextStyle(fontSize: 10, color: context.textMuted),
                                           ),
                                         ],
                                       ),
@@ -177,7 +178,7 @@ class _GraphOverviewModalState extends State<GraphOverviewModal> {
                                         node.title,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textMain),
+                                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: context.textMain),
                                       ),
                                     ],
                                   ),
@@ -193,9 +194,9 @@ class _GraphOverviewModalState extends State<GraphOverviewModal> {
               Center(
                 child: TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text(
+                  child: Text(
                     'Cerrar Mapa',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textSecondary),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: context.textSecondary),
                   ),
                 ),
               ),

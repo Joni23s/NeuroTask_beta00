@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
-import '../theme/neumorphic_theme.dart';
+import '../theme/theme_context.dart';
 import '../utils/haptic_helper.dart';
 
 enum NeumorphicButtonVariant {
@@ -40,6 +40,7 @@ class _NeumorphicButtonState extends State<NeumorphicButton> {
   @override
   Widget build(BuildContext context) {
     BoxDecoration decoration;
+    final isDark = context.isDarkMode;
 
     switch (widget.variant) {
       case NeumorphicButtonVariant.primary:
@@ -50,15 +51,15 @@ class _NeumorphicButtonState extends State<NeumorphicButton> {
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(widget.borderRadius),
-          boxShadow: const [
-            BoxShadow(
+          boxShadow: [
+            const BoxShadow(
               color: AppColors.indigoGlow,
               offset: Offset(4, 4),
               blurRadius: 14,
             ),
             BoxShadow(
-              color: Colors.white,
-              offset: Offset(-3, -3),
+              color: isDark ? Colors.white12 : Colors.white,
+              offset: const Offset(-3, -3),
               blurRadius: 8,
             ),
           ],
@@ -72,15 +73,15 @@ class _NeumorphicButtonState extends State<NeumorphicButton> {
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(widget.borderRadius),
-          boxShadow: const [
-            BoxShadow(
+          boxShadow: [
+            const BoxShadow(
               color: AppColors.emeraldGlow,
               offset: Offset(4, 4),
               blurRadius: 14,
             ),
             BoxShadow(
-              color: Colors.white,
-              offset: Offset(-3, -3),
+              color: isDark ? Colors.white12 : Colors.white,
+              offset: const Offset(-3, -3),
               blurRadius: 8,
             ),
           ],
@@ -88,18 +89,18 @@ class _NeumorphicButtonState extends State<NeumorphicButton> {
         break;
       case NeumorphicButtonVariant.pressed:
         decoration = BoxDecoration(
-          color: AppColors.pressedSurface,
+          color: context.pressedSurface,
           borderRadius: BorderRadius.circular(widget.borderRadius),
-          boxShadow: NeumorphicTheme.pressedElevation,
-          border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
+          boxShadow: context.pressedElevation,
+          border: Border.all(color: context.borderLight),
         );
         break;
       case NeumorphicButtonVariant.flat:
         decoration = BoxDecoration(
-          color: _isPressed ? AppColors.pressedSurface : AppColors.cardSurface,
+          color: _isPressed ? context.pressedSurface : context.cardSurface,
           borderRadius: BorderRadius.circular(widget.borderRadius),
-          boxShadow: _isPressed ? NeumorphicTheme.pressedElevation : NeumorphicTheme.subtleElevation,
-          border: Border.all(color: Colors.white.withValues(alpha: 0.7)),
+          boxShadow: _isPressed ? context.pressedElevation : context.subtleElevation,
+          border: Border.all(color: context.borderLight),
         );
         break;
     }

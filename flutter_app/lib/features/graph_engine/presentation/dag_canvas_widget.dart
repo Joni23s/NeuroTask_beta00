@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/theme_context.dart';
 import '../models/task_node.dart';
 
 class DagCanvasWidget extends StatefulWidget {
@@ -36,6 +37,8 @@ class _DagCanvasWidgetState extends State<DagCanvasWidget> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
+
     return AnimatedBuilder(
       animation: _pulseController,
       builder: (context, child) {
@@ -45,6 +48,7 @@ class _DagCanvasWidgetState extends State<DagCanvasWidget> with SingleTickerProv
             nodes: widget.nodes,
             currentIndex: widget.currentIndex,
             pulseValue: _pulseController.value,
+            isDarkMode: isDark,
           ),
         );
       },
@@ -56,11 +60,13 @@ class _DagGraphPainter extends CustomPainter {
   final List<TaskNode> nodes;
   final int currentIndex;
   final double pulseValue;
+  final bool isDarkMode;
 
   _DagGraphPainter({
     required this.nodes,
     required this.currentIndex,
     required this.pulseValue,
+    required this.isDarkMode,
   });
 
   @override
@@ -94,7 +100,7 @@ class _DagGraphPainter extends CustomPainter {
           end: Alignment.bottomCenter,
         ).createShader(Rect.fromLTRB(startX, y1, startX, y2));
       } else {
-        paint.color = AppColors.textMuted.withValues(alpha: 0.35);
+        paint.color = (isDarkMode ? AppColors.darkTextMuted : AppColors.textMuted).withValues(alpha: 0.35);
       }
 
       final path = Path();
@@ -164,12 +170,12 @@ class _DagGraphPainter extends CustomPainter {
       } else {
         // Future uncompleted node body
         final nodePaint = Paint()
-          ..color = AppColors.pressedSurface
+          ..color = isDarkMode ? AppColors.darkPressedSurface : AppColors.pressedSurface
           ..style = PaintingStyle.fill;
         canvas.drawCircle(center, nodeRadius, nodePaint);
 
         final borderPaint = Paint()
-          ..color = AppColors.textMuted.withValues(alpha: 0.5)
+          ..color = (isDarkMode ? AppColors.darkTextMuted : AppColors.textMuted).withValues(alpha: 0.5)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.5;
         canvas.drawCircle(center, nodeRadius, borderPaint);
@@ -178,7 +184,11 @@ class _DagGraphPainter extends CustomPainter {
         final textPainter = TextPainter(
           text: TextSpan(
             text: '${i + 1}',
-            style: const TextStyle(color: AppColors.textSecondary, fontSize: 11, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              color: isDarkMode ? AppColors.darkTextSecondary : AppColors.textSecondary,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           textDirection: TextDirection.ltr,
         )..layout();
@@ -196,8 +206,8 @@ class _DagGraphPainter extends CustomPainter {
               color: isCompleted
                   ? AppColors.successEmerald
                   : isCurrent
-                      ? AppColors.primaryIndigo
-                      : AppColors.textMuted,
+                      ? (isDarkMode ? AppColors.brandGlowCyan : AppColors.primaryIndigo)
+                      : (isDarkMode ? AppColors.darkTextMuted : AppColors.textMuted),
               letterSpacing: 0.8,
             ),
           ),
@@ -206,7 +216,9 @@ class _DagGraphPainter extends CustomPainter {
             style: TextStyle(
               fontSize: 12,
               fontWeight: isCurrent ? FontWeight.bold : FontWeight.w600,
-              color: isCurrent ? AppColors.textMain : AppColors.textSecondary,
+              color: isCurrent
+                  ? (isDarkMode ? AppColors.darkTextMain : AppColors.textMain)
+                  : (isDarkMode ? AppColors.darkTextSecondary : AppColors.textSecondary),
             ),
           ),
         ],
@@ -226,6 +238,7 @@ class _DagGraphPainter extends CustomPainter {
   bool shouldRepaint(covariant _DagGraphPainter oldDelegate) {
     return oldDelegate.pulseValue != pulseValue ||
         oldDelegate.currentIndex != currentIndex ||
-        oldDelegate.nodes != nodes;
+        oldDelegate.nodes != nodes ||
+        oldDelegate.isDarkMode != isDarkMode;
   }
 }

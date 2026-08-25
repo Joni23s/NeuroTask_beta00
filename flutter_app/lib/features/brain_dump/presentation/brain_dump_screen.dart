@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/neumorphic_theme.dart';
+import '../../../core/theme/theme_context.dart';
 import '../../../core/utils/haptic_helper.dart';
 import '../../../core/widgets/neumorphic_button.dart';
 import '../../../core/widgets/theme_toggle_button.dart';
@@ -60,24 +60,24 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
       barrierDismissible: false,
       builder: (context) {
         return Dialog(
-          backgroundColor: AppColors.background,
+          backgroundColor: context.cardSurface,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(color: AppColors.primaryIndigo),
-                SizedBox(height: 24),
+                const CircularProgressIndicator(color: AppColors.primaryIndigo),
+                const SizedBox(height: 24),
                 Text(
                   'Construyendo Grafo Lógico...',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textMain),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: context.textMain),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
                   'Eliminando ruido cognitivo y aislando tu primer paso...',
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  style: TextStyle(fontSize: 12, color: context.textSecondary),
                 ),
               ],
             ),
@@ -110,6 +110,7 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
   @override
   Widget build(BuildContext context) {
     final dumpState = ref.watch(brainDumpProvider);
+    final isDark = context.isDarkMode;
 
     if (dumpState.text != _textController.text && dumpState.text.isNotEmpty) {
       _textController.text = dumpState.text;
@@ -117,7 +118,7 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.backgroundColor,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -146,9 +147,10 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                   decoration: BoxDecoration(
-                                    color: AppColors.cardSurface,
+                                    color: context.cardSurface,
                                     borderRadius: BorderRadius.circular(16),
-                                    boxShadow: NeumorphicTheme.subtleElevation,
+                                    boxShadow: context.subtleElevation,
+                                    border: Border.all(color: context.borderLight),
                                   ),
                                   child: const Row(
                                     mainAxisSize: MainAxisSize.min,
@@ -163,14 +165,19 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                                   ),
                                 ),
                               ),
-                              const Row(
+                              Row(
                                 children: [
                                   Text(
                                     'NEUROTASK',
-                                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.brandDeepBlue, letterSpacing: 1.2),
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w800,
+                                      color: isDark ? AppColors.brandGlowCyan : AppColors.brandDeepBlue,
+                                      letterSpacing: 1.2,
+                                    ),
                                   ),
-                                  SizedBox(width: 10),
-                                  ThemeToggleButton(),
+                                  const SizedBox(width: 10),
+                                  const ThemeToggleButton(),
                                 ],
                               ),
                             ],
@@ -178,21 +185,21 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                           const SizedBox(height: 18),
 
                           // Title & Subtitle
-                          const Text(
+                          Text(
                             '¿Qué ronda por tu cabeza?',
-                            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textMain, height: 1.2),
+                            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: context.textMain, height: 1.2),
                           ),
                           const SizedBox(height: 6),
-                          const Text(
+                          Text(
                             'Escribí o dictá libremente. El sistema ordenará el camino lógico.',
-                            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                            style: TextStyle(fontSize: 12, color: context.textSecondary),
                           ),
                           const SizedBox(height: 14),
 
                           // Demo quick presets
                           Row(
                             children: [
-                              const Text('Ejemplos: ', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.textMuted)),
+                              Text('Ejemplos: ', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: context.textMuted)),
                               const SizedBox(width: 6),
                               Semantics(
                                 button: true,
@@ -202,11 +209,12 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                     decoration: BoxDecoration(
-                                      color: AppColors.cardSurface,
+                                      color: context.cardSurface,
                                       borderRadius: BorderRadius.circular(10),
-                                      boxShadow: NeumorphicTheme.subtleElevation,
+                                      boxShadow: context.subtleElevation,
+                                      border: Border.all(color: context.borderLight),
                                     ),
-                                    child: const Text('🎓 Entrega DAM', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                                    child: Text('🎓 Entrega DAM', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: context.textSecondary)),
                                   ),
                                 ),
                               ),
@@ -219,11 +227,12 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                                     decoration: BoxDecoration(
-                                      color: AppColors.cardSurface,
+                                      color: context.cardSurface,
                                       borderRadius: BorderRadius.circular(10),
-                                      boxShadow: NeumorphicTheme.subtleElevation,
+                                      boxShadow: context.subtleElevation,
+                                      border: Border.all(color: context.borderLight),
                                     ),
-                                    child: const Text('📱 Flutter', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                                    child: Text('📱 Flutter', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: context.textSecondary)),
                                   ),
                                 ),
                               ),
@@ -239,12 +248,12 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                         height: 220,
                         padding: const EdgeInsets.all(18),
                         decoration: BoxDecoration(
-                          color: AppColors.pressedSurface,
+                          color: context.pressedSurface,
                           borderRadius: BorderRadius.circular(28),
-                          boxShadow: NeumorphicTheme.pressedElevation,
+                          boxShadow: context.pressedElevation,
                           border: _showEmptyHint
                               ? Border.all(color: AppColors.amberWarning.withValues(alpha: 0.6), width: 1.5)
-                              : null,
+                              : Border.all(color: context.borderLight),
                         ),
                         child: Stack(
                           children: [
@@ -256,7 +265,7 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                                 focusNode: _focusNode,
                                 maxLines: null,
                                 expands: true,
-                                style: const TextStyle(fontSize: 14, color: AppColors.textMain, height: 1.5),
+                                style: TextStyle(fontSize: 14, color: context.textMain, height: 1.5),
                                 onChanged: (val) {
                                   if (_showEmptyHint && val.trim().isNotEmpty) {
                                     setState(() {
@@ -264,9 +273,9 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                                     });
                                   }
                                 },
-                                decoration: const InputDecoration(
+                                decoration: InputDecoration(
                                   hintText: 'Ej: Tengo que testear los endpoints en Postman, redactar el resumen ejecutivo del informe y armar las 7 diapositivas en Figma...',
-                                  hintStyle: TextStyle(color: AppColors.textMuted, fontSize: 13),
+                                  hintStyle: TextStyle(color: context.textMuted, fontSize: 13),
                                   border: InputBorder.none,
                                 ),
                               ),
@@ -289,9 +298,10 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                                     width: 44,
                                     height: 44,
                                     decoration: BoxDecoration(
-                                      color: AppColors.cardSurface,
+                                      color: context.cardSurface,
                                       borderRadius: BorderRadius.circular(14),
-                                      boxShadow: NeumorphicTheme.subtleElevation,
+                                      boxShadow: context.subtleElevation,
+                                      border: Border.all(color: context.borderLight),
                                     ),
                                     child: const Icon(Icons.mic_none_rounded, color: AppColors.primaryIndigo, size: 22),
                                   ),
