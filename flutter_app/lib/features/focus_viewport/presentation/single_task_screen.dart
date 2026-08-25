@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/services/audio_service.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/neumorphic_theme.dart';
 import '../../../core/utils/haptic_helper.dart';
 import '../../../core/widgets/flow_indicator.dart';
 import '../../../core/widgets/neumorphic_button.dart';
-import '../../../core/widgets/neumorphic_card.dart';
+import '../../../core/widgets/swipe_to_complete_card.dart';
 import '../../../core/widgets/zen_timer_widget.dart';
-import '../../brain_dump/presentation/brain_dump_screen.dart';
 import '../../unblock_mode/presentation/cognitive_rescue_sheet.dart';
 import '../../unblock_mode/presentation/graph_overview_modal.dart';
 import '../controllers/focus_controller.dart';
+import 'summary_celebration_screen.dart';
 
 class SingleTaskScreen extends ConsumerWidget {
   const SingleTaskScreen({super.key});
@@ -38,58 +38,11 @@ class SingleTaskScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final focusState = ref.watch(focusProvider);
+    final audioState = ref.watch(audioServiceProvider);
 
-    // If completed all tasks, show celebratory view
+    // If completed all tasks, navigate to the celebratory summary screen
     if (focusState.isCompletedAll || focusState.currentTask == null) {
-      return Scaffold(
-        backgroundColor: AppColors.background,
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 90,
-                  height: 90,
-                  decoration: BoxDecoration(
-                    color: AppColors.cardSurface,
-                    borderRadius: BorderRadius.circular(30),
-                    boxShadow: NeumorphicTheme.softElevation,
-                  ),
-                  child: const Center(
-                    child: Text('🏆', style: TextStyle(fontSize: 42)),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                const Text(
-                  '¡Objetivo Cumplido!',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textMain),
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  'Completaste todos los nodos del camino lógico sin sobrecarga sensorial ni parálisis por análisis.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.4),
-                ),
-                const SizedBox(height: 36),
-                NeumorphicButton(
-                  variant: NeumorphicButtonVariant.primary,
-                  height: 54,
-                  onPressed: () {
-                    ref.read(focusProvider.notifier).reset();
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (_) => const BrainDumpScreen()),
-                    );
-                  },
-                  child: const Text('Iniciar Nuevo Volcado (Brain Dump)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
+      return const SummaryCelebrationScreen();
     }
 
     final task = focusState.currentTask!;
@@ -102,7 +55,7 @@ class SingleTaskScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Top Bar Navigation
+              // Top Bar Navigation & Sensory Controls
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -112,6 +65,31 @@ class SingleTaskScreen extends ConsumerWidget {
                   ),
                   Row(
                     children: [
+                      // Ambient Noise Toggle
+                      IconButton(
+                        icon: Icon(
+                          audioState.ambientType == AmbientSoundType.brownNoise
+                              ? Icons.cloud_queue_rounded
+                              : Icons.cloud_outlined,
+                          color: audioState.ambientType == AmbientSoundType.brownNoise
+                              ? AppColors.primaryIndigo
+                              : AppColors.textSecondary,
+                        ),
+                        onPressed: () {
+                          ref.read(audioServiceProvider.notifier).toggleAmbient(AmbientSoundType.brownNoise);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              duration: const Duration(seconds: 2),
+                              content: Text(
+                                audioState.ambientType == AmbientSoundType.brownNoise
+                                    ? '🔇 Sonido ambiental pausado'
+                                    : '🌧️ Ruido Marrón activo para concentración',
+                              ),
+                            ),
+                          );
+                        },
+                        tooltip: 'Sonido de Enfoque',
+                      ),
                       IconButton(
                         icon: const Icon(Icons.hub_outlined, color: AppColors.textSecondary),
                         onPressed: () => _openGraphModal(context),
@@ -139,10 +117,13 @@ class SingleTaskScreen extends ConsumerWidget {
               ),
               const Spacer(),
 
-              // Neumorphic Central Focus Hero Card
-              NeumorphicCard(
-                borderRadius: 32,
-                padding: const EdgeInsets.all(24),
+              // Swipe-to-Complete Interactive Hero Card
+              SwipeToCompleteCard(
+                onSwipeCompleted: () {
+                  ref.read(audioServiceProvider.notifier).playCompletionChime();
+                  ref.read(focusProvider.notifier).completeCurrentTask();
+                },
+                onPullRescue: () => _openRescueSheet(context),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -150,7 +131,7 @@ class SingleTaskScreen extends ConsumerWidget {
                       width: 36,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: AppColors.primaryIndigo,
+                        color: AppColors.brandDeepBlue,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -163,7 +144,7 @@ class SingleTaskScreen extends ConsumerWidget {
                           style: const TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.primaryIndigo,
+                            color: AppColors.brandDeepBlue,
                             letterSpacing: 1.1,
                           ),
                         ),
@@ -176,7 +157,7 @@ class SingleTaskScreen extends ConsumerWidget {
                             ),
                             child: const Text(
                               'Micro-Paso (3m)',
-                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.amberWarning),
+                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.amberDark),
                             ),
                           ),
                       ],
@@ -210,15 +191,23 @@ class SingleTaskScreen extends ConsumerWidget {
                 ),
               ),
 
+              const SizedBox(height: 12),
+              const Center(
+                child: Text(
+                  '👉 Deslizá la tarjeta hacia la derecha para completar',
+                  style: TextStyle(fontSize: 11, color: AppColors.textMuted, fontWeight: FontWeight.w500),
+                ),
+              ),
+
               const Spacer(),
 
               // Action Buttons
               NeumorphicButton(
                 variant: NeumorphicButtonVariant.success,
                 borderRadius: 20,
-                height: 58,
+                height: 56,
                 onPressed: () {
-                  HapticHelper.success();
+                  ref.read(audioServiceProvider.notifier).playCompletionChime();
                   ref.read(focusProvider.notifier).completeCurrentTask();
                 },
                 child: const Row(

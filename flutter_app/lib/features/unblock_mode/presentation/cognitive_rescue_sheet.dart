@@ -57,12 +57,15 @@ class CognitiveRescueSheet extends ConsumerWidget {
             badgeNumber: '1',
             badgeColor: AppColors.primaryIndigoLight,
             title: 'Subdividir en micro-pasos de 3 min',
-            subtitle: 'Desarma la tarea en algo minúsculo para bajar fricción.',
+            subtitle: 'Desarma la tarea en un paso mínimo para arrancar ya.',
             onTap: () {
               ref.read(focusProvider.notifier).splitCurrentTask();
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('✨ Tarea dividida en micro-pasos de 3 min')),
+                const SnackBar(
+                  content: Text('✨ Tarea dividida en micro-pasos de 3 min sin fricción'),
+                  duration: Duration(seconds: 2),
+                ),
               );
             },
           ),
@@ -73,12 +76,15 @@ class CognitiveRescueSheet extends ConsumerWidget {
             badgeNumber: '2',
             badgeColor: AppColors.amberWarning,
             title: 'Activar Modo Baja Energía',
-            subtitle: 'Reordenar para hacer únicamente lo menos demandante.',
+            subtitle: 'Reordena el grafo para hacer únicamente lo menos demandante.',
             onTap: () {
               ref.read(focusProvider.notifier).activateLowEnergyMode();
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('🌱 Modo Baja Energía Activo')),
+                const SnackBar(
+                  content: Text('🌱 Modo Baja Energía Activo: Priorizando lo liviano'),
+                  duration: Duration(seconds: 2),
+                ),
               );
             },
           ),
@@ -88,11 +94,17 @@ class CognitiveRescueSheet extends ConsumerWidget {
           _RescueOptionCard(
             badgeNumber: '3',
             badgeColor: AppColors.successEmerald,
-            title: 'Saltar / Avanzar al siguiente nodo',
-            subtitle: 'Avanzá por otra rama independiente del proyecto.',
+            title: 'Saltar a rama independiente',
+            subtitle: 'Avanzá por otra tarea desbloqueada sin bloquear el flujo.',
             onTap: () {
               ref.read(focusProvider.notifier).completeCurrentTask();
               Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('🔀 Saltando a rama alternativa'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
             },
           ),
 
@@ -136,8 +148,8 @@ class _RescueOptionCard extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 32,
-            height: 32,
+            width: 34,
+            height: 34,
             decoration: BoxDecoration(
               color: badgeColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
