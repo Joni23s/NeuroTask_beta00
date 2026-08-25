@@ -1,0 +1,28 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "NeuroTask (Chrome)",
+            "request": "launch",
+            "type": "dart",
+            "program": "flutter_app/lib/main.dart",
+            "cwd": "flutter_app",
+            "deviceId": "chrome"
+        },
+        {
+            "name": "NeuroTask (Emulador / Celular)",
+            "request": "launch",
+            "type": "dart",
+            "program": "flutter_app/lib/main.dart",
+            "cwd": "flutter_app"
+        },
+        {
+            "name": "NeuroTask (Windows Desktop)",
+            "request": "launch",
+            "type": "dart",
+            "program": "flutter_app/lib/main.dart",
+            "cwd": "flutter_app",
+            "deviceId": "windows"
+        }
+    ]
+}
