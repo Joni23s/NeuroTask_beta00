@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../utils/haptic_helper.dart';
+import 'web_audio_bridge.dart';
 
 enum AmbientSoundType {
   none,
@@ -15,6 +17,8 @@ class AudioState {
     this.ambientType = AmbientSoundType.none,
     this.isMuted = false,
   });
+
+  bool get isPlayingBrownNoise => ambientType == AmbientSoundType.brownNoise && !isMuted;
 
   AudioState copyWith({
     AmbientSoundType? ambientType,
@@ -32,22 +36,57 @@ class AudioServiceNotifier extends StateNotifier<AudioState> {
 
   void toggleAmbient(AmbientSoundType type) {
     HapticHelper.lightTap();
+
     if (state.ambientType == type) {
+      // Turn off
       state = state.copyWith(ambientType: AmbientSoundType.none);
+      _stopAudio();
     } else {
-      state = state.copyWith(ambientType: type);
+      // Turn on
+      state = state.copyWith(ambientType: type, isMuted: false);
+      _playAudio(type);
     }
   }
 
   void toggleMute() {
     HapticHelper.lightTap();
-    state = state.copyWith(isMuted: !state.isMuted);
+    final newMute = !state.isMuted;
+    state = state.copyWith(isMuted: newMute);
+
+    if (newMute) {
+      _stopAudio();
+    } else if (state.ambientType != AmbientSoundType.none) {
+      _playAudio(state.ambientType);
+    }
+  }
+
+  void _playAudio(AmbientSoundType type) {
+    if (type == AmbientSoundType.brownNoise) {
+      if (kIsWeb) {
+        playWebBrownNoise();
+      }
+    }
+  }
+
+  void _stopAudio() {
+    if (kIsWeb) {
+      stopWebBrownNoise();
+    }
   }
 
   void playCompletionChime() {
     if (state.isMuted) return;
     HapticHelper.success();
-    // System feedback or audio synthesis
+
+    if (kIsWeb) {
+      playWebZenChime();
+    }
+  }
+
+  @override
+  void dispose() {
+    _stopAudio();
+    super.dispose();
   }
 }
 

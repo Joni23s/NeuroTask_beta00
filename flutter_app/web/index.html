@@ -18,7 +18,7 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="NeuroTask: Motor de Foco — Aplicación Mobile para Descompresión Cognitiva y Secuenciación DAG">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -29,7 +29,7 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>neurotask</title>
+  <title>NeuroTask: Motor de Foco</title>
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
@@ -42,6 +42,9 @@
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
   <script>
+    // ==========================================
+    // 1. Web Speech API + Audio Analyser Bridge
+    // ==========================================
     window.NeuroTaskVoice = {
       recognition: null,
       isListening: false,
@@ -138,6 +141,116 @@
           try {
             window.NeuroTaskVoice.recognition.stop();
           } catch(e) {}
+        }
+      }
+    };
+
+    // ==========================================
+    // 2. Pure Web Audio Brown Noise & Zen Chime Synthesizer
+    // ==========================================
+    window.NeuroTaskAudio = {
+      ctx: null,
+      brownNoiseNode: null,
+      gainNode: null,
+      isPlayingBrownNoise: false,
+
+      _getAudioContext: function() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          this.ctx = new AudioContext();
+        }
+        if (this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+        return this.ctx;
+      },
+
+      playBrownNoise: function() {
+        if (this.isPlayingBrownNoise) return;
+
+        try {
+          const ctx = this._getAudioContext();
+          const bufferSize = 5 * ctx.sampleRate; // 5-second seamless loop buffer
+          const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+          const output = noiseBuffer.getChannelData(0);
+
+          let lastOut = 0.0;
+          for (let i = 0; i < bufferSize; i++) {
+            const white = Math.random() * 2 - 1;
+            // Brownian noise integration formula
+            lastOut = (lastOut + (0.02 * white)) / 1.02;
+            output[i] = lastOut * 3.2; // Gain normalization
+          }
+
+          // Create source node
+          const source = ctx.createBufferSource();
+          source.buffer = noiseBuffer;
+          source.loop = true;
+
+          // Gentle warm lowpass filter to produce deep soothing rumble
+          const filter = ctx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.value = 500;
+
+          // Gain node with soft fade-in
+          this.gainNode = ctx.createGain();
+          this.gainNode.gain.setValueAtTime(0.001, ctx.currentTime);
+          this.gainNode.gain.exponentialRampToValueAtTime(0.28, ctx.currentTime + 0.8);
+
+          source.connect(filter);
+          filter.connect(this.gainNode);
+          this.gainNode.connect(ctx.destination);
+
+          source.start(0);
+          this.brownNoiseNode = source;
+          this.isPlayingBrownNoise = true;
+        } catch (e) {
+          console.warn("Brown noise synthesis error:", e);
+        }
+      },
+
+      stopBrownNoise: function() {
+        if (!this.isPlayingBrownNoise || !this.brownNoiseNode) return;
+
+        try {
+          const ctx = this._getAudioContext();
+          if (this.gainNode) {
+            this.gainNode.gain.setValueAtTime(this.gainNode.gain.value, ctx.currentTime);
+            this.gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.5);
+          }
+          setTimeout(() => {
+            if (this.brownNoiseNode) {
+              try { this.brownNoiseNode.stop(); } catch(e) {}
+              this.brownNoiseNode = null;
+            }
+            this.isPlayingBrownNoise = false;
+          }, 500);
+        } catch (e) {
+          this.isPlayingBrownNoise = false;
+        }
+      },
+
+      playZenChime: function() {
+        try {
+          const ctx = this._getAudioContext();
+          const osc = ctx.createOscillator();
+          const chimeGain = ctx.createGain();
+
+          // 528 Hz Solfeggio / Zen harmonic frequency
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(528, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(1056, ctx.currentTime + 0.6);
+
+          chimeGain.gain.setValueAtTime(0.35, ctx.currentTime);
+          chimeGain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 1.2);
+
+          osc.connect(chimeGain);
+          chimeGain.connect(ctx.destination);
+
+          osc.start();
+          osc.stop(ctx.currentTime + 1.2);
+        } catch (e) {
+          console.warn("Zen chime error:", e);
         }
       }
     };
