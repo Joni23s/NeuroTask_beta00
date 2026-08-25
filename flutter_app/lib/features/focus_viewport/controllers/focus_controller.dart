@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/services/session_storage_service.dart';
 import '../../graph_engine/models/task_graph.dart';
 import '../../graph_engine/models/task_node.dart';
 import '../../graph_engine/services/topological_sorter.dart';
@@ -9,6 +10,7 @@ class FocusState {
   final int currentIndex;
   final bool isLowEnergyMode;
   final bool isCompletedAll;
+  final bool isRestoredFromStorage;
 
   const FocusState({
     required this.graph,
@@ -16,6 +18,7 @@ class FocusState {
     this.currentIndex = 0,
     this.isLowEnergyMode = false,
     this.isCompletedAll = false,
+    this.isRestoredFromStorage = false,
   });
 
   TaskNode? get currentTask {
@@ -27,6 +30,7 @@ class FocusState {
 
   int get totalSteps => executionQueue.length;
   int get currentStepNumber => currentIndex + 1;
+  bool get hasActiveSession => executionQueue.isNotEmpty && !isCompletedAll;
 
   FocusState copyWith({
     TaskGraph? graph,
@@ -34,6 +38,7 @@ class FocusState {
     int? currentIndex,
     bool? isLowEnergyMode,
     bool? isCompletedAll,
+    bool? isRestoredFromStorage,
   }) {
     return FocusState(
       graph: graph ?? this.graph,
@@ -41,12 +46,15 @@ class FocusState {
       currentIndex: currentIndex ?? this.currentIndex,
       isLowEnergyMode: isLowEnergyMode ?? this.isLowEnergyMode,
       isCompletedAll: isCompletedAll ?? this.isCompletedAll,
+      isRestoredFromStorage: isRestoredFromStorage ?? this.isRestoredFromStorage,
     );
   }
 }
 
 class FocusNotifier extends StateNotifier<FocusState> {
-  FocusNotifier() : super(_initialState());
+  FocusNotifier() : super(_initialState()) {
+    restoreFromStorage();
+  }
 
   static FocusState _initialState() {
     final graph = TopologicalSorter.defaultSampleGraph();
@@ -58,6 +66,13 @@ class FocusNotifier extends StateNotifier<FocusState> {
     );
   }
 
+  Future<void> restoreFromStorage() async {
+    final saved = await SessionStorageService.loadSavedSession();
+    if (saved != null) {
+      state = saved.copyWith(isRestoredFromStorage: true);
+    }
+  }
+
   void loadFromRawText(String text) {
     final graph = TopologicalSorter.parseRawText(text);
     final sorted = TopologicalSorter.sort(graph);
@@ -67,7 +82,9 @@ class FocusNotifier extends StateNotifier<FocusState> {
       currentIndex: 0,
       isLowEnergyMode: false,
       isCompletedAll: false,
+      isRestoredFromStorage: false,
     );
+    SessionStorageService.saveSession(state);
   }
 
   void completeCurrentTask() {
@@ -90,6 +107,7 @@ class FocusNotifier extends StateNotifier<FocusState> {
         isCompletedAll: true,
       );
     }
+    SessionStorageService.saveSession(state);
   }
 
   void splitCurrentTask() {
@@ -124,6 +142,7 @@ class FocusNotifier extends StateNotifier<FocusState> {
     state = state.copyWith(
       executionQueue: updatedQueue,
     );
+    SessionStorageService.saveSession(state);
   }
 
   void activateLowEnergyMode() {
@@ -139,9 +158,11 @@ class FocusNotifier extends StateNotifier<FocusState> {
       executionQueue: newQueue,
       isLowEnergyMode: true,
     );
+    SessionStorageService.saveSession(state);
   }
 
   void reset() {
+    SessionStorageService.clearSession();
     state = _initialState();
   }
 }

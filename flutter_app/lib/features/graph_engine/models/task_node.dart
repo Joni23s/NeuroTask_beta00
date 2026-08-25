@@ -50,4 +50,32 @@ class TaskNode {
       isAtomicSubstep: isAtomicSubstep ?? this.isAtomicSubstep,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'category': category,
+      'subtext': subtext,
+      'estimatedMinutes': estimatedMinutes,
+      'energyLevel': energyLevel.index,
+      'dependencies': dependencies,
+      'isCompleted': isCompleted,
+      'isAtomicSubstep': isAtomicSubstep,
+    };
+  }
+
+  factory TaskNode.fromJson(Map<String, dynamic> json) {
+    return TaskNode(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      category: json['category'] as String,
+      subtext: json['subtext'] as String,
+      estimatedMinutes: (json['estimatedMinutes'] as num?)?.toInt() ?? 15,
+      energyLevel: EnergyLevel.values[(json['energyLevel'] as num?)?.toInt() ?? 1],
+      dependencies: (json['dependencies'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? const [],
+      isCompleted: json['isCompleted'] as bool? ?? false,
+      isAtomicSubstep: json['isAtomicSubstep'] as bool? ?? false,
+    );
+  }
 }
