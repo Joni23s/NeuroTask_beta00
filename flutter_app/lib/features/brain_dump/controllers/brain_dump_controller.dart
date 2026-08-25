@@ -43,15 +43,8 @@ class BrainDumpNotifier extends StateNotifier<BrainDumpState> {
     }
   }
 
-  void toggleVoiceSimulation() {
-    if (state.isListening) {
-      state = state.copyWith(isListening: false);
-    } else {
-      state = state.copyWith(
-        isListening: true,
-        text: 'Tengo que testear los endpoints del backend en Postman, después escribir el resumen ejecutivo del informe y armar las 7 diapositivas en Figma para la entrega final.',
-      );
-    }
+  void setListening(bool val) {
+    state = state.copyWith(isListening: val);
   }
 
   void setProcessing(bool val) {

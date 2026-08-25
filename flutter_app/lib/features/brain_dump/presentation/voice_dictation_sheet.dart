@@ -23,76 +23,71 @@ class VoiceDictationSheet extends ConsumerStatefulWidget {
 }
 
 class _VoiceDictationSheetState extends ConsumerState<VoiceDictationSheet> with SingleTickerProviderStateMixin {
-  late AnimationController _waveController;
+  late AnimationController _pulseController;
   String _currentLiveTranscript = '';
-  bool _isSimulatingLiveVoice = false;
+  double _micLevel = 0.0;
 
   @override
   void initState() {
     super.initState();
-    _waveController = AnimationController(
+    _pulseController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    )..repeat();
+      duration: const Duration(milliseconds: 1400),
+    )..repeat(reverse: true);
 
-    _startListeningOrSimulate();
+    // Start real microphone listening as soon as widget builds
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _startListening();
+    });
   }
 
   @override
   void dispose() {
-    _waveController.dispose();
+    _pulseController.dispose();
     super.dispose();
   }
 
-  void _startListeningOrSimulate() async {
+  void _startListening() async {
     final speechNotifier = ref.read(speechServiceProvider.notifier);
-    final speechState = ref.read(speechServiceProvider);
-
-    if (speechState.isAvailable) {
-      await speechNotifier.startListening(
-        onResult: (text) {
+    await speechNotifier.startListening(
+      onResult: (text) {
+        if (mounted) {
           setState(() {
             _currentLiveTranscript = text;
           });
           widget.onAppendText(text);
-        },
-      );
-    } else {
-      // Graceful fallback for Windows/Desktop simulator
-      setState(() {
-        _isSimulatingLiveVoice = true;
-      });
-      _simulateVoiceStream();
-    }
+        }
+      },
+      onSoundLevel: (level) {
+        if (mounted) {
+          setState(() {
+            _micLevel = level;
+          });
+        }
+      },
+    );
   }
 
-  void _simulateVoiceStream() async {
-    const fullText =
-        'Tengo que armar la presentación en diapositivas, revisar los endpoints en Postman y redactar el informe final del TP.';
-    final words = fullText.split(' ');
+  void _toggleListening() async {
+    final speechState = ref.read(speechServiceProvider);
+    final speechNotifier = ref.read(speechServiceProvider.notifier);
 
-    for (int i = 0; i < words.length; i++) {
-      await Future.delayed(const Duration(milliseconds: 260));
-      if (!mounted) return;
-      setState(() {
-        _currentLiveTranscript = words.sublist(0, i + 1).join(' ');
-      });
+    HapticHelper.lightTap();
+    if (speechState.isListening) {
+      await speechNotifier.stopListening();
+    } else {
+      _startListening();
     }
-
-    if (!mounted) return;
-    setState(() {
-      _isSimulatingLiveVoice = false;
-    });
   }
 
   void _onConfirmAndClose() {
     HapticHelper.success();
     ref.read(speechServiceProvider.notifier).stopListening();
-    if (_currentLiveTranscript.isNotEmpty) {
+    if (_currentLiveTranscript.trim().isNotEmpty) {
       if (widget.textController.text.trim().isEmpty) {
-        widget.textController.text = _currentLiveTranscript;
+        widget.textController.text = _currentLiveTranscript.trim();
       } else {
-        widget.textController.text = '${widget.textController.text.trim()} $_currentLiveTranscript';
+        widget.textController.text = '${widget.textController.text.trim()} ${_currentLiveTranscript.trim()}';
       }
       ref.read(brainDumpProvider.notifier).updateText(widget.textController.text);
     }
@@ -102,7 +97,9 @@ class _VoiceDictationSheetState extends ConsumerState<VoiceDictationSheet> with 
   @override
   Widget build(BuildContext context) {
     final speechState = ref.watch(speechServiceProvider);
-    final isListening = speechState.isListening || _isSimulatingLiveVoice;
+    final isListening = speechState.isListening;
+    final isAvailable = speechState.isAvailable;
+    final isDark = context.isDarkMode;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
@@ -131,45 +128,50 @@ class _VoiceDictationSheetState extends ConsumerState<VoiceDictationSheet> with 
           ),
           const SizedBox(height: 20),
 
-          // Glowing animated mic icon
-          AnimatedBuilder(
-            animation: _waveController,
-            builder: (context, child) {
-              final scale = isListening ? 1.0 + (math.sin(_waveController.value * math.pi * 2) * 0.08) : 1.0;
+          // Central Microphone Button & Pulsating Ambient Glow
+          GestureDetector(
+            onTap: _toggleListening,
+            child: AnimatedBuilder(
+              animation: _pulseController,
+              builder: (context, child) {
+                final pulse = isListening ? (0.85 + (_micLevel * 0.35) + (_pulseController.value * 0.1)) : 1.0;
 
-              return Transform.scale(
-                scale: scale,
-                child: Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: isListening ? AppColors.primaryIndigo : context.cardSurface,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: isListening
-                            ? AppColors.brandGlowCyan.withValues(alpha: 0.6)
-                            : AppColors.indigoGlow.withValues(alpha: 0.2),
-                        blurRadius: isListening ? 28 : 12,
-                        spreadRadius: isListening ? 4 : 0,
+                return Transform.scale(
+                  scale: pulse,
+                  child: Container(
+                    width: 86,
+                    height: 86,
+                    decoration: BoxDecoration(
+                      color: isListening ? AppColors.primaryIndigo : context.cardSurface,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: isListening
+                              ? AppColors.brandGlowCyan.withValues(alpha: (0.4 + (_micLevel * 0.5)).clamp(0.0, 0.9))
+                              : AppColors.indigoGlow.withValues(alpha: 0.15),
+                          blurRadius: isListening ? 26 + (_micLevel * 20) : 12,
+                          spreadRadius: isListening ? 4 + (_micLevel * 8) : 0,
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Icon(
+                        isListening ? Icons.mic_rounded : Icons.mic_off_rounded,
+                        color: isListening ? Colors.white : (isDark ? AppColors.brandGlowCyan : AppColors.primaryIndigo),
+                        size: 38,
                       ),
-                    ],
-                  ),
-                  child: Center(
-                    child: Icon(
-                      isListening ? Icons.mic_rounded : Icons.mic_none_rounded,
-                      color: isListening ? Colors.white : AppColors.primaryIndigo,
-                      size: 38,
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
           const SizedBox(height: 16),
 
           Text(
-            isListening ? '🎙️ Escuchando tu voz...' : '✨ Dictado listo',
+            isListening
+                ? '🎙️ Escuchando tu voz...'
+                : (!isAvailable ? '⚠️ Micrófono no detectado' : '⏸️ Dictado en pausa'),
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -179,39 +181,42 @@ class _VoiceDictationSheetState extends ConsumerState<VoiceDictationSheet> with 
           const SizedBox(height: 6),
           Text(
             isListening
-                ? 'Hablá con tranquilidad sin preocuparte por el orden.'
-                : 'Tu audio se convirtió en texto automáticamente.',
+                ? 'Hablá con tranquilidad. El sistema convertirá tu voz en texto en vivo.'
+                : (!isAvailable
+                    ? 'Asegurate de otorgar permisos de micrófono en el dispositivo.'
+                    : 'Tocá el micrófono para reanudar el dictado.'),
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 12, color: context.textSecondary),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 18),
 
-          // Live audio waves animation
-          if (isListening)
-            AnimatedBuilder(
-              animation: _waveController,
-              builder: (context, child) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(12, (index) {
-                    final height = 10.0 + (math.sin((_waveController.value * math.pi * 2) + (index * 0.5)).abs() * 26.0);
-                    return Container(
-                      width: 4,
-                      height: height,
-                      margin: const EdgeInsets.symmetric(horizontal: 2.5),
-                      decoration: BoxDecoration(
-                        color: AppColors.brandGlowCyan,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    );
-                  }),
-                );
-              },
-            ),
+          // Real-time Soundwave Bars reacting to live mic input
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(14, (index) {
+              // Soundwave height strictly driven by actual microphone sound level
+              final waveHeight = isListening
+                  ? 8.0 + (_micLevel * 32.0 * (1.0 + math.sin(index * 0.8)).abs())
+                  : 6.0;
+
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 70),
+                width: 4,
+                height: waveHeight.clamp(6.0, 42.0),
+                margin: const EdgeInsets.symmetric(horizontal: 2.5),
+                decoration: BoxDecoration(
+                  color: isListening
+                      ? (_micLevel > 0.15 ? AppColors.brandGlowCyan : AppColors.primaryIndigoLight)
+                      : context.textMuted.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              );
+            }),
+          ),
 
           const SizedBox(height: 18),
 
-          // Recognized Text Preview Box
+          // Live Transcription Box (real microphone stream)
           Container(
             width: double.infinity,
             constraints: const BoxConstraints(minHeight: 90, maxHeight: 160),
@@ -225,7 +230,7 @@ class _VoiceDictationSheetState extends ConsumerState<VoiceDictationSheet> with 
             child: SingleChildScrollView(
               child: Text(
                 _currentLiveTranscript.isEmpty
-                    ? (isListening ? 'Esperando que comiences a hablar...' : 'Sin texto detectado.')
+                    ? (isListening ? 'Esperando tu voz...' : 'Sin texto transcripto aún.')
                     : _currentLiveTranscript,
                 style: TextStyle(
                   fontSize: 13,
