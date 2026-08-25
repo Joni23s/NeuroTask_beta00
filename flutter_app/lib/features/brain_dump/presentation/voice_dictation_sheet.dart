@@ -26,6 +26,7 @@ class _VoiceDictationSheetState extends ConsumerState<VoiceDictationSheet> with 
   late AnimationController _pulseController;
   String _currentLiveTranscript = '';
   double _micLevel = 0.0;
+  bool _isAssistedDemoActive = false;
 
   @override
   void initState() {
@@ -80,6 +81,32 @@ class _VoiceDictationSheetState extends ConsumerState<VoiceDictationSheet> with 
     }
   }
 
+  void _runAssistedDemo() async {
+    setState(() {
+      _isAssistedDemoActive = true;
+      _currentLiveTranscript = '';
+    });
+
+    const demoVoiceText =
+        'Tengo que testear los endpoints del backend en Postman, redactar el informe ejecutivo del TP y armar las 7 diapositivas en Figma para la entrega final.';
+    final words = demoVoiceText.split(' ');
+
+    for (int i = 0; i < words.length; i++) {
+      await Future.delayed(const Duration(milliseconds: 220));
+      if (!mounted) return;
+      setState(() {
+        _currentLiveTranscript = words.sublist(0, i + 1).join(' ');
+        _micLevel = (0.2 + (math.Random().nextDouble() * 0.7));
+      });
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _isAssistedDemoActive = false;
+      _micLevel = 0.0;
+    });
+  }
+
   void _onConfirmAndClose() {
     HapticHelper.success();
     ref.read(speechServiceProvider.notifier).stopListening();
@@ -97,7 +124,7 @@ class _VoiceDictationSheetState extends ConsumerState<VoiceDictationSheet> with 
   @override
   Widget build(BuildContext context) {
     final speechState = ref.watch(speechServiceProvider);
-    final isListening = speechState.isListening;
+    final isListening = speechState.isListening || _isAssistedDemoActive;
     final isAvailable = speechState.isAvailable;
     final isDark = context.isDarkMode;
 
@@ -130,7 +157,7 @@ class _VoiceDictationSheetState extends ConsumerState<VoiceDictationSheet> with 
 
           // Central Microphone Button & Pulsating Ambient Glow
           GestureDetector(
-            onTap: _toggleListening,
+            onTap: isAvailable ? _toggleListening : _runAssistedDemo,
             child: AnimatedBuilder(
               animation: _pulseController,
               builder: (context, child) {
@@ -156,7 +183,9 @@ class _VoiceDictationSheetState extends ConsumerState<VoiceDictationSheet> with 
                     ),
                     child: Center(
                       child: Icon(
-                        isListening ? Icons.mic_rounded : Icons.mic_off_rounded,
+                        isListening
+                            ? Icons.mic_rounded
+                            : (isAvailable ? Icons.mic_none_rounded : Icons.mic_off_rounded),
                         color: isListening ? Colors.white : (isDark ? AppColors.brandGlowCyan : AppColors.primaryIndigo),
                         size: 38,
                       ),
@@ -171,9 +200,9 @@ class _VoiceDictationSheetState extends ConsumerState<VoiceDictationSheet> with 
           Text(
             isListening
                 ? '🎙️ Escuchando tu voz...'
-                : (!isAvailable ? '⚠️ Micrófono no detectado' : '⏸️ Dictado en pausa'),
+                : (isAvailable ? '⏸️ Dictado en pausa (Tocá para hablar)' : '⚠️ Reconocimiento de Voz no nativo en Windows'),
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 17,
               fontWeight: FontWeight.bold,
               color: context.textMain,
             ),
@@ -182,19 +211,18 @@ class _VoiceDictationSheetState extends ConsumerState<VoiceDictationSheet> with 
           Text(
             isListening
                 ? 'Hablá con tranquilidad. El sistema convertirá tu voz en texto en vivo.'
-                : (!isAvailable
-                    ? 'Asegurate de otorgar permisos de micrófono en el dispositivo.'
-                    : 'Tocá el micrófono para reanudar el dictado.'),
+                : (isAvailable
+                    ? 'Tocá el micrófono para iniciar el dictado por voz en vivo.'
+                    : 'Para usar el micrófono real en vivo en PC, corré la app en Chrome (flutter run -d chrome) o en Android.'),
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12, color: context.textSecondary),
+            style: TextStyle(fontSize: 12, color: context.textSecondary, height: 1.35),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
 
           // Real-time Soundwave Bars reacting to live mic input
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(14, (index) {
-              // Soundwave height strictly driven by actual microphone sound level
               final waveHeight = isListening
                   ? 8.0 + (_micLevel * 32.0 * (1.0 + math.sin(index * 0.8)).abs())
                   : 6.0;
@@ -214,12 +242,12 @@ class _VoiceDictationSheetState extends ConsumerState<VoiceDictationSheet> with 
             }),
           ),
 
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
 
           // Live Transcription Box (real microphone stream)
           Container(
             width: double.infinity,
-            constraints: const BoxConstraints(minHeight: 90, maxHeight: 160),
+            constraints: const BoxConstraints(minHeight: 85, maxHeight: 150),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: context.pressedSurface,
@@ -230,7 +258,11 @@ class _VoiceDictationSheetState extends ConsumerState<VoiceDictationSheet> with 
             child: SingleChildScrollView(
               child: Text(
                 _currentLiveTranscript.isEmpty
-                    ? (isListening ? 'Esperando tu voz...' : 'Sin texto transcripto aún.')
+                    ? (isListening
+                        ? 'Esperando que hables...'
+                        : (isAvailable
+                            ? 'Tocá el micrófono para comenzar a dictar...'
+                            : 'Podés probar la simulación o correr en Chrome/Android para micrófono real.'))
                     : _currentLiveTranscript,
                 style: TextStyle(
                   fontSize: 13,
@@ -241,7 +273,24 @@ class _VoiceDictationSheetState extends ConsumerState<VoiceDictationSheet> with 
               ),
             ),
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 16),
+
+          if (!isAvailable) ...[
+            NeumorphicButton(
+              variant: NeumorphicButtonVariant.flat,
+              height: 44,
+              onPressed: _runAssistedDemo,
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.play_circle_outline_rounded, size: 16, color: AppColors.primaryIndigo),
+                  SizedBox(width: 8),
+                  Text('Probar Simulación de Dictado en Windows', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primaryIndigo)),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
 
           // Action Buttons
           Row(
