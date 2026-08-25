@@ -63,7 +63,7 @@ class _ZenTimerWidgetState extends State<ZenTimerWidget> with SingleTickerProvid
                   width: 14 + (_pulseController.value * 4),
                   height: 14 + (_pulseController.value * 4),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryIndigoLight.withOpacity(0.2 + (_pulseController.value * 0.2)),
+                    color: AppColors.primaryIndigoLight.withValues(alpha: 0.2 + (_pulseController.value * 0.2)),
                     shape: BoxShape.circle,
                   ),
                   child: Center(

@@ -52,7 +52,6 @@ class NeumorphicTheme {
       colorScheme: ColorScheme.fromSeed(
         seedColor: AppColors.primaryIndigo,
         surface: AppColors.cardSurface,
-        background: AppColors.background,
       ),
       textTheme: GoogleFonts.plusJakartaSansTextTheme().copyWith(
         displayLarge: GoogleFonts.plusJakartaSans(fontSize: 26, fontWeight: FontWeight.bold, color: AppColors.textMain),

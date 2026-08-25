@@ -20,7 +20,7 @@ class FlowIndicator extends StatelessWidget {
         color: AppColors.cardSurface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: NeumorphicTheme.subtleElevation,
-        border: Border.all(color: Colors.white.withOpacity(0.8)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.8)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

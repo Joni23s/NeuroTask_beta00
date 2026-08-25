@@ -27,7 +27,7 @@ class GraphOverviewModal extends ConsumerWidget {
               width: 48,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.textMuted.withOpacity(0.4),
+                color: AppColors.textMuted.withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -53,7 +53,7 @@ class GraphOverviewModal extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: AppColors.primaryIndigoLight.withOpacity(0.12),
+                  color: AppColors.primaryIndigoLight.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Text(
@@ -79,7 +79,7 @@ class GraphOverviewModal extends ConsumerWidget {
                 return NeumorphicCard(
                   padding: const EdgeInsets.all(14),
                   borderRadius: 18,
-                  backgroundColor: isCurrent ? AppColors.primaryIndigoLight.withOpacity(0.08) : AppColors.cardSurface,
+                  backgroundColor: isCurrent ? AppColors.primaryIndigoLight.withValues(alpha: 0.08) : AppColors.cardSurface,
                   child: Row(
                     children: [
                       Container(

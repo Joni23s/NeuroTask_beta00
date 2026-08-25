@@ -50,13 +50,13 @@ class _NeumorphicButtonState extends State<NeumorphicButton> {
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(widget.borderRadius),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
               color: AppColors.indigoGlow,
-              offset: const Offset(4, 4),
+              offset: Offset(4, 4),
               blurRadius: 14,
             ),
-            const BoxShadow(
+            BoxShadow(
               color: Colors.white,
               offset: Offset(-3, -3),
               blurRadius: 8,
@@ -72,13 +72,13 @@ class _NeumorphicButtonState extends State<NeumorphicButton> {
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(widget.borderRadius),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
               color: AppColors.emeraldGlow,
-              offset: const Offset(4, 4),
+              offset: Offset(4, 4),
               blurRadius: 14,
             ),
-            const BoxShadow(
+            BoxShadow(
               color: Colors.white,
               offset: Offset(-3, -3),
               blurRadius: 8,
@@ -91,17 +91,17 @@ class _NeumorphicButtonState extends State<NeumorphicButton> {
           color: AppColors.pressedSurface,
           borderRadius: BorderRadius.circular(widget.borderRadius),
           boxShadow: NeumorphicTheme.pressedElevation,
-          border: Border.all(color: Colors.white.withOpacity(0.4)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
         );
         break;
       case NeumorphicButtonVariant.flat:
-      default:
         decoration = BoxDecoration(
           color: _isPressed ? AppColors.pressedSurface : AppColors.cardSurface,
           borderRadius: BorderRadius.circular(widget.borderRadius),
           boxShadow: _isPressed ? NeumorphicTheme.pressedElevation : NeumorphicTheme.subtleElevation,
-          border: Border.all(color: Colors.white.withOpacity(0.7)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.7)),
         );
+        break;
     }
 
     return GestureDetector(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/neumorphic_theme.dart';
 import '../../../core/widgets/neumorphic_card.dart';
 import '../../focus_viewport/controllers/focus_controller.dart';
 
@@ -32,7 +31,7 @@ class CognitiveRescueSheet extends ConsumerWidget {
               width: 48,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.textMuted.withOpacity(0.4),
+                color: AppColors.textMuted.withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -140,7 +139,7 @@ class _RescueOptionCard extends StatelessWidget {
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: badgeColor.withOpacity(0.15),
+              color: badgeColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Center(
