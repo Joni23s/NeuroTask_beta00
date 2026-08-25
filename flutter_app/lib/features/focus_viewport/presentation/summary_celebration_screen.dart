@@ -16,13 +16,12 @@ class SummaryCelebrationScreen extends ConsumerWidget {
 
   String _buildFormattedReport(FocusState state) {
     final totalNodes = state.executionQueue.length;
-    final totalMinutes = state.executionQueue.fold<int>(0, (sum, item) => sum + item.estimatedMinutes);
     final buffer = StringBuffer();
 
     buffer.writeln('🧠 *NeuroTask — Victoria de Foco Conquistada* ✨');
     buffer.writeln('━━━━━━━━━━━━━━━━━━━━━━━━━');
     buffer.writeln('🎯 *Nodos completados:* $totalNodes / $totalNodes (100%)');
-    buffer.writeln('⏳ *Tiempo sereno acumulado:* $totalMinutes min');
+    buffer.writeln('⏳ *Tiempo real de foco:* ${state.formattedRealTime} (Estimado: ${state.totalEstimatedMinutes} min)');
     buffer.writeln('🌿 *Calma mental:* 100% (Sin sobrecarga)');
     buffer.writeln('');
     buffer.writeln('📋 *Camino Lógico Ejecutado:*');
@@ -139,7 +138,6 @@ class SummaryCelebrationScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final focusState = ref.watch(focusProvider);
     final totalNodes = focusState.executionQueue.length;
-    final totalMinutes = focusState.executionQueue.fold<int>(0, (sum, item) => sum + item.estimatedMinutes);
     final isDark = context.isDarkMode;
 
     return Scaffold(
@@ -235,7 +233,7 @@ class SummaryCelebrationScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 20),
 
-                // Metrics Cards
+                // Metrics Cards (Real Measured Metrics)
                 Row(
                   children: [
                     Expanded(
@@ -268,11 +266,11 @@ class SummaryCelebrationScreen extends ConsumerWidget {
                             const Text('⏳', style: TextStyle(fontSize: 18)),
                             const SizedBox(height: 4),
                             Text(
-                              '${totalMinutes}m',
+                              focusState.formattedRealTime,
                               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.primaryIndigo),
                             ),
                             Text(
-                              'Tiempo Sereno',
+                              'Tiempo Real',
                               style: TextStyle(fontSize: 10, color: context.textMuted, fontWeight: FontWeight.w600),
                             ),
                           ],

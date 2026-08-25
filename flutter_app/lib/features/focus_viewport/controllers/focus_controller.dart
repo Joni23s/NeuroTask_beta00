@@ -11,6 +11,8 @@ class FocusState {
   final bool isLowEnergyMode;
   final bool isCompletedAll;
   final bool isRestoredFromStorage;
+  final DateTime? sessionStartTime;
+  final int elapsedSeconds;
 
   const FocusState({
     required this.graph,
@@ -19,6 +21,8 @@ class FocusState {
     this.isLowEnergyMode = false,
     this.isCompletedAll = false,
     this.isRestoredFromStorage = false,
+    this.sessionStartTime,
+    this.elapsedSeconds = 0,
   });
 
   TaskNode? get currentTask {
@@ -32,6 +36,21 @@ class FocusState {
   int get currentStepNumber => currentIndex + 1;
   bool get hasActiveSession => executionQueue.isNotEmpty && !isCompletedAll;
 
+  int get totalEstimatedMinutes =>
+      executionQueue.fold<int>(0, (sum, item) => sum + item.estimatedMinutes);
+
+  String get formattedRealTime {
+    final mins = elapsedSeconds ~/ 60;
+    final secs = elapsedSeconds % 60;
+    if (mins == 0) {
+      return '${secs > 0 ? secs : 1}s';
+    } else if (secs == 0) {
+      return '${mins}m';
+    } else {
+      return '${mins}m ${secs}s';
+    }
+  }
+
   FocusState copyWith({
     TaskGraph? graph,
     List<TaskNode>? executionQueue,
@@ -39,6 +58,8 @@ class FocusState {
     bool? isLowEnergyMode,
     bool? isCompletedAll,
     bool? isRestoredFromStorage,
+    DateTime? sessionStartTime,
+    int? elapsedSeconds,
   }) {
     return FocusState(
       graph: graph ?? this.graph,
@@ -47,6 +68,8 @@ class FocusState {
       isLowEnergyMode: isLowEnergyMode ?? this.isLowEnergyMode,
       isCompletedAll: isCompletedAll ?? this.isCompletedAll,
       isRestoredFromStorage: isRestoredFromStorage ?? this.isRestoredFromStorage,
+      sessionStartTime: sessionStartTime ?? this.sessionStartTime,
+      elapsedSeconds: elapsedSeconds ?? this.elapsedSeconds,
     );
   }
 }
@@ -63,6 +86,8 @@ class FocusNotifier extends StateNotifier<FocusState> {
       graph: graph,
       executionQueue: sorted,
       currentIndex: 0,
+      sessionStartTime: DateTime.now(),
+      elapsedSeconds: 0,
     );
   }
 
@@ -83,11 +108,25 @@ class FocusNotifier extends StateNotifier<FocusState> {
       isLowEnergyMode: false,
       isCompletedAll: false,
       isRestoredFromStorage: false,
+      sessionStartTime: DateTime.now(),
+      elapsedSeconds: 0,
     );
     SessionStorageService.saveSession(state);
   }
 
+  void updateElapsedSeconds(int seconds) {
+    state = state.copyWith(elapsedSeconds: seconds);
+  }
+
   void completeCurrentTask() {
+    int currentElapsed = state.elapsedSeconds;
+    if (state.sessionStartTime != null) {
+      final diff = DateTime.now().difference(state.sessionStartTime!).inSeconds;
+      if (diff > currentElapsed) {
+        currentElapsed = diff;
+      }
+    }
+
     if (state.currentIndex < state.executionQueue.length - 1) {
       // Mark current completed
       final updatedQueue = List<TaskNode>.from(state.executionQueue);
@@ -96,6 +135,7 @@ class FocusNotifier extends StateNotifier<FocusState> {
       state = state.copyWith(
         executionQueue: updatedQueue,
         currentIndex: state.currentIndex + 1,
+        elapsedSeconds: currentElapsed,
       );
     } else {
       final updatedQueue = List<TaskNode>.from(state.executionQueue);
@@ -105,6 +145,7 @@ class FocusNotifier extends StateNotifier<FocusState> {
       state = state.copyWith(
         executionQueue: updatedQueue,
         isCompletedAll: true,
+        elapsedSeconds: currentElapsed > 0 ? currentElapsed : 1,
       );
     }
     SessionStorageService.saveSession(state);

@@ -22,6 +22,8 @@ class SessionStorageService {
         'currentIndex': state.currentIndex,
         'isLowEnergyMode': state.isLowEnergyMode,
         'isCompletedAll': state.isCompletedAll,
+        'sessionStartTime': state.sessionStartTime?.toIso8601String(),
+        'elapsedSeconds': state.elapsedSeconds,
         'timestamp': DateTime.now().toIso8601String(),
       };
 
@@ -46,6 +48,9 @@ class SessionStorageService {
       final currentIndex = (data['currentIndex'] as num?)?.toInt() ?? 0;
       final isLowEnergy = data['isLowEnergyMode'] as bool? ?? false;
       final isCompletedAll = data['isCompletedAll'] as bool? ?? false;
+      final sessionStartStr = data['sessionStartTime'] as String?;
+      final sessionStartTime = sessionStartStr != null ? DateTime.tryParse(sessionStartStr) : null;
+      final elapsedSeconds = (data['elapsedSeconds'] as num?)?.toInt() ?? 0;
 
       if (queue.isEmpty || isCompletedAll) return null;
 
@@ -55,6 +60,8 @@ class SessionStorageService {
         currentIndex: currentIndex,
         isLowEnergyMode: isLowEnergy,
         isCompletedAll: isCompletedAll,
+        sessionStartTime: sessionStartTime,
+        elapsedSeconds: elapsedSeconds,
       );
     } catch (_) {
       return null;

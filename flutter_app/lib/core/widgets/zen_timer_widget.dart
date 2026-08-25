@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../features/focus_viewport/controllers/focus_controller.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_context.dart';
 
-class ZenTimerWidget extends StatefulWidget {
+class ZenTimerWidget extends ConsumerStatefulWidget {
   final int initialMinutes;
 
   const ZenTimerWidget({
@@ -12,10 +14,10 @@ class ZenTimerWidget extends StatefulWidget {
   });
 
   @override
-  State<ZenTimerWidget> createState() => _ZenTimerWidgetState();
+  ConsumerState<ZenTimerWidget> createState() => _ZenTimerWidgetState();
 }
 
-class _ZenTimerWidgetState extends State<ZenTimerWidget> with SingleTickerProviderStateMixin {
+class _ZenTimerWidgetState extends ConsumerState<ZenTimerWidget> with SingleTickerProviderStateMixin {
   late AnimationController _pulseController;
   Timer? _ticker;
   int _secondsElapsed = 0;
@@ -33,6 +35,13 @@ class _ZenTimerWidgetState extends State<ZenTimerWidget> with SingleTickerProvid
         setState(() {
           _secondsElapsed++;
         });
+        final focusState = ref.read(focusProvider);
+        if (focusState.sessionStartTime != null) {
+          final realTotalSeconds = DateTime.now().difference(focusState.sessionStartTime!).inSeconds;
+          ref.read(focusProvider.notifier).updateElapsedSeconds(realTotalSeconds);
+        } else {
+          ref.read(focusProvider.notifier).updateElapsedSeconds(_secondsElapsed);
+        }
       }
     });
   }
