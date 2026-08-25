@@ -58,8 +58,42 @@
       </div>
     </div>
 
+    <!-- PANTALLA 0: BIENVENIDA & SPLASH INTERACTIVO (LOGOTIPO) -->
+    <section id="screen-welcome" class="flex-1 flex flex-col p-6 justify-between items-center text-center screen-transition">
+      <!-- Top Academic Header -->
+      <div class="inline-flex items-center px-3 py-1 rounded-full neu-flat-sm text-[11px] font-bold text-indigo-600">
+        <span class="w-2 h-2 rounded-full bg-indigo-500 mr-1.5 animate-pulse"></span>
+        DAM — ITU UNCuyo
+      </div>
+
+      <!-- Interactive Pulsing Brain Hero -->
+      <div class="my-auto flex flex-col items-center">
+        <div onclick="enterFromWelcome(false)" class="w-48 h-48 rounded-full neu-flat flex items-center justify-center cursor-pointer p-5 transition-transform hover:scale-105 active:scale-95 animate-zen-breathe relative group" title="Tocá el cerebro para comenzar">
+          <img src="../NeuroTask_logo.jpg" alt="NeuroTask Logo" class="w-full h-full object-contain filter drop-shadow-md">
+          <div class="absolute inset-0 rounded-full border-2 border-indigo-400/30 animate-ping pointer-events-none opacity-40"></div>
+        </div>
+
+        <div class="mt-6">
+          <h1 class="text-3xl font-extrabold tracking-tight text-[#2B5B84]">NEUROTASK</h1>
+          <p class="text-xs font-bold tracking-[0.25em] text-[#4A7D9D] mt-1">MOTOR DE FOCO</p>
+          <p class="text-xs text-slate-500 mt-3 max-w-[240px] leading-relaxed">
+            Transformá el caos de ideas en un camino lógico y sereno.
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <div class="w-full space-y-2">
+        <button onclick="enterFromWelcome(false)" class="w-full py-4 rounded-2xl neu-btn-primary font-semibold text-sm tracking-wide flex items-center justify-center space-x-2 shadow-lg">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5"/></svg>
+          <span>Tocar para Descomprimir</span>
+        </button>
+        <p class="text-[11px] text-slate-400">Tocá el cerebrito o el botón para iniciar</p>
+      </div>
+    </section>
+
     <!-- PANTALLA 1: BRAIN DUMP (INGESTA CRUDA) -->
-    <section id="screen-brain-dump" class="flex-1 flex flex-col p-6 overflow-y-auto screen-transition">
+    <section id="screen-brain-dump" class="hidden flex-1 flex flex-col p-6 overflow-y-auto screen-transition">
       <!-- App Brand & Title -->
       <div class="mt-1 mb-3">
         <div class="flex items-center justify-between mb-2">

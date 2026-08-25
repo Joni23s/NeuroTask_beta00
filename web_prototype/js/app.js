@@ -255,14 +255,34 @@ function showCompletionCelebration() {
   window.neuroAudio.playZenCompletionChime();
 }
 
+function enterFromWelcome(startVoice = false) {
+  window.neuroAudio.playSoftTap();
+  switchScreen('screen-welcome', 'screen-brain-dump');
+  if (startVoice) {
+    setTimeout(() => {
+      startVoice();
+    }, 300);
+  }
+}
+
 function resetToBeginning() {
   window.neuroAudio.playSoftTap();
   stopZenTimer();
   window.dagEngine._loadDefaultPreset();
   isLowEnergyActive = false;
   document.getElementById('brain-dump-input').value = "";
-  switchScreen('screen-celebration', 'screen-brain-dump');
-  switchScreen('screen-focus', 'screen-brain-dump');
+  
+  // Hide other screens and return to Welcome
+  ['screen-focus', 'screen-celebration', 'screen-processing', 'screen-brain-dump'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+  });
+  
+  const welcome = document.getElementById('screen-welcome');
+  if (welcome) {
+    welcome.classList.remove('hidden');
+    welcome.classList.add('screen-active');
+  }
 }
 
 /**

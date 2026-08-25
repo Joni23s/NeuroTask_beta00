@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/neumorphic_theme.dart';
-import 'features/brain_dump/presentation/brain_dump_screen.dart';
+import 'features/welcome/presentation/welcome_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,7 +27,7 @@ class NeuroTaskApp extends StatelessWidget {
       title: 'NeuroTask: Motor de Foco',
       debugShowCheckedModeBanner: false,
       theme: NeumorphicTheme.lightTheme,
-      home: const BrainDumpScreen(),
+      home: const WelcomeScreen(),
     );
   }
 }
