@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/theme_context.dart';
 import '../../../core/widgets/neumorphic_card.dart';
-import '../../focus_viewport/controllers/focus_controller.dart';
-import '../../graph_engine/presentation/dag_canvas_widget.dart';
+import '../focus_controller.dart';
+import 'dag_canvas_widget.dart';
 
 class GraphOverviewModal extends StatefulWidget {
   const GraphOverviewModal({super.key});

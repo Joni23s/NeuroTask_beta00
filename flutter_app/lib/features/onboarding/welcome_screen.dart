@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/theme_context.dart';
-import '../../../core/utils/haptic_helper.dart';
-import '../../../core/widgets/theme_toggle_button.dart';
-import '../../achievements/presentation/achievements_vault_screen.dart';
-import '../../brain_dump/presentation/brain_dump_screen.dart';
-import '../../focus_viewport/controllers/focus_controller.dart';
-import '../../focus_viewport/presentation/single_task_screen.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/theme_context.dart';
+import '../../core/utils/haptic_helper.dart';
+import '../../core/widgets/theme_toggle_button.dart';
+import '../achievements/presentation/achievements_vault_screen.dart';
+import '../brain_dump/presentation/brain_dump_screen.dart';
+import '../focus/focus_controller.dart';
+import '../focus/single_task_screen.dart';
 
 class WelcomeScreen extends ConsumerStatefulWidget {
   const WelcomeScreen({super.key});

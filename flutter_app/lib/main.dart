@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/neumorphic_theme.dart';
 import 'core/theme/theme_controller.dart';
-import 'features/welcome/presentation/welcome_screen.dart';
+import 'features/onboarding/welcome_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:neurotask/main.dart';
-import 'package:neurotask/features/graph_engine/models/task_node.dart';
-import 'package:neurotask/features/graph_engine/models/task_graph.dart';
-import 'package:neurotask/features/graph_engine/services/topological_sorter.dart';
+import 'package:neurotask/core/domain/models/task_node.dart';
+import 'package:neurotask/core/domain/models/task_graph.dart';
+import 'package:neurotask/core/domain/services/topological_sorter.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

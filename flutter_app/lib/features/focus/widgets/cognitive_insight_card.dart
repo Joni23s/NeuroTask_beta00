@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/theme_context.dart';
 import '../../../core/widgets/neumorphic_card.dart';
-import '../controllers/focus_controller.dart';
+import '../focus_controller.dart';
 
 class CognitiveInsightCard extends StatelessWidget {
   final FocusState focusState;

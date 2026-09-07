@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/services/audio_service.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/theme_context.dart';
-import '../../../core/utils/haptic_helper.dart';
-import '../../../core/widgets/neumorphic_button.dart';
-import '../../../core/widgets/neumorphic_card.dart';
-import '../../../core/widgets/theme_toggle_button.dart';
-import '../../achievements/controllers/achievements_controller.dart';
-import '../../achievements/presentation/achievements_vault_screen.dart';
-import '../../brain_dump/presentation/brain_dump_screen.dart';
-import '../../unblock_mode/presentation/graph_overview_modal.dart';
-import '../controllers/focus_controller.dart';
-import 'cognitive_insight_card.dart';
+import '../../core/services/audio_service.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/theme_context.dart';
+import '../../core/utils/haptic_helper.dart';
+import '../../core/widgets/neumorphic_button.dart';
+import '../../core/widgets/neumorphic_card.dart';
+import '../../core/widgets/theme_toggle_button.dart';
+import '../achievements/controllers/achievements_controller.dart';
+import '../achievements/presentation/achievements_vault_screen.dart';
+import '../brain_dump/presentation/brain_dump_screen.dart';
+import 'focus_controller.dart';
+import 'widgets/cognitive_insight_card.dart';
+import 'widgets/graph_overview_modal.dart';
 
 class SummaryCelebrationScreen extends ConsumerStatefulWidget {
   const SummaryCelebrationScreen({super.key});

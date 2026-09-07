@@ -6,8 +6,8 @@ import '../../../core/utils/haptic_helper.dart';
 import '../../../core/widgets/neumorphic_button.dart';
 import '../../../core/widgets/theme_toggle_button.dart';
 import '../../achievements/controllers/achievements_controller.dart';
-import '../../focus_viewport/controllers/focus_controller.dart';
-import '../../focus_viewport/presentation/single_task_screen.dart';
+import '../../focus/focus_controller.dart';
+import '../../focus/single_task_screen.dart';
 import '../controllers/brain_dump_controller.dart';
 import 'voice_dictation_sheet.dart';
 

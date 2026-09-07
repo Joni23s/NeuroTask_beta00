@@ -4,7 +4,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/theme_context.dart';
 import '../../../core/widgets/neumorphic_card.dart';
 import '../../achievements/controllers/achievements_controller.dart';
-import '../../focus_viewport/controllers/focus_controller.dart';
+import '../focus_controller.dart';
 
 class CognitiveRescueSheet extends ConsumerWidget {
   const CognitiveRescueSheet({super.key});

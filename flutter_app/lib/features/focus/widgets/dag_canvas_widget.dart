@@ -1,9 +1,9 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../../../core/domain/models/task_graph.dart';
+import '../../../core/domain/models/task_node.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/theme_context.dart';
-import '../models/task_graph.dart';
-import '../models/task_node.dart';
 
 class DagCanvasWidget extends StatefulWidget {
   final List<TaskNode> nodes;

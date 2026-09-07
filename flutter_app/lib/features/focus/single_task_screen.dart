@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/services/audio_service.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/theme_context.dart';
-import '../../../core/utils/haptic_helper.dart';
-import '../../../core/widgets/flow_indicator.dart';
-import '../../../core/widgets/neumorphic_button.dart';
-import '../../../core/widgets/swipe_to_complete_card.dart';
-import '../../../core/widgets/theme_toggle_button.dart';
-import '../../../core/widgets/zen_timer_widget.dart';
-import '../../unblock_mode/presentation/cognitive_rescue_sheet.dart';
-import '../../unblock_mode/presentation/graph_overview_modal.dart';
-import '../controllers/focus_controller.dart';
+import '../../core/services/audio_service.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/theme_context.dart';
+import '../../core/utils/haptic_helper.dart';
+import '../../core/widgets/flow_indicator.dart';
+import '../../core/widgets/neumorphic_button.dart';
+import '../../core/widgets/swipe_to_complete_card.dart';
+import '../../core/widgets/theme_toggle_button.dart';
+import '../../core/widgets/zen_timer_widget.dart';
+import 'focus_controller.dart';
 import 'summary_celebration_screen.dart';
+import 'widgets/cognitive_rescue_sheet.dart';
+import 'widgets/graph_overview_modal.dart';
 
 class SingleTaskScreen extends ConsumerWidget {
   const SingleTaskScreen({super.key});

@@ -160,11 +160,11 @@ class SpeechNotifier extends StateNotifier<SpeechState> {
           state = state.copyWith(soundLevel: normalized);
           onSoundLevel?.call(normalized);
         },
-        localeId: state.currentLocale,
         listenOptions: SpeechListenOptions(
           cancelOnError: false,
           partialResults: true,
           listenMode: ListenMode.dictation,
+          localeId: state.currentLocale,
         ),
       );
     } catch (e) {

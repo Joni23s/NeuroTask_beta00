@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../features/focus_viewport/controllers/focus_controller.dart';
-import '../../features/graph_engine/models/task_graph.dart';
-import '../../features/graph_engine/models/task_node.dart';
+import '../../features/focus/focus_controller.dart';
+import '../domain/models/task_graph.dart';
+import '../domain/models/task_node.dart';
 
 class SessionStorageService {
   static const String _keySession = 'neurotask_focus_session_v1';

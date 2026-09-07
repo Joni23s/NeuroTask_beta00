@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/services/session_storage_service.dart';
-import '../../graph_engine/models/task_graph.dart';
-import '../../graph_engine/models/task_node.dart';
-import '../../graph_engine/services/topological_sorter.dart';
+import '../../core/domain/models/task_graph.dart';
+import '../../core/domain/models/task_node.dart';
+import '../../core/domain/services/topological_sorter.dart';
+import '../../core/services/session_storage_service.dart';
 
 class FocusState {
   final TaskGraph graph;

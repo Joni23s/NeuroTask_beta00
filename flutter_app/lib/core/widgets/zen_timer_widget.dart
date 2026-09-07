@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../features/focus_viewport/controllers/focus_controller.dart';
+import '../../features/focus/focus_controller.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_context.dart';
 
