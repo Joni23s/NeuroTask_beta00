@@ -1,0 +1,17 @@
+# Antigravity Rules — NeuroTask Mobile
+
+## Metodología Obligatoria de Desarrollo
+- **Metodología Oficial**: **Spec-Driven Development (SDD)**.
+- Todas las decisiones de arquitectura, optimización, nuevos flujos, refactorizaciones y creación de componentes deben estar formalmente especificadas en `docs/` bajo nomenclatura `NT-SPEC-...` antes o durante su ejecución.
+- Toda especificación debe contar con:
+  1. Diagnóstico y objetivos medibles.
+  2. Plan de ejecución incremental por especificaciones/fases.
+  3. Criterios de Aceptación y Calidad (DoD - Definition of Done).
+  4. Validación automatizada (`dart analyze`, `flutter test`) con 0 advertencias y 0 errores.
+  5. Sincronización continua con Git (`commit` y `push` tras validar cada especificación).
+
+## Estándares de Diseño y Experiencia de Usuario (UI/UX - DCU)
+- **Filosofía**: Diseño Centrado en el Usuario Neurodivergente (TDAH, sobrecarga ejecutiva, descompresión cognitiva).
+- **Estética Neumórfica Serena**: Paleta suave, sombras duales sutiles, micro-animaciones orgánicas con curvas suaves (`Curves.easeInOutCubic`).
+- **No Castigo Visual**: Las acciones destructivas o de reinicio deben ser zen, tranquilizadoras y visualmente fluidas (ej. borrado progresivo acelerado en lugar de desapariciones bruscas).
+- **Rendimiento Gráfico**: Micro-animaciones continuas o tickers deben aislarse con `RepaintBoundary`.

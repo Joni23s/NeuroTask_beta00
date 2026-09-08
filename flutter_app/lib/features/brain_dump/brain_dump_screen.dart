@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
@@ -25,7 +26,6 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
   late TextEditingController _textController;
   final FocusNode _focusNode = FocusNode();
   bool _showEmptyHint = false;
-  double _textOpacity = 1.0;
   bool _isClearing = false;
 
   @override
@@ -123,24 +123,103 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
     ref.read(brainDumpProvider.notifier).loadPreset(presetKey);
   }
 
+  /// Algoritmo de desconstrucción regresiva progresiva (retroceso de palabras/caracteres)
+  List<String> _buildDeconstructionSnapshots(String text) {
+    final trimmed = text.trimRight();
+    if (trimmed.isEmpty) return [];
+
+    // Para textos cortos (<= 30 caracteres): borrado carácter por carácter hacia atrás
+    if (trimmed.length <= 30) {
+      final snapshots = <String>[];
+      for (int i = trimmed.length - 1; i >= 0; i--) {
+        snapshots.add(trimmed.substring(0, i));
+      }
+      return snapshots;
+    }
+
+    // Para textos más extensos: borrado regresivo palabra por palabra / tokens
+    final tokens = RegExp(r'\S+\s*').allMatches(trimmed).map((m) => m.group(0)!).toList();
+    if (tokens.length <= 4) {
+      // 2 a 4 palabras: borrado en pequeños bloques de 2 caracteres para granularidad visible
+      final snapshots = <String>[];
+      const cluster = 2;
+      for (int i = trimmed.length - cluster; i > 0; i -= cluster) {
+        snapshots.add(trimmed.substring(0, i));
+      }
+      snapshots.add('');
+      return snapshots;
+    }
+
+    // Agrupación y paso regulado para mantener la animación entre 10 y 24 pasos (~450-650ms total)
+    final totalTokens = tokens.length;
+    const maxSteps = 24;
+    final stride = (totalTokens / maxSteps).ceil().clamp(1, totalTokens);
+
+    final snapshots = <String>[];
+    int currentTokenCount = totalTokens;
+
+    while (currentTokenCount > 0) {
+      currentTokenCount = math.max(0, currentTokenCount - stride);
+      if (currentTokenCount == 0) {
+        snapshots.add('');
+      } else {
+        final remaining = tokens.take(currentTokenCount).join('').trimRight();
+        snapshots.add(remaining);
+      }
+    }
+
+    if (snapshots.isEmpty || snapshots.last.isNotEmpty) {
+      snapshots.add('');
+    }
+    return snapshots;
+  }
+
   void _onClearText() async {
     if (_isClearing || _textController.text.trim().isEmpty) return;
-    HapticHelper.lightTap();
 
     setState(() {
       _isClearing = true;
-      _textOpacity = 0.0;
+      _showEmptyHint = false;
     });
 
-    // Desvanecimiento suave y fluido (360ms con curva desacelerada cúbica)
-    await Future.delayed(const Duration(milliseconds: 360));
+    final snapshots = _buildDeconstructionSnapshots(_textController.text);
+    final totalSteps = snapshots.length;
+
+    if (totalSteps > 0) {
+      // Curva de aceleración algorítmica:
+      // Comienza pausado y deliberado (85ms) y adquiere velocidad exponencial (hasta 8ms)
+      const double maxDelay = 85.0; // ms por paso al inicio
+      const double minDelay = 8.0;  // ms por paso al final
+
+      for (int i = 0; i < totalSteps; i++) {
+        if (!mounted) return;
+
+        final newText = snapshots[i];
+        _textController.text = newText;
+        _textController.selection = TextSelection.fromPosition(
+          TextPosition(offset: newText.length),
+        );
+
+        // Micro-haptic feedback en puntos clave de la progresión
+        if (i == 0 || i == totalSteps - 1 || i % 4 == 0) {
+          HapticHelper.selectionClick();
+        }
+
+        // Progresión no lineal con aceleración cúbica/exponencial
+        final progress = totalSteps == 1 ? 1.0 : i / (totalSteps - 1);
+        final delayMs = (minDelay + (maxDelay - minDelay) * math.pow(1.0 - progress, 2.4)).round();
+
+        await Future.delayed(Duration(milliseconds: delayMs));
+      }
+    }
+
     if (!mounted) return;
 
     _textController.clear();
     ref.read(brainDumpProvider.notifier).updateText('');
+    HapticHelper.lightTap();
 
     setState(() {
-      _textOpacity = 1.0;
       _isClearing = false;
       _showEmptyHint = false;
     });
@@ -158,7 +237,7 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
     final dumpState = ref.watch(brainDumpProvider);
     final isDark = context.isDarkMode;
 
-    if (dumpState.text != _textController.text && dumpState.text.isNotEmpty) {
+    if (!_isClearing && dumpState.text != _textController.text && dumpState.text.isNotEmpty) {
       _textController.text = dumpState.text;
       _textController.selection = TextSelection.fromPosition(TextPosition(offset: _textController.text.length));
     }
@@ -254,32 +333,27 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                             : null,
                         child: Stack(
                           children: [
-                            AnimatedOpacity(
-                              opacity: _textOpacity,
-                              duration: const Duration(milliseconds: 360),
-                              curve: Curves.easeInOutCubic,
-                              child: Semantics(
-                                label: 'Campo de texto libre para volcado de ideas',
-                                textField: true,
-                                child: TextField(
-                                  controller: _textController,
-                                  focusNode: _focusNode,
-                                  maxLines: null,
-                                  expands: true,
-                                  style: TextStyle(fontSize: 14, color: context.textMain, height: 1.5),
-                                  onChanged: (val) {
-                                    if (_showEmptyHint && val.trim().isNotEmpty) {
-                                      setState(() {
-                                        _showEmptyHint = false;
-                                      });
-                                    }
-                                  },
-                                  decoration: InputDecoration(
-                                    hintText: 'Ej: Tengo que testear los endpoints en Postman, redactar el resumen ejecutivo del informe y armar las 7 diapositivas en Figma...',
-                                    hintStyle: TextStyle(color: context.textMuted, fontSize: 13),
-                                    border: InputBorder.none,
-                                    contentPadding: const EdgeInsets.only(bottom: 48, right: 48),
-                                  ),
+                            Semantics(
+                              label: 'Campo de texto libre para volcado de ideas',
+                              textField: true,
+                              child: TextField(
+                                controller: _textController,
+                                focusNode: _focusNode,
+                                maxLines: null,
+                                expands: true,
+                                style: TextStyle(fontSize: 14, color: context.textMain, height: 1.5),
+                                onChanged: (val) {
+                                  if (_showEmptyHint && val.trim().isNotEmpty) {
+                                    setState(() {
+                                      _showEmptyHint = false;
+                                    });
+                                  }
+                                },
+                                decoration: InputDecoration(
+                                  hintText: 'Ej: Tengo que testear los endpoints en Postman, redactar el resumen ejecutivo del informe y armar las 7 diapositivas en Figma...',
+                                  hintStyle: TextStyle(color: context.textMuted, fontSize: 13),
+                                  border: InputBorder.none,
+                                  contentPadding: const EdgeInsets.only(bottom: 48, right: 48),
                                 ),
                               ),
                             ),

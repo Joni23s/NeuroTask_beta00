@@ -9,6 +9,10 @@ class HapticHelper {
     HapticFeedback.mediumImpact();
   }
 
+  static void selectionClick() {
+    HapticFeedback.selectionClick();
+  }
+
   static void warning() {
     HapticFeedback.heavyImpact();
   }
