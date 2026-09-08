@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/domain/models/task_graph.dart';
 import '../../core/domain/models/task_node.dart';
+import '../../core/domain/models/time_anchor.dart';
+import '../../core/domain/services/anchor_schedule_fitter.dart';
 import '../../core/domain/services/topological_sorter.dart';
 import '../../core/services/session_storage_service.dart';
 
@@ -84,9 +86,13 @@ class FocusNotifier extends Notifier<FocusState> {
   static FocusState _initialState() {
     final graph = TopologicalSorter.defaultSampleGraph();
     final sorted = TopologicalSorter.sort(graph);
+    final fit = AnchorScheduleFitter.fitTasks(
+      tasks: sorted,
+      anchors: TimeAnchor.initialPresets(),
+    );
     return FocusState(
       graph: graph,
-      executionQueue: sorted,
+      executionQueue: fit.scheduledTasks,
       currentIndex: 0,
       sessionStartTime: DateTime.now(),
       elapsedSeconds: 0,
@@ -103,9 +109,13 @@ class FocusNotifier extends Notifier<FocusState> {
   void loadFromRawText(String text) {
     final graph = TopologicalSorter.parseRawText(text);
     final sorted = TopologicalSorter.sort(graph);
+    final fit = AnchorScheduleFitter.fitTasks(
+      tasks: sorted,
+      anchors: TimeAnchor.initialPresets(),
+    );
     state = FocusState(
       graph: graph,
-      executionQueue: sorted,
+      executionQueue: fit.scheduledTasks,
       currentIndex: 0,
       isLowEnergyMode: false,
       isCompletedAll: false,
@@ -113,6 +123,15 @@ class FocusNotifier extends Notifier<FocusState> {
       sessionStartTime: DateTime.now(),
       elapsedSeconds: 0,
     );
+    SessionStorageService.saveSession(state);
+  }
+
+  void applyAnchorSchedule(List<TimeAnchor> anchors) {
+    final fit = AnchorScheduleFitter.fitTasks(
+      tasks: state.executionQueue,
+      anchors: anchors,
+    );
+    state = state.copyWith(executionQueue: fit.scheduledTasks);
     SessionStorageService.saveSession(state);
   }
 

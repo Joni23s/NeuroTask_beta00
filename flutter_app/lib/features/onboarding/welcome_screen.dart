@@ -6,6 +6,7 @@ import '../../core/utils/haptic_helper.dart';
 import '../../core/widgets/neuro_badge.dart';
 import '../../core/widgets/theme_toggle_button.dart';
 import '../achievements/achievements_vault_screen.dart';
+import '../anchors/anchors_manager_screen.dart';
 import '../brain_dump/brain_dump_screen.dart';
 import '../focus/focus_controller.dart';
 import '../focus/single_task_screen.dart';
@@ -94,6 +95,34 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
                   ),
                   Row(
                     children: [
+                      Semantics(
+                        button: true,
+                        label: 'Gestionar Anclas y Horarios Fijos',
+                        child: InkWell(
+                          onTap: () {
+                            HapticHelper.lightTap();
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const AnchorsManagerScreen()),
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(16),
+                          child: Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: context.cardSurface,
+                              shape: BoxShape.circle,
+                              boxShadow: context.subtleElevation,
+                              border: Border.all(color: context.borderLight),
+                            ),
+                            child: const Center(
+                              child: Text('⚓', style: TextStyle(fontSize: 16)),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
                       Semantics(
                         button: true,
                         label: 'Abrir Baúl de Logros Cognitivos',

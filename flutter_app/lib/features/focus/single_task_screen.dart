@@ -15,6 +15,7 @@ import 'focus_controller.dart';
 import 'summary_celebration_screen.dart';
 import 'widgets/cognitive_rescue_sheet.dart';
 import 'widgets/graph_overview_modal.dart';
+import '../anchors/schedule_overview_modal.dart';
 
 class SingleTaskScreen extends ConsumerWidget {
   const SingleTaskScreen({super.key});
@@ -32,6 +33,16 @@ class SingleTaskScreen extends ConsumerWidget {
     showNeuroModalSheet(
       context: context,
       builder: (_) => const GraphOverviewModal(),
+    );
+  }
+
+  void _openScheduleModal(BuildContext context) {
+    HapticHelper.lightTap();
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const ScheduleOverviewModal(),
     );
   }
 
@@ -90,6 +101,11 @@ class SingleTaskScreen extends ConsumerWidget {
                           );
                         },
                         tooltip: 'Sonido de Enfoque',
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.schedule_rounded, color: AppColors.brandSteelBlue),
+                        onPressed: () => _openScheduleModal(context),
+                        tooltip: 'Ver Horarios y Anclas',
                       ),
                       IconButton(
                         icon: Icon(Icons.hub_outlined, color: context.textSecondary),
@@ -151,12 +167,25 @@ class SingleTaskScreen extends ConsumerWidget {
                             letterSpacing: 1.1,
                           ),
                         ),
-                        if (task.isAtomicSubstep)
-                          const NeuroBadge.highlight(
-                            label: 'Micro-Paso (3m)',
-                            backgroundColor: AppColors.amberLight,
-                            textColor: AppColors.amberDark,
-                          ),
+                        Row(
+                          children: [
+                            if (task.scheduledStartTime != null)
+                              Padding(
+                                padding: const EdgeInsets.only(right: 6.0),
+                                child: NeuroBadge.highlight(
+                                  label: '⏰ ${task.scheduledStartTime}',
+                                  backgroundColor: isDark ? Colors.white12 : AppColors.brandSteelBlue.withValues(alpha: 0.12),
+                                  textColor: isDark ? AppColors.brandGlowCyan : AppColors.brandDeepBlue,
+                                ),
+                              ),
+                            if (task.isAtomicSubstep)
+                              const NeuroBadge.highlight(
+                                label: 'Micro-Paso (3m)',
+                                backgroundColor: AppColors.amberLight,
+                                textColor: AppColors.amberDark,
+                              ),
+                          ],
+                        ),
                       ],
                     ),
                     const SizedBox(height: 10),

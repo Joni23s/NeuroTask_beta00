@@ -14,6 +14,8 @@ class TaskNode {
   final List<String> dependencies;
   final bool isCompleted;
   final bool isAtomicSubstep;
+  final String? scheduledStartTime; // "HH:mm" (ej. "14:00")
+  final String? scheduledEndTime;   // "HH:mm" (ej. "15:30")
 
   const TaskNode({
     required this.id,
@@ -25,6 +27,8 @@ class TaskNode {
     this.dependencies = const [],
     this.isCompleted = false,
     this.isAtomicSubstep = false,
+    this.scheduledStartTime,
+    this.scheduledEndTime,
   });
 
   TaskNode copyWith({
@@ -37,6 +41,8 @@ class TaskNode {
     List<String>? dependencies,
     bool? isCompleted,
     bool? isAtomicSubstep,
+    String? scheduledStartTime,
+    String? scheduledEndTime,
   }) {
     return TaskNode(
       id: id ?? this.id,
@@ -48,6 +54,8 @@ class TaskNode {
       dependencies: dependencies ?? this.dependencies,
       isCompleted: isCompleted ?? this.isCompleted,
       isAtomicSubstep: isAtomicSubstep ?? this.isAtomicSubstep,
+      scheduledStartTime: scheduledStartTime ?? this.scheduledStartTime,
+      scheduledEndTime: scheduledEndTime ?? this.scheduledEndTime,
     );
   }
 
@@ -62,6 +70,8 @@ class TaskNode {
       'dependencies': dependencies,
       'isCompleted': isCompleted,
       'isAtomicSubstep': isAtomicSubstep,
+      'scheduledStartTime': scheduledStartTime,
+      'scheduledEndTime': scheduledEndTime,
     };
   }
 
@@ -76,6 +86,8 @@ class TaskNode {
       dependencies: (json['dependencies'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? const [],
       isCompleted: json['isCompleted'] as bool? ?? false,
       isAtomicSubstep: json['isAtomicSubstep'] as bool? ?? false,
+      scheduledStartTime: json['scheduledStartTime'] as String?,
+      scheduledEndTime: json['scheduledEndTime'] as String?,
     );
   }
 }
