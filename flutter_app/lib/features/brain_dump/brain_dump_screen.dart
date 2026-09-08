@@ -5,6 +5,7 @@ import '../../core/theme/theme_context.dart';
 import '../../core/utils/haptic_helper.dart';
 import '../../core/widgets/neuro_badge.dart';
 import '../../core/widgets/neuro_inset_container.dart';
+import '../../core/widgets/neuro_modal_sheet.dart';
 import '../../core/widgets/neumorphic_button.dart';
 import '../../core/widgets/theme_toggle_button.dart';
 import '../achievements/achievements_controller.dart';
@@ -24,15 +25,25 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
   late TextEditingController _textController;
   final FocusNode _focusNode = FocusNode();
   bool _showEmptyHint = false;
+  double _textOpacity = 1.0;
+  bool _isClearing = false;
 
   @override
   void initState() {
     super.initState();
     _textController = TextEditingController();
+    _textController.addListener(_onTextChanged);
+  }
+
+  void _onTextChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
   void dispose() {
+    _textController.removeListener(_onTextChanged);
     _textController.dispose();
     _focusNode.dispose();
     super.dispose();
@@ -110,6 +121,36 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
       _showEmptyHint = false;
     });
     ref.read(brainDumpProvider.notifier).loadPreset(presetKey);
+  }
+
+  void _onClearText() async {
+    if (_isClearing || _textController.text.trim().isEmpty) return;
+    HapticHelper.lightTap();
+
+    setState(() {
+      _isClearing = true;
+      _textOpacity = 0.0;
+    });
+
+    // Desvanecimiento suave y fluido (360ms con curva desacelerada cúbica)
+    await Future.delayed(const Duration(milliseconds: 360));
+    if (!mounted) return;
+
+    _textController.clear();
+    ref.read(brainDumpProvider.notifier).updateText('');
+
+    setState(() {
+      _textOpacity = 1.0;
+      _isClearing = false;
+      _showEmptyHint = false;
+    });
+  }
+
+  String get _wordCountText {
+    final text = _textController.text.trim();
+    if (text.isEmpty) return '';
+    final words = text.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
+    return '$words ${words == 1 ? "palabra" : "palabras"}';
   }
 
   @override
@@ -213,26 +254,32 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                             : null,
                         child: Stack(
                           children: [
-                            Semantics(
-                              label: 'Campo de texto libre para volcado de ideas',
-                              textField: true,
-                              child: TextField(
-                                controller: _textController,
-                                focusNode: _focusNode,
-                                maxLines: null,
-                                expands: true,
-                                style: TextStyle(fontSize: 14, color: context.textMain, height: 1.5),
-                                onChanged: (val) {
-                                  if (_showEmptyHint && val.trim().isNotEmpty) {
-                                    setState(() {
-                                      _showEmptyHint = false;
-                                    });
-                                  }
-                                },
-                                decoration: InputDecoration(
-                                  hintText: 'Ej: Tengo que testear los endpoints en Postman, redactar el resumen ejecutivo del informe y armar las 7 diapositivas en Figma...',
-                                  hintStyle: TextStyle(color: context.textMuted, fontSize: 13),
-                                  border: InputBorder.none,
+                            AnimatedOpacity(
+                              opacity: _textOpacity,
+                              duration: const Duration(milliseconds: 360),
+                              curve: Curves.easeInOutCubic,
+                              child: Semantics(
+                                label: 'Campo de texto libre para volcado de ideas',
+                                textField: true,
+                                child: TextField(
+                                  controller: _textController,
+                                  focusNode: _focusNode,
+                                  maxLines: null,
+                                  expands: true,
+                                  style: TextStyle(fontSize: 14, color: context.textMain, height: 1.5),
+                                  onChanged: (val) {
+                                    if (_showEmptyHint && val.trim().isNotEmpty) {
+                                      setState(() {
+                                        _showEmptyHint = false;
+                                      });
+                                    }
+                                  },
+                                  decoration: InputDecoration(
+                                    hintText: 'Ej: Tengo que testear los endpoints en Postman, redactar el resumen ejecutivo del informe y armar las 7 diapositivas en Figma...',
+                                    hintStyle: TextStyle(color: context.textMuted, fontSize: 13),
+                                    border: InputBorder.none,
+                                    contentPadding: const EdgeInsets.only(bottom: 48, right: 48),
+                                  ),
                                 ),
                               ),
                             ),
@@ -248,10 +295,8 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                                     setState(() {
                                       _showEmptyHint = false;
                                     });
-                                    showModalBottomSheet(
+                                    showNeuroModalSheet(
                                       context: context,
-                                      backgroundColor: Colors.transparent,
-                                      isScrollControlled: true,
                                       builder: (_) => VoiceDictationSheet(
                                         textController: _textController,
                                         onAppendText: (text) {
@@ -276,6 +321,59 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                               ),
                             ),
                           ],
+                        ),
+                      ),
+
+                      // Helper bar: Word count + Smooth Clear Action Button
+                      AnimatedOpacity(
+                        opacity: _textController.text.trim().isNotEmpty ? 1.0 : 0.0,
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeInOut,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 8.0, left: 4.0, right: 4.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                _wordCountText,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                  color: context.textMuted,
+                                ),
+                              ),
+                              Semantics(
+                                button: true,
+                                label: 'Limpiar todo el texto',
+                                child: InkWell(
+                                  onTap: (_isClearing || _textController.text.trim().isEmpty) ? null : _onClearText,
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.clear_all_rounded,
+                                          size: 16,
+                                          color: isDark ? AppColors.brandGlowCyan : AppColors.primaryIndigo,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          'Limpiar',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color: isDark ? AppColors.brandGlowCyan : AppColors.primaryIndigo,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
 
