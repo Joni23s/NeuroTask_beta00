@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../utils/haptic_helper.dart';
@@ -32,10 +33,18 @@ class AudioState {
 }
 
 class AudioServiceNotifier extends Notifier<AudioState> {
+  AudioPlayer? _ambientPlayer;
+  AudioPlayer? _sfxPlayer;
+
+  AudioPlayer get _getAmbientPlayer => _ambientPlayer ??= AudioPlayer();
+  AudioPlayer get _getSfxPlayer => _sfxPlayer ??= AudioPlayer();
+
   @override
   AudioState build() {
     ref.onDispose(() {
       _stopAudio();
+      _ambientPlayer?.dispose();
+      _sfxPlayer?.dispose();
     });
     return const AudioState();
   }
@@ -66,29 +75,52 @@ class AudioServiceNotifier extends Notifier<AudioState> {
     }
   }
 
-  void _playAudio(AmbientSoundType type) {
+  Future<void> _playAudio(AmbientSoundType type) async {
     if (type == AmbientSoundType.brownNoise) {
       if (kIsWeb) {
         playWebBrownNoise();
+      } else {
+        try {
+          final player = _getAmbientPlayer;
+          await player.setReleaseMode(ReleaseMode.loop);
+          await player.setVolume(0.7);
+          await player.play(AssetSource('audio/brown_noise_loop.wav'));
+        } catch (e) {
+          debugPrint('Error playing native brown noise: $e');
+        }
       }
     }
   }
 
-  void _stopAudio() {
+  Future<void> _stopAudio() async {
     if (kIsWeb) {
       stopWebBrownNoise();
+    } else {
+      try {
+        await _ambientPlayer?.stop();
+      } catch (e) {
+        debugPrint('Error stopping native brown noise: $e');
+      }
     }
   }
 
-  void playCompletionChime() {
+  Future<void> playCompletionChime() async {
     if (state.isMuted) return;
     HapticHelper.success();
 
     if (kIsWeb) {
       playWebZenChime();
+    } else {
+      try {
+        final player = _getSfxPlayer;
+        await player.setReleaseMode(ReleaseMode.release);
+        await player.setVolume(0.85);
+        await player.play(AssetSource('audio/zen_chime.wav'));
+      } catch (e) {
+        debugPrint('Error playing zen chime: $e');
+      }
     }
   }
-
 }
 
 final audioServiceProvider = NotifierProvider<AudioServiceNotifier, AudioState>(
