@@ -24,8 +24,11 @@ class BrainDumpState {
   }
 }
 
-class BrainDumpNotifier extends StateNotifier<BrainDumpState> {
-  BrainDumpNotifier() : super(const BrainDumpState());
+class BrainDumpNotifier extends Notifier<BrainDumpState> {
+  @override
+  BrainDumpState build() {
+    return const BrainDumpState();
+  }
 
   void updateText(String val) {
     state = state.copyWith(text: val);
@@ -52,6 +55,6 @@ class BrainDumpNotifier extends StateNotifier<BrainDumpState> {
   }
 }
 
-final brainDumpProvider = StateNotifierProvider<BrainDumpNotifier, BrainDumpState>((ref) {
-  return BrainDumpNotifier();
-});
+final brainDumpProvider = NotifierProvider<BrainDumpNotifier, BrainDumpState>(
+  BrainDumpNotifier.new,
+);

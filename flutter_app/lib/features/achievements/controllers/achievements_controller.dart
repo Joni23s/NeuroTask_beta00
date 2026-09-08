@@ -30,9 +30,11 @@ class AchievementsState {
   }
 }
 
-class AchievementsNotifier extends StateNotifier<AchievementsState> {
-  AchievementsNotifier() : super(AchievementsState(achievements: Achievement.initialCatalog())) {
-    _loadStoredAchievements();
+class AchievementsNotifier extends Notifier<AchievementsState> {
+  @override
+  AchievementsState build() {
+    Future.microtask(() => _loadStoredAchievements());
+    return AchievementsState(achievements: Achievement.initialCatalog());
   }
 
   Future<void> _loadStoredAchievements() async {
@@ -142,6 +144,6 @@ class AchievementsNotifier extends StateNotifier<AchievementsState> {
   }
 }
 
-final achievementsProvider = StateNotifierProvider<AchievementsNotifier, AchievementsState>((ref) {
-  return AchievementsNotifier();
-});
+final achievementsProvider = NotifierProvider<AchievementsNotifier, AchievementsState>(
+  AchievementsNotifier.new,
+);

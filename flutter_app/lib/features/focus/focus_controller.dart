@@ -74,9 +74,11 @@ class FocusState {
   }
 }
 
-class FocusNotifier extends StateNotifier<FocusState> {
-  FocusNotifier() : super(_initialState()) {
-    restoreFromStorage();
+class FocusNotifier extends Notifier<FocusState> {
+  @override
+  FocusState build() {
+    Future.microtask(() => restoreFromStorage());
+    return _initialState();
   }
 
   static FocusState _initialState() {
@@ -208,6 +210,6 @@ class FocusNotifier extends StateNotifier<FocusState> {
   }
 }
 
-final focusProvider = StateNotifierProvider<FocusNotifier, FocusState>((ref) {
-  return FocusNotifier();
-});
+final focusProvider = NotifierProvider<FocusNotifier, FocusState>(
+  FocusNotifier.new,
+);

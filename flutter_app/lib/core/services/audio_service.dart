@@ -31,8 +31,14 @@ class AudioState {
   }
 }
 
-class AudioServiceNotifier extends StateNotifier<AudioState> {
-  AudioServiceNotifier() : super(const AudioState());
+class AudioServiceNotifier extends Notifier<AudioState> {
+  @override
+  AudioState build() {
+    ref.onDispose(() {
+      _stopAudio();
+    });
+    return const AudioState();
+  }
 
   void toggleAmbient(AmbientSoundType type) {
     HapticHelper.lightTap();
@@ -83,13 +89,8 @@ class AudioServiceNotifier extends StateNotifier<AudioState> {
     }
   }
 
-  @override
-  void dispose() {
-    _stopAudio();
-    super.dispose();
-  }
 }
 
-final audioServiceProvider = StateNotifierProvider<AudioServiceNotifier, AudioState>((ref) {
-  return AudioServiceNotifier();
-});
+final audioServiceProvider = NotifierProvider<AudioServiceNotifier, AudioState>(
+  AudioServiceNotifier.new,
+);

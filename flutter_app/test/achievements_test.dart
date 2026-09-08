@@ -39,16 +39,19 @@ void main() {
     });
 
     test('AchievementsNotifier unlocks achievements and calculates progress', () async {
-      final notifier = AchievementsNotifier();
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
 
-      expect(notifier.state.unlockedCount, 0);
-      expect(notifier.state.progressPercentage, 0.0);
+      final notifier = container.read(achievementsProvider.notifier);
+
+      expect(container.read(achievementsProvider).unlockedCount, 0);
+      expect(container.read(achievementsProvider).progressPercentage, 0.0);
 
       // Unlock first brain dump
       final res = await notifier.unlock('first_brain_dump');
       expect(res, true);
-      expect(notifier.state.unlockedCount, 1);
-      expect(notifier.state.progressPercentage, greaterThan(0.0));
+      expect(container.read(achievementsProvider).unlockedCount, 1);
+      expect(container.read(achievementsProvider).progressPercentage, greaterThan(0.0));
 
       // Attempting to unlock again returns false
       final secondTry = await notifier.unlock('first_brain_dump');

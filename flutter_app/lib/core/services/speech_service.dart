@@ -45,11 +45,13 @@ class SpeechState {
   }
 }
 
-class SpeechNotifier extends StateNotifier<SpeechState> {
+class SpeechNotifier extends Notifier<SpeechState> {
   final SpeechToText _speechToText = SpeechToText();
 
-  SpeechNotifier() : super(const SpeechState()) {
-    initSpeech();
+  @override
+  SpeechState build() {
+    Future.microtask(() => initSpeech());
+    return const SpeechState();
   }
 
   Future<bool> initSpeech() async {
@@ -183,6 +185,6 @@ class SpeechNotifier extends StateNotifier<SpeechState> {
   }
 }
 
-final speechServiceProvider = StateNotifierProvider<SpeechNotifier, SpeechState>((ref) {
-  return SpeechNotifier();
-});
+final speechServiceProvider = NotifierProvider<SpeechNotifier, SpeechState>(
+  SpeechNotifier.new,
+);

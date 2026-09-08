@@ -17,11 +17,13 @@ class ThemeState {
   }
 }
 
-class ThemeNotifier extends StateNotifier<ThemeState> {
+class ThemeNotifier extends Notifier<ThemeState> {
   static const String _keyThemeMode = 'neurotask_theme_mode_v1';
 
-  ThemeNotifier() : super(const ThemeState()) {
-    _loadTheme();
+  @override
+  ThemeState build() {
+    Future.microtask(() => _loadTheme());
+    return const ThemeState();
   }
 
   Future<void> _loadTheme() async {
@@ -50,6 +52,6 @@ class ThemeNotifier extends StateNotifier<ThemeState> {
   }
 }
 
-final themeProvider = StateNotifierProvider<ThemeNotifier, ThemeState>((ref) {
-  return ThemeNotifier();
-});
+final themeProvider = NotifierProvider<ThemeNotifier, ThemeState>(
+  ThemeNotifier.new,
+);
