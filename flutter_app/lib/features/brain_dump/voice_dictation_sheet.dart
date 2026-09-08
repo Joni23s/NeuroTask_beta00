@@ -1,12 +1,13 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/services/speech_service.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/theme_context.dart';
-import '../../../core/utils/haptic_helper.dart';
-import '../../../core/widgets/neumorphic_button.dart';
-import '../controllers/brain_dump_controller.dart';
+import '../../core/services/speech_service.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/theme_context.dart';
+import '../../core/utils/haptic_helper.dart';
+import '../../core/widgets/neumorphic_button.dart';
+import '../../core/widgets/neuro_modal_sheet.dart';
+import 'brain_dump_controller.dart';
 
 class VoiceDictationSheet extends ConsumerStatefulWidget {
   final Function(String text) onAppendText;
@@ -128,71 +129,51 @@ class _VoiceDictationSheetState extends ConsumerState<VoiceDictationSheet> with 
     final isAvailable = speechState.isAvailable;
     final isDark = context.isDarkMode;
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-      decoration: BoxDecoration(
-        color: context.backgroundColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(36)),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 24,
-            offset: Offset(0, -8),
-          ),
-        ],
-      ),
+    return NeuroModalSheet(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Drag handle
-          Container(
-            width: 44,
-            height: 4,
-            decoration: BoxDecoration(
-              color: context.textMuted.withValues(alpha: 0.4),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(height: 20),
+          // Central Microphone Button & Pulsating Ambient Glow (Isolated with RepaintBoundary)
+          RepaintBoundary(
+            child: GestureDetector(
+              onTap: isAvailable ? _toggleListening : _runAssistedDemo,
+              child: AnimatedBuilder(
+                animation: _pulseController,
+                builder: (context, child) {
+                  final pulse = isListening ? (0.85 + (_micLevel * 0.35) + (_pulseController.value * 0.1)) : 1.0;
 
-          // Central Microphone Button & Pulsating Ambient Glow
-          GestureDetector(
-            onTap: isAvailable ? _toggleListening : _runAssistedDemo,
-            child: AnimatedBuilder(
-              animation: _pulseController,
-              builder: (context, child) {
-                final pulse = isListening ? (0.85 + (_micLevel * 0.35) + (_pulseController.value * 0.1)) : 1.0;
-
-                return Transform.scale(
-                  scale: pulse,
-                  child: Container(
-                    width: 86,
-                    height: 86,
-                    decoration: BoxDecoration(
-                      color: isListening ? AppColors.primaryIndigo : context.cardSurface,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: isListening
-                              ? AppColors.brandGlowCyan.withValues(alpha: (0.4 + (_micLevel * 0.5)).clamp(0.0, 0.9))
-                              : AppColors.indigoGlow.withValues(alpha: 0.15),
-                          blurRadius: isListening ? 26 + (_micLevel * 20) : 12,
-                          spreadRadius: isListening ? 4 + (_micLevel * 8) : 0,
+                  return Transform.scale(
+                    scale: pulse,
+                    child: Container(
+                      width: 86,
+                      height: 86,
+                      decoration: BoxDecoration(
+                        color: isListening ? AppColors.primaryIndigo : context.cardSurface,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: isListening
+                                ? AppColors.brandGlowCyan.withValues(alpha: (0.4 + (_micLevel * 0.5)).clamp(0.0, 0.9))
+                                : AppColors.indigoGlow.withValues(alpha: 0.15),
+                            blurRadius: isListening ? 26 + (_micLevel * 20) : 12,
+                            spreadRadius: isListening ? 4 + (_micLevel * 8) : 0,
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Icon(
+                          isListening
+                              ? Icons.mic_rounded
+                              : (isAvailable ? Icons.mic_none_rounded : Icons.mic_off_rounded),
+                          color: isListening ? Colors.white : (isDark ? AppColors.brandGlowCyan : AppColors.primaryIndigo),
+                          size: 38,
                         ),
-                      ],
-                    ),
-                    child: Center(
-                      child: Icon(
-                        isListening
-                            ? Icons.mic_rounded
-                            : (isAvailable ? Icons.mic_none_rounded : Icons.mic_off_rounded),
-                        color: isListening ? Colors.white : (isDark ? AppColors.brandGlowCyan : AppColors.primaryIndigo),
-                        size: 38,
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
           const SizedBox(height: 16),

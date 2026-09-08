@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/services/achievements_storage_service.dart';
-import '../models/achievement.dart';
+import '../../core/domain/models/achievement.dart';
+import '../../core/services/achievements_storage_service.dart';
 
 class AchievementsState {
   final List<Achievement> achievements;

@@ -6,6 +6,8 @@ import '../../core/theme/theme_context.dart';
 import '../../core/utils/haptic_helper.dart';
 import '../../core/widgets/flow_indicator.dart';
 import '../../core/widgets/neumorphic_button.dart';
+import '../../core/widgets/neuro_badge.dart';
+import '../../core/widgets/neuro_modal_sheet.dart';
 import '../../core/widgets/swipe_to_complete_card.dart';
 import '../../core/widgets/theme_toggle_button.dart';
 import '../../core/widgets/zen_timer_widget.dart';
@@ -19,20 +21,16 @@ class SingleTaskScreen extends ConsumerWidget {
 
   void _openRescueSheet(BuildContext context) {
     HapticHelper.lightTap();
-    showModalBottomSheet(
+    showNeuroModalSheet(
       context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
       builder: (_) => const CognitiveRescueSheet(),
     );
   }
 
   void _openGraphModal(BuildContext context) {
     HapticHelper.lightTap();
-    showModalBottomSheet(
+    showNeuroModalSheet(
       context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
       builder: (_) => const GraphOverviewModal(),
     );
   }
@@ -154,16 +152,10 @@ class SingleTaskScreen extends ConsumerWidget {
                           ),
                         ),
                         if (task.isAtomicSubstep)
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: AppColors.amberLight,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Text(
-                              'Micro-Paso (3m)',
-                              style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.amberDark),
-                            ),
+                          const NeuroBadge.highlight(
+                            label: 'Micro-Paso (3m)',
+                            backgroundColor: AppColors.amberLight,
+                            textColor: AppColors.amberDark,
                           ),
                       ],
                     ),

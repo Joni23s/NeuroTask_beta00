@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/theme_context.dart';
-import '../../../core/utils/haptic_helper.dart';
-import '../../../core/widgets/neumorphic_button.dart';
-import '../../../core/widgets/theme_toggle_button.dart';
-import '../../achievements/controllers/achievements_controller.dart';
-import '../../focus/focus_controller.dart';
-import '../../focus/single_task_screen.dart';
-import '../controllers/brain_dump_controller.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/theme_context.dart';
+import '../../core/utils/haptic_helper.dart';
+import '../../core/widgets/neuro_badge.dart';
+import '../../core/widgets/neuro_inset_container.dart';
+import '../../core/widgets/neumorphic_button.dart';
+import '../../core/widgets/theme_toggle_button.dart';
+import '../achievements/achievements_controller.dart';
+import '../focus/focus_controller.dart';
+import '../focus/single_task_screen.dart';
+import 'brain_dump_controller.dart';
 import 'voice_dictation_sheet.dart';
 
 class BrainDumpScreen extends ConsumerStatefulWidget {
@@ -145,28 +147,9 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Semantics(
-                                label: 'Sección de Descompresión Cognitiva',
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: context.cardSurface,
-                                    borderRadius: BorderRadius.circular(16),
-                                    boxShadow: context.subtleElevation,
-                                    border: Border.all(color: context.borderLight),
-                                  ),
-                                  child: const Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      CircleAvatar(radius: 3.5, backgroundColor: AppColors.primaryIndigo),
-                                      SizedBox(width: 6),
-                                      Text(
-                                        'Descompresión Cognitiva',
-                                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primaryIndigo),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                              const NeuroBadge.status(
+                                label: 'Descompresión Cognitiva',
+                                dotColor: AppColors.primaryIndigo,
                               ),
                               Row(
                                 children: [
@@ -204,40 +187,14 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                             children: [
                               Text('Ejemplos: ', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: context.textMuted)),
                               const SizedBox(width: 6),
-                              Semantics(
-                                button: true,
-                                label: 'Cargar ejemplo de Entrega DAM',
-                                child: InkWell(
-                                  onTap: () => _loadPreset('dam'),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                    decoration: BoxDecoration(
-                                      color: context.cardSurface,
-                                      borderRadius: BorderRadius.circular(10),
-                                      boxShadow: context.subtleElevation,
-                                      border: Border.all(color: context.borderLight),
-                                    ),
-                                    child: Text('🎓 Entrega DAM', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: context.textSecondary)),
-                                  ),
-                                ),
+                              NeuroBadge.chip(
+                                label: '🎓 Entrega DAM',
+                                onTap: () => _loadPreset('dam'),
                               ),
                               const SizedBox(width: 8),
-                              Semantics(
-                                button: true,
-                                label: 'Cargar ejemplo de Sprint Flutter',
-                                child: InkWell(
-                                  onTap: () => _loadPreset('flutter'),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                    decoration: BoxDecoration(
-                                      color: context.cardSurface,
-                                      borderRadius: BorderRadius.circular(10),
-                                      boxShadow: context.subtleElevation,
-                                      border: Border.all(color: context.borderLight),
-                                    ),
-                                    child: Text('📱 Flutter', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: context.textSecondary)),
-                                  ),
-                                ),
+                              NeuroBadge.chip(
+                                label: '📱 Flutter',
+                                onTap: () => _loadPreset('flutter'),
                               ),
                             ],
                           ),
@@ -247,17 +204,13 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                       const SizedBox(height: 16),
 
                       // Neumorphic Inset Text Area
-                      Container(
+                      NeuroInsetContainer(
                         height: 220,
                         padding: const EdgeInsets.all(18),
-                        decoration: BoxDecoration(
-                          color: context.pressedSurface,
-                          borderRadius: BorderRadius.circular(28),
-                          boxShadow: context.pressedElevation,
-                          border: _showEmptyHint
-                              ? Border.all(color: AppColors.amberWarning.withValues(alpha: 0.6), width: 1.5)
-                              : Border.all(color: context.borderLight),
-                        ),
+                        borderRadius: 28,
+                        border: _showEmptyHint
+                            ? Border.all(color: AppColors.amberWarning.withValues(alpha: 0.6), width: 1.5)
+                            : null,
                         child: Stack(
                           children: [
                             Semantics(

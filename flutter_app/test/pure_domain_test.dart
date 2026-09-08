@@ -1,6 +1,6 @@
-import '../lib/core/domain/models/task_node.dart';
-import '../lib/core/domain/models/task_graph.dart';
-import '../lib/core/domain/services/topological_sorter.dart';
+import 'package:neurotask/core/domain/models/task_node.dart';
+import 'package:neurotask/core/domain/models/task_graph.dart';
+import 'package:neurotask/core/domain/services/topological_sorter.dart';
 
 void main() {
   print('--- TEST 1: TaskNode and TaskGraph serialization ---');

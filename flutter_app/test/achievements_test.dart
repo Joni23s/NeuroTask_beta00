@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:neurotask/features/achievements/controllers/achievements_controller.dart';
-import 'package:neurotask/features/achievements/models/achievement.dart';
-import 'package:neurotask/features/achievements/presentation/achievements_vault_screen.dart';
+import 'package:neurotask/core/domain/models/achievement.dart';
+import 'package:neurotask/features/achievements/achievements_controller.dart';
+import 'package:neurotask/features/achievements/achievements_vault_screen.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

@@ -66,28 +66,30 @@ class _ZenTimerWidgetState extends ConsumerState<ZenTimerWidget> with SingleTick
       children: [
         Row(
           children: [
-            AnimatedBuilder(
-              animation: _pulseController,
-              builder: (context, child) {
-                return Container(
-                  width: 14 + (_pulseController.value * 4),
-                  height: 14 + (_pulseController.value * 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryIndigoLight.withValues(alpha: 0.2 + (_pulseController.value * 0.2)),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Container(
-                      width: 6,
-                      height: 6,
-                      decoration: const BoxDecoration(
-                        color: AppColors.primaryIndigo,
-                        shape: BoxShape.circle,
+            RepaintBoundary(
+              child: AnimatedBuilder(
+                animation: _pulseController,
+                builder: (context, child) {
+                  return Container(
+                    width: 14 + (_pulseController.value * 4),
+                    height: 14 + (_pulseController.value * 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryIndigoLight.withValues(alpha: 0.2 + (_pulseController.value * 0.2)),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Container(
+                        width: 6,
+                        height: 6,
+                        decoration: const BoxDecoration(
+                          color: AppColors.primaryIndigo,
+                          shape: BoxShape.circle,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
             const SizedBox(width: 8),
             Text(
@@ -102,13 +104,15 @@ class _ZenTimerWidgetState extends ConsumerState<ZenTimerWidget> with SingleTick
         ),
         Row(
           children: [
-            Text(
-              _formattedTime,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Courier',
-                color: context.isDarkMode ? AppColors.brandGlowCyan : AppColors.primaryIndigo,
+            RepaintBoundary(
+              child: Text(
+                _formattedTime,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Courier',
+                  color: context.isDarkMode ? AppColors.brandGlowCyan : AppColors.primaryIndigo,
+                ),
               ),
             ),
             const SizedBox(width: 4),

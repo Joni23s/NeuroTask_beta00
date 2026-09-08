@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/theme_context.dart';
-import '../../../core/utils/haptic_helper.dart';
-import '../../../core/widgets/neumorphic_button.dart';
-import '../../../core/widgets/neumorphic_card.dart';
-import '../../../core/widgets/theme_toggle_button.dart';
-import '../controllers/achievements_controller.dart';
-import '../models/achievement.dart';
+import '../../core/domain/models/achievement.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/theme_context.dart';
+import '../../core/utils/haptic_helper.dart';
+import '../../core/widgets/neumorphic_button.dart';
+import '../../core/widgets/neumorphic_card.dart';
+import '../../core/widgets/neuro_badge.dart';
+import '../../core/widgets/theme_toggle_button.dart';
+import 'achievements_controller.dart';
 
 class AchievementsVaultScreen extends ConsumerStatefulWidget {
   const AchievementsVaultScreen({super.key});
@@ -79,25 +80,14 @@ class _AchievementsVaultScreenState extends ConsumerState<AchievementsVaultScree
               ),
               const SizedBox(height: 6),
 
-              Container(
+              NeuroBadge.highlight(
+                label: achievement.isUnlocked ? '✨ DESBLOQUEADO' : '🔒 BLOQUEADO',
+                backgroundColor: achievement.isUnlocked
+                    ? AppColors.successEmerald.withValues(alpha: 0.15)
+                    : context.pressedSurface,
+                textColor: achievement.isUnlocked ? AppColors.successEmerald : context.textMuted,
+                borderRadius: 10,
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: achievement.isUnlocked
-                      ? AppColors.successEmerald.withValues(alpha: 0.15)
-                      : context.pressedSurface,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  achievement.isUnlocked
-                      ? '✨ DESBLOQUEADO'
-                      : '🔒 BLOQUEADO',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: achievement.isUnlocked ? AppColors.successEmerald : context.textMuted,
-                    letterSpacing: 0.8,
-                  ),
-                ),
               ),
               const SizedBox(height: 14),
 

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/theme_context.dart';
 import '../../../core/widgets/neumorphic_card.dart';
+import '../../../core/widgets/neuro_badge.dart';
+import '../../../core/widgets/neuro_modal_sheet.dart';
 import '../focus_controller.dart';
 import 'dag_canvas_widget.dart';
 
@@ -23,81 +25,21 @@ class _GraphOverviewModalState extends State<GraphOverviewModal> {
         final focusState = ref.watch(focusProvider);
         final queue = focusState.executionQueue;
 
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-          decoration: BoxDecoration(
-            color: context.backgroundColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(36)),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 20,
-                offset: Offset(0, -6),
-              ),
-            ],
+        return NeuroModalSheet(
+          title: 'Mapa del Grafo (Tus ideas)',
+          subtitle: 'Secuencia topológica calculada',
+          trailing: NeuroBadge.chip(
+            label: _showVectorCanvas ? 'Ver Lista' : 'Ver Grafo',
+            icon: _showVectorCanvas ? Icons.view_list_rounded : Icons.hub_outlined,
+            textColor: AppColors.primaryIndigo,
+            iconColor: AppColors.primaryIndigo,
+            backgroundColor: AppColors.primaryIndigoLight.withValues(alpha: 0.12),
+            onTap: () => setState(() => _showVectorCanvas = !_showVectorCanvas),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Container(
-                  width: 48,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: context.textMuted.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 18),
-
-              // Title and Toggle View
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Mapa del Grafo (Tus ideas)',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.textMain),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Secuencia topológica calculada',
-                        style: TextStyle(fontSize: 12, color: context.textSecondary),
-                      ),
-                    ],
-                  ),
-                  InkWell(
-                    onTap: () => setState(() => _showVectorCanvas = !_showVectorCanvas),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryIndigoLight.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            _showVectorCanvas ? Icons.view_list_rounded : Icons.hub_outlined,
-                            size: 14,
-                            color: AppColors.primaryIndigo,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            _showVectorCanvas ? 'Ver Lista' : 'Ver Grafo',
-                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primaryIndigo),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
 
               // Content Area (Tree DAG Canvas or Structured List)
               ConstrainedBox(

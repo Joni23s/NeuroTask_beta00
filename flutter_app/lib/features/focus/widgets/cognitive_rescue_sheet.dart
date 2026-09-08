@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/theme_context.dart';
 import '../../../core/widgets/neumorphic_card.dart';
-import '../../achievements/controllers/achievements_controller.dart';
+import '../../../core/widgets/neuro_modal_sheet.dart';
+import '../../achievements/achievements_controller.dart';
 import '../focus_controller.dart';
 
 class CognitiveRescueSheet extends ConsumerWidget {
@@ -11,48 +12,13 @@ class CognitiveRescueSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-      decoration: BoxDecoration(
-        color: context.backgroundColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(36)),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 20,
-            offset: Offset(0, -6),
-          ),
-        ],
-      ),
+    return NeuroModalSheet(
+      title: 'Descompresión y Rescate Cognitivo',
+      subtitle: 'Elegí cómo querés continuar sin culpas ni presiones.',
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Center(
-            child: Container(
-              width: 48,
-              height: 4,
-              decoration: BoxDecoration(
-                color: context.textMuted.withValues(alpha: 0.4),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 18),
-          Text(
-            'Descompresión y Rescate Cognitivo',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: context.textMain,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Elegí cómo querés continuar sin culpas ni presiones.',
-            style: TextStyle(fontSize: 12, color: context.textSecondary),
-          ),
-          const SizedBox(height: 20),
 
           // Option 1: Split in 3 min micro-steps
           _RescueOptionCard(

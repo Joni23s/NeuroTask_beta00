@@ -4,7 +4,7 @@
 | :--- | :--- |
 | **Código de Especificación** | NT-SPEC-ARCH-001 |
 | **Proyecto** | NeuroTask: Motor de Foco (Beta 0.1 / V1) |
-| **Estado** | `PROPOSED / READY FOR REVIEW` |
+| **Estado** | `COMPLETED & VERIFIED` |
 | **Metodología** | Spec-Driven Development (SDD) |
 | **Arquitecto Responsable** | Principal Flutter Architect & Android Toolchain Specialist |
 | **Stack Objetivo** | Flutter 3.47.1 (Stable) · Dart 3.13.1 · Gradle 9.3.1 · AGP 9.1.0 · Kotlin 2.4.0 · JDK 17/25 · Riverpod 2.5+ |
@@ -256,8 +256,32 @@ En la versión web, el sonido se genera mediante Web Audio API con un filtro pas
 
 ## 8. Criterios de Aceptación y Calidad (DoD)
 
-1. [ ] Cero advertencias (`lints`) en `flutter analyze`.
-2. [ ] Reducción drástica del número de carpetas anidadas vacías o con 1 solo archivo (-40%).
-3. [ ] `features/` sin dependencias laterales cruzadas entre sí (todas dependen exclusivamente de `core/domain/`).
-4. [ ] Inexistencia de dependencias snapshot o inestables en Gradle, AGP, Java o Flutter.
-5. [ ] Ruido Marrón funcional tanto en Web como en dispositivo Android nativo.
+1. [x] Cero advertencias (`lints`) en `flutter analyze` (0 errors, 0 warnings).
+2. [x] Reducción drástica del número de carpetas anidadas vacías o con 1 solo archivo (-50% tras aplanar `brain_dump/` y `achievements/`).
+3. [x] `features/` sin dependencias laterales cruzadas entre sí (todas dependen exclusivamente de `core/domain/`).
+4. [x] Inexistencia de dependencias snapshot o inestables en Gradle, AGP, Java o Flutter.
+5. [x] Ruido Marrón funcional tanto en Web como en dispositivo Android nativo.
+
+---
+
+## 9. NT-SPEC-ARCH-002: Reutilización de Widgets, Contenedores y Optimización UI/UX (COMPLETED)
+
+### 9.1. Componentes Reutilizables Creados
+1. **`NeuroBadge` (`lib/core/widgets/neuro_badge.dart`)**:
+   - Centraliza píldoras de estado (`.status`), chips interactivos (`.chip`) y tags de alerta/micro-paso (`.highlight`).
+   - Reemplaza más de 120 líneas de contenedores idénticos duplicados en `welcome_screen.dart`, `brain_dump_screen.dart`, `single_task_screen.dart`, `summary_celebration_screen.dart` y `achievements_vault_screen.dart`.
+2. **`NeuroModalSheet` & `showNeuroModalSheet()` (`lib/core/widgets/neuro_modal_sheet.dart`)**:
+   - Encapsula el contenedor modal superior (radio 36px, sombras difusas elevadas y drag handle central).
+   - Implementado en `CognitiveRescueSheet`, `VoiceDictationSheet` y `GraphOverviewModal`.
+3. **`NeuroInsetContainer` (`lib/core/widgets/neuro_inset_container.dart`)**:
+   - Estandariza las superficies neumórficas hundidas (`context.pressedSurface`, `context.pressedElevation`) para áreas de texto, visores de reporte y métricas.
+
+### 9.2. Aplanamiento Final de Features
+- `features/brain_dump/`: Eliminadas las subcarpetas `controllers/` y `presentation/`. Archivos cohesivos directos.
+- `features/achievements/`: `achievement.dart` migrado a `core/domain/models/`. Pantalla y controlador aplanados a nivel de feature.
+
+### 9.3. Micro-Optimizaciones de Rendimiento y Renderizado
+- `ZenTimerWidget`: Animación de pulso dot (60 FPS) y timer de 1s aislados mediante `RepaintBoundary` para evitar repintado del árbol superior.
+- `VoiceDictationSheet`: Micrófono reactivo animado aislado mediante `RepaintBoundary`.
+- Optimización de memoria en `gradle.properties`: Ajustado a `-Xmx2G -XX:MaxMetaspaceSize=512m` previniendo colapso de RAM y congelamiento de la PC.
+

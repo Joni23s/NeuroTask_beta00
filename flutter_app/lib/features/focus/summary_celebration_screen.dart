@@ -7,10 +7,12 @@ import '../../core/theme/theme_context.dart';
 import '../../core/utils/haptic_helper.dart';
 import '../../core/widgets/neumorphic_button.dart';
 import '../../core/widgets/neumorphic_card.dart';
+import '../../core/widgets/neuro_badge.dart';
+import '../../core/widgets/neuro_inset_container.dart';
 import '../../core/widgets/theme_toggle_button.dart';
-import '../achievements/controllers/achievements_controller.dart';
-import '../achievements/presentation/achievements_vault_screen.dart';
-import '../brain_dump/presentation/brain_dump_screen.dart';
+import '../achievements/achievements_controller.dart';
+import '../achievements/achievements_vault_screen.dart';
+import '../brain_dump/brain_dump_screen.dart';
 import 'focus_controller.dart';
 import 'widgets/cognitive_insight_card.dart';
 import 'widgets/graph_overview_modal.dart';
@@ -152,15 +154,10 @@ class _SummaryCelebrationScreenState extends ConsumerState<SummaryCelebrationScr
                 ],
               ),
               const SizedBox(height: 12),
-              Container(
+              NeuroInsetContainer(
                 constraints: const BoxConstraints(maxHeight: 220),
                 padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: context.pressedSurface,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: context.pressedElevation,
-                  border: Border.all(color: context.borderLight),
-                ),
+                borderRadius: 16,
                 child: SingleChildScrollView(
                   child: Text(
                     report,
@@ -211,29 +208,9 @@ class _SummaryCelebrationScreenState extends ConsumerState<SummaryCelebrationScr
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: context.cardSurface,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: context.subtleElevation,
-                        border: Border.all(color: context.borderLight),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CircleAvatar(radius: 3.5, backgroundColor: AppColors.successEmerald),
-                          SizedBox(width: 8),
-                          Text(
-                            'Objetivo Conquistado',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.successEmerald,
-                            ),
-                          ),
-                        ],
-                      ),
+                    const NeuroBadge.status(
+                      label: 'Objetivo Conquistado',
+                      dotColor: AppColors.successEmerald,
                     ),
                     Row(
                       children: [
