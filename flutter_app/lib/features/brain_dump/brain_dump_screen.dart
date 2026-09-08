@@ -10,6 +10,7 @@ import '../../core/widgets/neuro_modal_sheet.dart';
 import '../../core/widgets/neumorphic_button.dart';
 import '../../core/widgets/theme_toggle_button.dart';
 import '../achievements/achievements_controller.dart';
+import '../anchors/anchors_manager_screen.dart';
 import '../focus/focus_controller.dart';
 import '../focus/single_task_screen.dart';
 import 'brain_dump_controller.dart';
@@ -263,26 +264,73 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Header Badge, Brand & Theme Toggle
+                          // Header Navigation & Actions: Back to Home, Badge, Anchors & Theme Toggle
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const NeuroBadge.status(
-                                label: 'Descompresión Cognitiva',
-                                dotColor: AppColors.primaryIndigo,
-                              ),
                               Row(
                                 children: [
-                                  Text(
-                                    'NEUROTASK',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w800,
-                                      color: isDark ? AppColors.brandGlowCyan : AppColors.brandDeepBlue,
-                                      letterSpacing: 1.2,
+                                  Semantics(
+                                    button: true,
+                                    label: 'Volver a la pantalla principal',
+                                    child: InkWell(
+                                      onTap: () {
+                                        HapticHelper.lightTap();
+                                        ref.read(brainDumpProvider.notifier).updateText(_textController.text);
+                                        Navigator.pop(context);
+                                      },
+                                      borderRadius: BorderRadius.circular(16),
+                                      child: Container(
+                                        width: 38,
+                                        height: 38,
+                                        decoration: BoxDecoration(
+                                          color: context.cardSurface,
+                                          shape: BoxShape.circle,
+                                          boxShadow: context.subtleElevation,
+                                          border: Border.all(color: context.borderLight),
+                                        ),
+                                        child: Icon(Icons.arrow_back_rounded, color: context.textMain, size: 19),
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(width: 10),
+                                  const NeuroBadge.status(
+                                    label: 'Descompresión Cognitiva',
+                                    dotColor: AppColors.primaryIndigo,
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Semantics(
+                                    button: true,
+                                    label: 'Gestionar Anclas y Horarios Fijos',
+                                    child: InkWell(
+                                      onTap: () {
+                                        HapticHelper.lightTap();
+                                        ref.read(brainDumpProvider.notifier).updateText(_textController.text);
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (_) => const AnchorsManagerScreen()),
+                                        );
+                                      },
+                                      borderRadius: BorderRadius.circular(16),
+                                      child: Container(
+                                        width: 38,
+                                        height: 38,
+                                        decoration: BoxDecoration(
+                                          color: context.cardSurface,
+                                          shape: BoxShape.circle,
+                                          boxShadow: context.subtleElevation,
+                                          border: Border.all(color: context.borderLight),
+                                        ),
+                                        child: const Center(
+                                          child: Text('⚓', style: TextStyle(fontSize: 16)),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
                                   const ThemeToggleButton(),
                                 ],
                               ),
