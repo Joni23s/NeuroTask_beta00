@@ -6,19 +6,22 @@
 
 ## Resumen Rápido de Ejecución
 
-Para probar e iterar **NeuroTask** en tu navegador Web con **Hot Reload** instantáneo sin tener que compilar y enviar el APK a tu teléfono en cada cambio:
+### Opción A (Recomendada): Probar en tu Celular Físico mediante Código QR
+Para ver la app en tu propio celular con **Hot Reload en vivo** sin cables ni instalar APKs:
+1. Haz doble clic en **`iniciar_con_qr.bat`** (o corre `.\iniciar_con_qr.bat` en la terminal).
+2. Se abrirá una ventana en tu PC con un **código QR**.
+3. Abre la cámara de tu celular (conectado al mismo Wi-Fi que la PC) y escanea el QR.
+4. La app se abrirá en el navegador de tu celular. Cada vez que guardes cambios y toques **`r`** en la consola, ¡tu teléfono se actualizará al instante!
 
-### 1. Iniciar en Chrome
+---
+
+### Opción B: Probar en Google Chrome de la PC
 ```bash
 cd flutter_app
 flutter pub get
 flutter run -d chrome
 ```
-
-### 2. Simular Vista de Celular (Device Toolbar)
-- Presiona **`F12`** en Chrome para abrir las DevTools.
-- Presiona **`Ctrl + Shift + M`** para activar el modo responsive móvil.
-- Elige dimensiones de pantalla de celular (ej. **390 x 844** o **Pixel 7**).
+- Presiona **`F12`** $\rightarrow$ **`Ctrl + Shift + M`** para activar la vista responsive de celular (ej. 390 x 844).
 
 ### 3. Teclas de Control en Terminal
 - **`r`**: Hot Reload (aplica cambios en < 1 segundo sin perder el estado).

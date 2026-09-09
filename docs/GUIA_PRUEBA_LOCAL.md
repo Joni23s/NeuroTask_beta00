@@ -39,7 +39,7 @@ Descarga y valida los paquetes de `pubspec.yaml`:
 flutter pub get
 ```
 
-### Paso 3: Lanzar la aplicación en Google Chrome
+### Paso 3: Lanzar la aplicación en Google Chrome (Modo Escritorio)
 Ejecuta el siguiente comando para iniciar el servidor de desarrollo local:
 ```bash
 flutter run -d chrome
@@ -50,6 +50,28 @@ flutter run -d chrome
 > ```bash
 > flutter run -d chrome --web-port=8080
 > ```
+
+---
+
+## 3.1. Flujo con Código QR para Probar en tu Teléfono Físico (En Vivo por Wi-Fi)
+
+Si prefieres ver y tocar la app directamente en la pantalla de tu celular con **Hot Reload instantáneo**:
+
+1. Ejecuta el script de inicio con QR desde la raíz del proyecto:
+   ```cmd
+   iniciar_con_qr.bat
+   ```
+   *(O haz doble clic en el archivo `iniciar_con_qr.bat` desde el explorador de Windows)*.
+2. El script detectará tu IP local en la red (ej. `192.168.18.10`) y abrirá una pantalla con un **código QR grande y nítido**.
+3. Asegúrate de que tu celular esté conectado a la **misma red Wi-Fi** que tu computadora.
+4. Abre la cámara de tu celular, escanea el código QR y abre el enlace (ej: `http://192.168.18.10:8080`).
+5. **Experiencia de App Nativa a Pantalla Completa:**
+   - En Chrome de Android: Toca los tres puntos arriba a la derecha $\rightarrow$ *"Agregar a la pantalla principal"* o *"Instalar aplicación"*.
+   - En Safari de iOS: Toca el botón de Compartir $\rightarrow$ *"Agregar al inicio"*.
+6. **Cambios en tiempo real:**
+   - Modifica cualquier archivo en tu código.
+   - Presiona **`r`** en la terminal donde se ejecuta el script.
+   - ¡Tu celular se actualizará en menos de 1 segundo sin tocar ningún cable!
 
 ---
 
