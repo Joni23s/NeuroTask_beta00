@@ -1,10 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:neurotask/core/domain/models/task_node.dart';
 import 'package:neurotask/core/domain/models/time_anchor.dart';
 import 'package:neurotask/core/domain/services/anchor_schedule_fitter.dart';
+import 'package:neurotask/model/dbhelper.dart';
 import 'package:neurotask/util/date_time_formatter.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   group('TimeAnchor Domain Model Tests', () {
     test('TimeAnchor JSON round-trip serialization', () {
       const anchor = TimeAnchor(
@@ -170,6 +173,104 @@ void main() {
 
       expect(result.isOverloaded, isTrue);
       expect(result.statusMessage, contains('Alerta de Sobrecarga'));
+    });
+  });
+
+  group('DbHelper Singleton & CRUD Transactions (Unidad 3.1.1)', () {
+    setUp(() {
+      SharedPreferences.setMockInitialValues({});
+    });
+
+    test('DbHelper enforces Singleton pattern (identical instances)', () {
+      final db1 = DbHelper();
+      final db2 = DbHelper();
+      expect(identical(db1, db2), isTrue);
+    });
+
+    test('TimeAnchor toMap and fromObject bidirectional serialization', () {
+      const original = TimeAnchor.withId(
+        id: 'anchor_db_1',
+        title: 'Tutoría DAM',
+        startTime: '14:00',
+        endTime: '15:30',
+        category: 'Facultad',
+        daysOfWeek: [2, 4],
+        isRecurring: true,
+        isActive: true,
+      );
+
+      final map = original.toMap();
+      final reconstructed = TimeAnchor.fromObject(map);
+
+      expect(reconstructed.id, equals(original.id));
+      expect(reconstructed.title, equals(original.title));
+      expect(reconstructed.startTime, equals('14:00'));
+      expect(reconstructed.endTime, equals('15:30'));
+      expect(reconstructed.daysOfWeek, equals([2, 4]));
+    });
+
+    test('TaskNode toMap and fromObject bidirectional serialization', () {
+      const node = TaskNode.withId(
+        id: 'node_db_1',
+        title: 'Preparar informe SQLite',
+        category: 'Backend',
+        subtext: 'Paso 1',
+        estimatedMinutes: 20,
+      );
+
+      final map = node.toMap();
+      final reconstructed = TaskNode.fromObject(map);
+
+      expect(reconstructed.id, equals(node.id));
+      expect(reconstructed.title, equals(node.title));
+      expect(reconstructed.estimatedMinutes, equals(20));
+    });
+
+    test('DbHelper CRUD lifecycle: insert, get, update, delete, deleteRows', () async {
+      final db = DbHelper();
+      await db.deleteRows(); // Empezar limpio
+
+      // 1. Insert
+      const anchor = TimeAnchor.withId(
+        id: 'test_anchor_crud',
+        title: 'Clase de SQLite',
+        startTime: '10:00',
+        endTime: '12:00',
+      );
+      final insertResult = await db.insertAnchor(anchor);
+      expect(insertResult, equals(1));
+
+      // 2. Read
+      final rows = await db.getAnchors();
+      expect(rows.any((r) => r['id'] == 'test_anchor_crud'), isTrue);
+
+      final objects = await db.getAnchorObjects();
+      expect(objects.any((a) => a.id == 'test_anchor_crud'), isTrue);
+
+      // 3. Update
+      final updated = anchor.copyWith(title: 'Clase de SQLite Avanzada');
+      final updateResult = await db.updateAnchor(updated);
+      expect(updateResult, equals(1));
+
+      final rowsAfterUpdate = await db.getAnchors();
+      final updatedRow = rowsAfterUpdate.firstWhere((r) => r['id'] == 'test_anchor_crud');
+      expect(updatedRow['title'], equals('Clase de SQLite Avanzada'));
+
+      // 4. Delete
+      final deleteResult = await db.deleteAnchor('test_anchor_crud');
+      expect(deleteResult, equals(1));
+
+      final rowsAfterDelete = await db.getAnchors();
+      expect(rowsAfterDelete.any((r) => r['id'] == 'test_anchor_crud'), isFalse);
+
+      // 5. Delete rows / Truncate
+      await db.insertAnchor(anchor);
+      final deletedCount = await db.deleteRows();
+      expect(deletedCount, greaterThanOrEqualTo(1));
+
+      // 6. Reset to defaults
+      final defaultCount = await db.resetToDefaults();
+      expect(defaultCount, equals(3));
     });
   });
 }

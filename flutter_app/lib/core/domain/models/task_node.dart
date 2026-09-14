@@ -90,6 +90,9 @@ class TaskNode {
     };
   }
 
+  /// Serialización relacional plana toMap() según la especificación de la cátedra
+  Map<String, dynamic> toMap() => toJson();
+
   factory TaskNode.fromJson(Map<String, dynamic> json) {
     return TaskNode(
       id: json['id'] as String,
@@ -104,5 +107,15 @@ class TaskNode {
       scheduledStartTime: json['scheduledStartTime'] as String?,
       scheduledEndTime: json['scheduledEndTime'] as String?,
     );
+  }
+
+  /// Deserialización fromObject(dynamic o) según la especificación de la cátedra
+  factory TaskNode.fromObject(dynamic o) {
+    if (o is Map<String, dynamic>) {
+      return TaskNode.fromJson(o);
+    } else if (o is Map) {
+      return TaskNode.fromJson(Map<String, dynamic>.from(o));
+    }
+    throw ArgumentError('El objeto a deserializar debe ser un Map');
   }
 }

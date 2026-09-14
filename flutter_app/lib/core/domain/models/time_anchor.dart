@@ -89,6 +89,9 @@ class TimeAnchor {
     };
   }
 
+  /// Serialización relacional plana toMap() según la especificación de la cátedra (Unidad 3.1.1)
+  Map<String, dynamic> toMap() => toJson();
+
   factory TimeAnchor.fromJson(Map<String, dynamic> json) {
     return TimeAnchor(
       id: json['id'] as String? ?? '',
@@ -100,6 +103,16 @@ class TimeAnchor {
       isRecurring: json['isRecurring'] as bool? ?? true,
       isActive: json['isActive'] as bool? ?? true,
     );
+  }
+
+  /// Deserialización nombrada fromObject(dynamic o) según la especificación de la cátedra (Unidad 3.1.1)
+  factory TimeAnchor.fromObject(dynamic o) {
+    if (o is Map<String, dynamic>) {
+      return TimeAnchor.fromJson(o);
+    } else if (o is Map) {
+      return TimeAnchor.fromJson(Map<String, dynamic>.from(o));
+    }
+    throw ArgumentError('El objeto a deserializar debe ser un Map');
   }
 
   static int parseTimeToMinutes(String time) {
