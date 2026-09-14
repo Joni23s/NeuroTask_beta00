@@ -31,6 +31,21 @@ class TaskNode {
     this.scheduledEndTime,
   });
 
+  /// Constructor nombrado para instancias existentes persistidas
+  const TaskNode.withId({
+    required this.id,
+    required this.title,
+    required this.category,
+    required this.subtext,
+    this.estimatedMinutes = 15,
+    this.energyLevel = EnergyLevel.medium,
+    this.dependencies = const [],
+    this.isCompleted = false,
+    this.isAtomicSubstep = false,
+    this.scheduledStartTime,
+    this.scheduledEndTime,
+  });
+
   TaskNode copyWith({
     String? id,
     String? title,

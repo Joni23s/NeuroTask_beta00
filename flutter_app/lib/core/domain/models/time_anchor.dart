@@ -19,6 +19,19 @@ class TimeAnchor {
     this.isActive = true,
   });
 
+  /// Constructor nombrado para recrear o manejar anclas existentes desde persistencia local (SQLite/Preferences),
+  /// tal como lo especifica el documento de la cátedra (ej: Doc.withId).
+  const TimeAnchor.withId({
+    required this.id,
+    required this.title,
+    required this.startTime,
+    required this.endTime,
+    this.daysOfWeek = const [],
+    this.category = 'General',
+    this.isRecurring = true,
+    this.isActive = true,
+  });
+
   /// Hora de inicio en minutos desde las 00:00 (0 a 1439)
   int get startMinutes => parseTimeToMinutes(startTime);
 

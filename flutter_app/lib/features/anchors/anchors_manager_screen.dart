@@ -9,6 +9,7 @@ import '../../core/widgets/neuro_badge.dart';
 import '../../core/widgets/neuro_inset_container.dart';
 import '../../core/widgets/neuro_modal_sheet.dart';
 import '../../core/widgets/theme_toggle_button.dart';
+import '../../util/date_time_formatter.dart';
 import 'anchors_controller.dart';
 
 class AnchorsManagerScreen extends ConsumerStatefulWidget {
@@ -32,6 +33,21 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
           onSave: (anchor) {
             ref.read(anchorsProvider.notifier).addAnchor(anchor);
             Navigator.pop(ctx);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(child: Text('Ancla "${anchor.title}" agregada correctamente')),
+                  ],
+                ),
+                behavior: SnackBarBehavior.floating,
+                backgroundColor: AppColors.primaryIndigo,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                duration: const Duration(seconds: 3),
+              ),
+            );
           },
         ),
       ),
@@ -41,6 +57,80 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
   void _onDeleteAnchor(TimeAnchor anchor) {
     HapticHelper.warning();
     ref.read(anchorsProvider.notifier).deleteAnchor(anchor.id);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Ancla "${anchor.title}" eliminada'),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _onShowAnchorDetails(TimeAnchor anchor) {
+    HapticHelper.lightTap();
+    showNeuroModalSheet(
+      context: context,
+      builder: (ctx) => NeuroModalSheet(
+        title: anchor.title,
+        subtitle: 'Detalle del ancla horaria fija',
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  NeuroBadge(
+                    label: anchor.category,
+                    textColor: AppColors.primaryIndigo,
+                    backgroundColor: AppColors.primaryIndigo.withValues(alpha: 0.12),
+                  ),
+                  const SizedBox(width: 8),
+                  NeuroBadge.status(
+                    label: anchor.isActive ? 'Activa' : 'Pausada',
+                    dotColor: anchor.isActive ? Colors.green : Colors.grey,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Horario programado:',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: context.textSecondary),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                DateTimeFormatter.formatTimeRangeWithDuration(anchor.startTime, anchor.endTime, anchor.durationMinutes),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: context.textMain),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                'Días de la semana:',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: context.textSecondary),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                anchor.daysOfWeek.isEmpty
+                    ? 'Todos los días'
+                    : anchor.daysOfWeek.map(DateTimeFormatter.formatWeekday).join(', '),
+                style: TextStyle(fontSize: 13, color: context.textSecondary),
+              ),
+              const SizedBox(height: 24),
+              NeumorphicButton(
+                variant: NeumorphicButtonVariant.primary,
+                borderRadius: 16,
+                height: 46,
+                onPressed: () => Navigator.pop(ctx),
+                child: const Center(
+                  child: Text('Cerrar', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -192,94 +282,85 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
                                 }
                                 final anchor = todayAnchors[index];
                                 return Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                   decoration: BoxDecoration(
                                     color: context.cardSurface,
                                     borderRadius: BorderRadius.circular(20),
                                     boxShadow: context.subtleElevation,
                                     border: Border.all(color: context.borderLight),
                                   ),
-                                  child: Row(
-                                    children: [
-                                      // Rango Horario
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                        decoration: BoxDecoration(
-                                          color: isDark ? Colors.white10 : AppColors.primaryIndigo.withValues(alpha: 0.08),
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: Column(
-                                          children: [
-                                            Text(
-                                              anchor.startTime,
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w800,
-                                                color: isDark ? AppColors.brandGlowCyan : AppColors.primaryIndigo,
-                                              ),
+                                  clipBehavior: Clip.antiAlias,
+                                  child: ListTile(
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                    onTap: () => _onShowAnchorDetails(anchor),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                    leading: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: isDark ? Colors.white10 : AppColors.primaryIndigo.withValues(alpha: 0.08),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            anchor.startTime,
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w800,
+                                              color: isDark ? AppColors.brandGlowCyan : AppColors.primaryIndigo,
                                             ),
-                                            Container(
-                                              width: 1,
-                                              height: 6,
-                                              color: context.textMuted.withValues(alpha: 0.4),
-                                              margin: const EdgeInsets.symmetric(vertical: 2),
+                                          ),
+                                          Container(
+                                            width: 1,
+                                            height: 4,
+                                            color: context.textMuted.withValues(alpha: 0.4),
+                                            margin: const EdgeInsets.symmetric(vertical: 1),
+                                          ),
+                                          Text(
+                                            anchor.endTime,
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w600,
+                                              color: context.textSecondary,
                                             ),
-                                            Text(
-                                              anchor.endTime,
-                                              style: TextStyle(
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w600,
-                                                color: context.textSecondary,
-                                              ),
-                                            ),
-                                          ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    title: Text(
+                                      anchor.title,
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: context.textMain,
+                                      ),
+                                    ),
+                                    subtitle: Padding(
+                                      padding: const EdgeInsets.only(top: 2.0),
+                                      child: Text(
+                                        '${anchor.category} • ${DateTimeFormatter.formatDuration(anchor.durationMinutes)}',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: context.textMuted,
                                         ),
                                       ),
-                                      const SizedBox(width: 14),
-
-                                      // Nombre y categoría
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              anchor.title,
-                                              style: TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.bold,
-                                                color: context.textMain,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              '${anchor.category} • ${anchor.durationMinutes} min',
-                                              style: TextStyle(
-                                                fontSize: 11,
-                                                color: context.textMuted,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-
-                                      // Botón de Borrar (✕) sutil
-                                      Semantics(
-                                        button: true,
-                                        label: 'Eliminar ancla ${anchor.title}',
-                                        child: InkWell(
-                                          onTap: () => _onDeleteAnchor(anchor),
-                                          borderRadius: BorderRadius.circular(12),
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Icon(
-                                              Icons.close_rounded,
-                                              size: 18,
-                                              color: context.textMuted,
-                                            ),
+                                    ),
+                                    trailing: Semantics(
+                                      button: true,
+                                      label: 'Eliminar ancla ${anchor.title}',
+                                      child: InkWell(
+                                        onTap: () => _onDeleteAnchor(anchor),
+                                        borderRadius: BorderRadius.circular(12),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Icon(
+                                            Icons.close_rounded,
+                                            size: 18,
+                                            color: context.textMuted,
                                           ),
                                         ),
                                       ),
-                                    ],
+                                    ),
                                   ),
                                 );
                               },
@@ -365,6 +446,7 @@ class _AddAnchorForm extends StatefulWidget {
 }
 
 class _AddAnchorFormState extends State<_AddAnchorForm> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _titleController = TextEditingController();
   String _startTime = '17:30';
   String _endTime = '19:30';
@@ -380,10 +462,15 @@ class _AddAnchorFormState extends State<_AddAnchorForm> {
   }
 
   void _onSave() {
-    final title = _titleController.text.trim();
-    if (title.isEmpty) return;
+    // Validación de formulario mediante _formKey según el estándar de la cátedra
+    if (!_formKey.currentState!.validate()) {
+      HapticHelper.warning();
+      return;
+    }
 
-    final anchor = TimeAnchor(
+    final title = _titleController.text.trim();
+    // Instanciación usando el constructor nombrado TimeAnchor.withId
+    final anchor = TimeAnchor.withId(
       id: 'anchor_${DateTime.now().millisecondsSinceEpoch}',
       title: title,
       startTime: _startTime,
@@ -403,98 +490,115 @@ class _AddAnchorFormState extends State<_AddAnchorForm> {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Título del compromiso
-          Text('Nombre de la actividad:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: context.textSecondary)),
-          const SizedBox(height: 6),
-          TextField(
-            controller: _titleController,
-            style: TextStyle(fontSize: 14, color: context.textMain),
-            decoration: InputDecoration(
-              hintText: 'Ej: Clases de DAM / Entrenamiento...',
-              hintStyle: TextStyle(fontSize: 13, color: context.textMuted),
-              filled: true,
-              fillColor: isDark ? Colors.white10 : context.cardSurface,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: context.borderLight)),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Título del compromiso
+            Text('Nombre de la actividad:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: context.textSecondary)),
+            const SizedBox(height: 6),
+            TextFormField(
+              controller: _titleController,
+              style: TextStyle(fontSize: 14, color: context.textMain),
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) {
+                  return 'Por favor ingresá el nombre de la actividad';
+                }
+                if (val.trim().length < 3) {
+                  return 'El nombre debe tener al menos 3 caracteres';
+                }
+                return null;
+              },
+              decoration: InputDecoration(
+                hintText: 'Ej: Clases de DAM / Entrenamiento...',
+                hintStyle: TextStyle(fontSize: 13, color: context.textMuted),
+                filled: true,
+                fillColor: isDark ? Colors.white10 : context.cardSurface,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: context.borderLight)),
+                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: context.borderLight)),
+                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: AppColors.primaryIndigo, width: 1.5)),
+                errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Colors.redAccent)),
+                focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
+                errorStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.redAccent),
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-          // Horas de Inicio y Fin
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Hora Inicio (HH:mm):', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: context.textSecondary)),
-                    const SizedBox(height: 6),
-                    _TimeSelectorPill(
-                      time: _startTime,
-                      onChanged: (newVal) => setState(() => _startTime = newVal),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Hora Fin (HH:mm):', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: context.textSecondary)),
-                    const SizedBox(height: 6),
-                    _TimeSelectorPill(
-                      time: _endTime,
-                      onChanged: (newVal) => setState(() => _endTime = newVal),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          // Selector de Categoría
-          Text('Categoría:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: context.textSecondary)),
-          const SizedBox(height: 6),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: _categories.map((cat) {
-                final isSelected = _category == cat;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 6.0),
-                  child: ChoiceChip(
-                    label: Text(cat, style: TextStyle(fontSize: 11, color: isSelected ? Colors.white : context.textSecondary)),
-                    selected: isSelected,
-                    selectedColor: AppColors.primaryIndigo,
-                    backgroundColor: context.cardSurface,
-                    onSelected: (val) {
-                      if (val) setState(() => _category = cat);
-                    },
+            // Horas de Inicio y Fin
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Hora Inicio (HH:mm):', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: context.textSecondary)),
+                      const SizedBox(height: 6),
+                      _TimeSelectorPill(
+                        time: _startTime,
+                        onChanged: (newVal) => setState(() => _startTime = newVal),
+                      ),
+                    ],
                   ),
-                );
-              }).toList(),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Hora Fin (HH:mm):', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: context.textSecondary)),
+                      const SizedBox(height: 6),
+                      _TimeSelectorPill(
+                        time: _endTime,
+                        onChanged: (newVal) => setState(() => _endTime = newVal),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 24),
+            const SizedBox(height: 16),
 
-          // Botón Crear
-          NeumorphicButton(
-            variant: NeumorphicButtonVariant.primary,
-            borderRadius: 18,
-            height: 50,
-            onPressed: _onSave,
-            child: const Center(
-              child: Text('Guardar Ancla', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+            // Selector de Categoría
+            Text('Categoría:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: context.textSecondary)),
+            const SizedBox(height: 6),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: _categories.map((cat) {
+                  final isSelected = _category == cat;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 6.0),
+                    child: ChoiceChip(
+                      label: Text(cat, style: TextStyle(fontSize: 11, color: isSelected ? Colors.white : context.textSecondary)),
+                      selected: isSelected,
+                      selectedColor: AppColors.primaryIndigo,
+                      backgroundColor: context.cardSurface,
+                      onSelected: (val) {
+                        if (val) setState(() => _category = cat);
+                      },
+                    ),
+                  );
+                }).toList(),
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-        ],
+            const SizedBox(height: 24),
+
+            // Botón Crear
+            NeumorphicButton(
+              variant: NeumorphicButtonVariant.primary,
+              borderRadius: 18,
+              height: 50,
+              onPressed: _onSave,
+              child: const Center(
+                child: Text('Guardar Ancla', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
       ),
     );
   }

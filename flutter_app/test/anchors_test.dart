@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:neurotask/core/domain/models/task_node.dart';
 import 'package:neurotask/core/domain/models/time_anchor.dart';
 import 'package:neurotask/core/domain/services/anchor_schedule_fitter.dart';
+import 'package:neurotask/util/date_time_formatter.dart';
 
 void main() {
   group('TimeAnchor Domain Model Tests', () {
@@ -31,6 +32,41 @@ void main() {
       expect(restored.appliesToWeekday(1), isTrue); // Lunes
       expect(restored.appliesToWeekday(2), isFalse); // Martes
       expect(restored.isActive, isTrue);
+    });
+
+    test('TimeAnchor.withId named constructor behaves correctly', () {
+      const anchor = TimeAnchor.withId(
+        id: 'anchor_dam_exam',
+        title: 'Examen Final DAM',
+        startTime: '09:00',
+        endTime: '11:30',
+        category: 'Facultad',
+      );
+      expect(anchor.id, equals('anchor_dam_exam'));
+      expect(anchor.title, equals('Examen Final DAM'));
+      expect(anchor.durationMinutes, equals(150));
+    });
+
+    test('TaskNode.withId named constructor behaves correctly', () {
+      const node = TaskNode.withId(
+        id: 'node_dam_1',
+        title: 'Entrega DAM',
+        category: 'Facultad',
+        subtext: 'Revisión final',
+      );
+      expect(node.id, equals('node_dam_1'));
+      expect(node.title, equals('Entrega DAM'));
+    });
+
+    test('DateTimeFormatter utility formats days, durations and ranges in Spanish', () {
+      expect(DateTimeFormatter.formatWeekday(1), equals('Lunes'));
+      expect(DateTimeFormatter.formatWeekday(7), equals('Domingo'));
+      expect(DateTimeFormatter.formatWeekdayShort(1), equals('Lun'));
+      expect(DateTimeFormatter.formatWeekdayShort(5), equals('Vie'));
+      expect(DateTimeFormatter.formatDuration(45), equals('45 min'));
+      expect(DateTimeFormatter.formatDuration(60), equals('1 h'));
+      expect(DateTimeFormatter.formatDuration(90), equals('1 h 30 min'));
+      expect(DateTimeFormatter.formatTimeRangeWithDuration('08:00', '12:00', 240), equals('08:00 - 12:00 (4 h)'));
     });
 
     test('Helper parseTimeToMinutes and minutesToTimeString conversions', () {
