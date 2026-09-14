@@ -62,6 +62,8 @@ NeuroTask_beta00/
 │           └── unblock_mode/ (cognitive_rescue_sheet.dart, graph_overview_modal.dart)
 │
 └── docs/
+    ├── ADR-005-MAQUETADO-FLUTTER-Y-USABILIDAD-UN-SOLO-USUARIO.md # Maquetado, Restricciones y Usabilidad (Unidad 2.2.1)
+    ├── PROTOCOLO_PRUEBA_USABILIDAD_1_USUARIO.md             # Protocolo y Guion de Prueba de Guerrilla (Steve Krug)
     ├── ADR-004-ALINEACION-PROGRAMA-DAM-FLUTTER.md           # Decisiones de Arquitectura y Alineación Rúbrica DAM
     ├── NT-SPEC-ARCH-003-TIME-ANCHORS-AND-PERSISTENCE.md     # Especificación de Anclas Temporales y Scheduler Fitter
     ├── GUIA_PRUEBA_LOCAL.md                                 # Guía de prueba local en celular vía QR
