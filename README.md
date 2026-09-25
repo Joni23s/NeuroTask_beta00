@@ -48,18 +48,21 @@ NeuroTask_beta00/
 │   ├── analysis_options.yaml                                # Reglas de linting
 │   ├── assets/images/logo.jpg                               # Asset del logotipo
 │   └── lib/
-│       ├── main.dart                                        # Entrypoint con ProviderScope y WelcomeScreen
+│       ├── main.dart                                        # Entrypoint con ProviderScope y rutas nombradas
 │       ├── core/
-│       │   ├── theme/ (app_colors.dart, neumorphic_theme.dart)
-│       │   ├── widgets/ (neumorphic_card.dart, neumorphic_button.dart, swipe_to_complete_card.dart, zen_timer.dart, flow_indicator.dart)
-│       │   ├── services/ (audio_service.dart)
-│       │   └── utils/ (haptic_helper.dart)
+│       │   ├── theme/ (app_colors.dart, neumorphic_theme.dart, theme_controller.dart)
+│       │   ├── widgets/ (neumorphic_card.dart, neumorphic_button.dart, swipe_to_complete_card.dart, etc.)
+│       │   └── services/ (audio_service.dart, speech_service.dart)
 │       └── features/
-│           ├── welcome/ (welcome_screen.dart)
-│           ├── brain_dump/ (brain_dump_screen.dart, brain_dump_controller.dart)
-│           ├── graph_engine/ (task_node.dart, task_graph.dart, topological_sorter.dart, dag_canvas_widget.dart)
-│           ├── focus_viewport/ (single_task_screen.dart, focus_controller.dart, summary_celebration_screen.dart)
-│           └── unblock_mode/ (cognitive_rescue_sheet.dart, graph_overview_modal.dart)
+│           ├── splash/ (splash_screen.dart)
+│           ├── onboarding/ (onboarding_screen.dart, welcome_screen.dart)
+│           ├── auth/ (login_register_screen.dart)
+│           ├── brain_dump/ (brain_dump_screen.dart, voice_dictation_sheet.dart)
+│           ├── focus/ (single_task_screen.dart, summary_celebration_screen.dart, cognitive_rescue_sheet.dart, dag_canvas_widget.dart)
+│           ├── anchors/ (anchors_manager_screen.dart)
+│           ├── achievements/ (achievements_vault_screen.dart)
+│           ├── profile/ (profile_screen.dart)
+│           └── settings/ (settings_screen.dart)
 │
 └── docs/
     ├── ADR-006-ARQUITECTURA-Y-CAPA-DE-DATOS-FLUTTER.md      # Persistencia, Singleton DbHelper y Capa de Datos (Unidad 3.1.1)

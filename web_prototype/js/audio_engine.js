@@ -35,6 +35,10 @@ class NeuroAudioEngine {
     return this.isMuted;
   }
 
+  playZenChime() {
+    this.playZenCompletionChime();
+  }
+
   /**
    * Plays a harmonious, soothing Tibetan singing bowl / meditation chime.
    * Multi-frequency harmonic decay with zero harsh transients.
