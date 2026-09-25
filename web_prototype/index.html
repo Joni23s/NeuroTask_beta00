@@ -22,7 +22,7 @@
       <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
       <span class="font-semibold">DAM — ITU Universidad Nacional de Cuyo</span>
       <span class="text-slate-400">|</span>
-      <span>Tema 1: DCU</span>
+      <span>11 Pantallas + 6 Modales</span>
     </div>
     <div class="flex items-center justify-center space-x-3 mt-1 text-xs">
       <button onclick="toggleSimulatorFullscreen()" class="px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white text-slate-700 font-semibold shadow-sm border border-slate-300 transition-all flex items-center space-x-1.5">
@@ -33,12 +33,9 @@
         <span>🌧️</span>
         <span>Sonido Ambiente</span>
       </button>
-      <button onclick="toggleMuteFX()" id="mute-fx-btn" class="px-2.5 py-1.5 rounded-xl bg-white/80 hover:bg-white text-slate-700 font-semibold shadow-sm border border-slate-300 transition-all" title="Sonido Zen">
-        🔔
-      </button>
       <button onclick="resetToBeginning()" class="px-3 py-1.5 rounded-xl bg-white/80 hover:bg-white text-slate-700 font-semibold shadow-sm border border-slate-300 transition-all flex items-center space-x-1.5">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-        <span>Reiniciar</span>
+        <span>Reiniciar App</span>
       </button>
     </div>
   </header>
@@ -58,25 +55,122 @@
       </div>
     </div>
 
-    <!-- PANTALLA 0: BIENVENIDA & SPLASH INTERACTIVO (LOGOTIPO) -->
-    <section id="screen-welcome" class="flex-1 flex flex-col p-6 justify-between items-center text-center screen-transition">
-      <!-- Top Academic Header -->
-      <div class="inline-flex items-center px-3 py-1 rounded-full neu-flat-sm text-[11px] font-bold text-indigo-600">
-        <span class="w-2 h-2 rounded-full bg-indigo-500 mr-1.5 animate-pulse"></span>
-        DAM — ITU UNCuyo
+    <!-- PANTALLA 0: SPLASH SCREEN (LOGO ANIMADO) -->
+    <section id="screen-splash" class="flex-1 flex flex-col items-center justify-center p-6 text-center screen-transition">
+      <div class="w-32 h-32 rounded-full neu-flat flex items-center justify-center p-4 animate-pulse relative">
+        <div class="w-24 h-24 rounded-full bg-gradient-to-br from-[#2B5B84] to-indigo-600 flex items-center justify-center text-white text-4xl shadow-lg">
+          🧠
+        </div>
+      </div>
+      <h1 class="text-3xl font-extrabold tracking-tight text-slate-800 mt-6">NeuroTask</h1>
+      <p class="text-xs text-slate-500 font-medium mt-1">Cero carga cognitiva. Foco puro.</p>
+      <div class="mt-8 flex space-x-1.5">
+        <div class="w-2 h-2 rounded-full bg-indigo-500 animate-bounce"></div>
+        <div class="w-2 h-2 rounded-full bg-indigo-500 animate-bounce [animation-delay:0.2s]"></div>
+        <div class="w-2 h-2 rounded-full bg-indigo-500 animate-bounce [animation-delay:0.4s]"></div>
+      </div>
+    </section>
+
+    <!-- PANTALLA 1: ONBOARDING INTERACTIVO (3 SLIDES) -->
+    <section id="screen-onboarding" class="hidden flex-1 flex flex-col p-6 justify-between items-center text-center screen-transition">
+      <div class="w-full flex justify-between items-center text-xs">
+        <div class="flex items-center space-x-1.5 font-bold text-indigo-600">
+          <span>🧠 NeuroTask</span>
+        </div>
+        <button onclick="goToAuth()" class="text-slate-400 font-semibold hover:text-slate-600">Saltar</button>
+      </div>
+
+      <!-- Slide Content Container -->
+      <div id="onboarding-slide-content" class="my-auto flex flex-col items-center px-4">
+        <div id="ob-icon-card" class="w-32 h-32 rounded-3xl neu-flat flex items-center justify-center text-5xl mb-6 text-indigo-600">
+          🎙️
+        </div>
+        <h2 id="ob-title" class="text-xl font-bold text-slate-800">Volcá tus ideas libremente</h2>
+        <p id="ob-desc" class="text-xs text-slate-500 mt-3 leading-relaxed max-w-[250px]">
+          Hacé un Brain Dump por texto o voz sin preocuparte por fechas, categorías o prioridades.
+        </p>
+      </div>
+
+      <!-- Slide Controls -->
+      <div class="w-full space-y-4">
+        <div class="flex justify-center space-x-2">
+          <div id="dot-0" class="w-6 h-2 rounded-full bg-indigo-600 transition-all"></div>
+          <div id="dot-1" class="w-2 h-2 rounded-full bg-slate-300 transition-all"></div>
+          <div id="dot-2" class="w-2 h-2 rounded-full bg-slate-300 transition-all"></div>
+        </div>
+        <button onclick="nextOnboardingSlide()" class="w-full py-4 rounded-2xl neu-btn-primary font-bold text-sm flex items-center justify-center space-x-2">
+          <span id="ob-btn-text">Siguiente</span>
+          <span>➔</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- PANTALLA 2: AUTHENTICATION (LOGIN / REGISTRO / INVITADO) -->
+    <section id="screen-auth" class="hidden flex-1 flex flex-col p-6 overflow-y-auto screen-transition justify-between">
+      <div class="text-center mt-4">
+        <div class="w-16 h-16 rounded-2xl neu-flat mx-auto flex items-center justify-center text-2xl text-indigo-600 mb-3">
+          🧠
+        </div>
+        <h2 class="text-xl font-bold text-slate-800">¡Bienvenido a NeuroTask!</h2>
+        <p class="text-xs text-slate-500 mt-1">Ingresá para desarmar la sobrecarga mental</p>
+      </div>
+
+      <!-- Auth Form Card -->
+      <div class="neu-flat p-5 rounded-3xl space-y-4 my-4">
+        <div class="flex bg-slate-200/60 p-1 rounded-xl text-xs font-semibold text-center">
+          <button id="tab-login" onclick="setAuthTab(true)" class="flex-1 py-2 rounded-lg bg-white text-indigo-600 shadow-sm">Iniciar Sesión</button>
+          <button id="tab-register" onclick="setAuthTab(false)" class="flex-1 py-2 rounded-lg text-slate-500">Registrarse</button>
+        </div>
+
+        <div class="space-y-3 text-left">
+          <div>
+            <label class="text-[11px] font-bold text-slate-600 uppercase tracking-wider">Email</label>
+            <input type="email" placeholder="usuario@neurotask.app" class="w-full mt-1 p-3 rounded-xl neu-pressed text-xs text-slate-700 outline-none">
+          </div>
+          <div>
+            <label class="text-[11px] font-bold text-slate-600 uppercase tracking-wider">Contraseña</label>
+            <input type="password" placeholder="••••••••" class="w-full mt-1 p-3 rounded-xl neu-pressed text-xs text-slate-700 outline-none">
+          </div>
+        </div>
+
+        <button onclick="goToWelcome()" class="w-full py-3.5 rounded-2xl neu-btn-primary font-bold text-xs">
+          Ingresar
+        </button>
+      </div>
+
+      <!-- Guest Login Option -->
+      <div class="space-y-2 text-center">
+        <button onclick="goToWelcome()" class="w-full py-3 rounded-2xl neu-btn font-semibold text-xs text-slate-600">
+          👤 Continuar como Invitado
+        </button>
+      </div>
+    </section>
+
+    <!-- PANTALLA 3: WELCOME & HERO SPLASH (PANTALLA PRINCIPAL) -->
+    <section id="screen-welcome" class="hidden flex-1 flex flex-col p-6 justify-between items-center text-center screen-transition">
+      <!-- Top Actions Bar -->
+      <div class="w-full flex items-center justify-between">
+        <div class="inline-flex items-center px-3 py-1 rounded-full neu-flat-sm text-[11px] font-bold text-indigo-600">
+          <span class="w-2 h-2 rounded-full bg-indigo-500 mr-1.5 animate-pulse"></span>
+          NeuroTask
+        </div>
+        <div class="flex items-center space-x-2">
+          <button onclick="goToProfile()" class="w-8 h-8 rounded-full neu-btn flex items-center justify-center text-xs" title="Perfil">👤</button>
+          <button onclick="goToSettings()" class="w-8 h-8 rounded-full neu-btn flex items-center justify-center text-xs" title="Configuración">⚙️</button>
+        </div>
       </div>
 
       <!-- Interactive Pulsing Brain Hero -->
       <div class="my-auto flex flex-col items-center">
-        <div onclick="enterFromWelcome(false)" class="w-48 h-48 rounded-full neu-flat flex items-center justify-center cursor-pointer p-5 transition-transform hover:scale-105 active:scale-95 animate-zen-breathe relative group" title="Tocá el cerebro para comenzar">
-          <img src="../NeuroTask_logo.jpg" alt="NeuroTask Logo" class="w-full h-full object-contain filter drop-shadow-md">
+        <div onclick="enterFromWelcome(false)" class="w-44 h-44 rounded-full neu-flat flex items-center justify-center cursor-pointer p-4 transition-transform hover:scale-105 active:scale-95 animate-zen-breathe relative group" title="Tocá el cerebro para comenzar">
+          <img src="../NeuroTask_logo.jpg" alt="NeuroTask Logo" class="w-full h-full object-contain filter drop-shadow-md" onerror="this.src='https://api.iconify.design/heroicons:psychology.svg'">
           <div class="absolute inset-0 rounded-full border-2 border-indigo-400/30 animate-ping pointer-events-none opacity-40"></div>
         </div>
 
-        <div class="mt-6">
-          <h1 class="text-3xl font-extrabold tracking-tight text-[#2B5B84]">NEUROTASK</h1>
-          <p class="text-xs font-bold tracking-[0.25em] text-[#4A7D9D] mt-1">MOTOR DE FOCO</p>
-          <p class="text-xs text-slate-500 mt-3 max-w-[240px] leading-relaxed">
+        <div class="mt-5">
+          <h1 class="text-2xl font-extrabold tracking-tight text-[#2B5B84]">NEUROTASK</h1>
+          <p class="text-[10px] font-bold tracking-[0.25em] text-[#4A7D9D] mt-1">MOTOR DE FOCO</p>
+          <p class="text-xs text-slate-500 mt-2 max-w-[240px] leading-relaxed">
             Transformá el caos de ideas en un camino lógico y sereno.
           </p>
         </div>
@@ -88,20 +182,19 @@
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5"/></svg>
           <span>Tocar para Descomprimir</span>
         </button>
-        <p class="text-[11px] text-slate-400">Tocá el cerebrito o el botón para iniciar</p>
+        <p class="text-[11px] text-slate-400">Tocá el cerebrito para iniciar tu Brain Dump</p>
       </div>
     </section>
 
-    <!-- PANTALLA 1: BRAIN DUMP (INGESTA CRUDA) -->
+    <!-- PANTALLA 4: BRAIN DUMP (INGESTA CRUDA) -->
     <section id="screen-brain-dump" class="hidden flex-1 flex flex-col p-6 overflow-y-auto screen-transition">
-      <!-- App Brand & Title -->
       <div class="mt-1 mb-3">
         <div class="flex items-center justify-between mb-2">
           <div class="inline-flex items-center px-3 py-1 rounded-full neu-flat-sm text-[11px] font-bold text-indigo-600">
             <span class="w-2 h-2 rounded-full bg-indigo-500 mr-1.5 animate-pulse"></span>
             Descompresión Cognitiva
           </div>
-          <img src="../NeuroTask_logo.jpg" alt="NeuroTask" class="h-6 w-auto object-contain opacity-90" onerror="this.style.display='none'">
+          <button onclick="goToWelcome()" class="text-xs text-slate-400 font-semibold hover:text-slate-600">✕ Volver</button>
         </div>
         <h1 class="text-2xl font-bold text-slate-800 tracking-tight leading-tight">¿Qué ronda por tu cabeza?</h1>
         <p class="text-xs text-slate-500 mt-1">Escribí o dictá libremente. El sistema descompondrá el camino lógico.</p>
@@ -118,86 +211,85 @@
             📱 Sprint Flutter
           </button>
           <button onclick="loadPresetPrompt('general')" class="neu-flat-sm px-2.5 py-1 rounded-xl text-[11px] font-semibold text-slate-600 hover:text-indigo-600 whitespace-nowrap">
-            💼 General
+            📝 Tareas del Día
           </button>
         </div>
       </div>
 
-      <!-- Textarea Neumórfica de Ingesta Libre -->
-      <div class="flex-1 neu-pressed rounded-3xl p-4 flex flex-col relative mb-4 min-h-[190px]">
-        <textarea id="brain-dump-input" class="w-full h-full bg-transparent resize-none border-none outline-none text-sm text-slate-700 leading-relaxed placeholder-slate-400 font-normal" placeholder="Ej: Tengo que testear los endpoints del backend en Postman, escribir el resumen ejecutivo del informe y armar las 7 diapositivas en Figma para la entrega de DAM..."></textarea>
+      <!-- Ingesta de Texto (Inset Neumorphic Input Area) -->
+      <div class="relative flex-1 mb-4 flex flex-col">
+        <textarea id="brain-dump-input" placeholder="Ej: Tengo que testear los endpoints del backend en Postman, después redactar el informe y armar la presentación en Figma..." class="w-full h-full p-4 rounded-2xl neu-pressed text-xs text-slate-700 placeholder-slate-400 outline-none resize-none leading-relaxed font-sans border-0"></textarea>
         
-        <!-- Voice Input Wave Effect -->
-        <div id="voice-wave-indicator" class="hidden absolute bottom-4 left-4 flex items-center space-x-1 text-indigo-600 text-xs font-semibold">
-          <span class="w-2 h-2 rounded-full bg-indigo-500 animate-ping"></span>
-          <span>Escuchando dictado...</span>
+        <!-- Action Toolbar inside Input -->
+        <div class="absolute bottom-3 right-3 flex items-center space-x-2">
+          <button onclick="toggleVoice()" id="voice-btn" class="p-2.5 rounded-xl neu-btn text-slate-600 hover:text-indigo-600 transition-all flex items-center justify-center" title="Dictado por voz">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+          </button>
         </div>
-
-        <!-- Voice Input Floating Button -->
-        <button onclick="toggleVoice()" id="voice-btn" class="absolute bottom-3 right-3 w-11 h-11 rounded-2xl neu-btn flex items-center justify-center text-slate-600 hover:text-indigo-600 transition-all" title="Dictar por voz">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
-        </button>
       </div>
 
-      <!-- Action Button: Secuenciar -->
-      <button onclick="startProcessing()" class="w-full py-4 rounded-2xl neu-btn-primary font-semibold text-sm tracking-wide flex items-center justify-center space-x-2 shadow-lg">
+      <!-- Voice Animation Wave Bar -->
+      <div id="voice-wave-indicator" class="hidden mb-3 p-2.5 rounded-xl neu-flat-sm bg-indigo-50/70 border border-indigo-100 flex items-center justify-between">
+        <span class="text-[11px] font-bold text-indigo-600 flex items-center">
+          <span class="w-2 h-2 rounded-full bg-indigo-600 mr-2 animate-ping"></span>
+          Escuchando tu voz...
+        </span>
+        <div class="flex items-center space-x-1 h-3">
+          <div class="w-1 bg-indigo-500 h-full animate-bounce"></div>
+          <div class="w-1 bg-indigo-500 h-2/3 animate-bounce [animation-delay:0.15s]"></div>
+          <div class="w-1 bg-indigo-500 h-full animate-bounce [animation-delay:0.3s]"></div>
+        </div>
+      </div>
+
+      <button onclick="startProcessing()" class="w-full py-4 rounded-2xl neu-btn-primary font-bold text-sm tracking-wide flex items-center justify-center space-x-2 shadow-md">
         <span>Descomprimir y Secuenciar</span>
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
       </button>
     </section>
 
-    <!-- PANTALLA 2: MOTOR ALGORÍTMICO (TRANSICIÓN DE CALMA & RESPIRACIÓN) -->
+    <!-- PANTALLA 5: PROCESANDO & MOTOR DAG -->
     <section id="screen-processing" class="hidden flex-1 flex flex-col items-center justify-center p-6 text-center screen-transition">
-      <!-- Glowing Concentric Breathing Rings -->
-      <div class="relative w-32 h-32 flex items-center justify-center mb-6">
-        <div class="absolute inset-0 rounded-full bg-indigo-200/40 animate-zen-breathe"></div>
-        <div class="w-24 h-24 rounded-full neu-flat flex items-center justify-center z-10">
-          <div class="w-16 h-16 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
-            <svg class="w-8 h-8 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
-          </div>
-        </div>
+      <div class="w-28 h-28 rounded-full neu-flat flex items-center justify-center p-4 animate-zen-breathe relative">
+        <div class="w-20 h-20 rounded-full border-4 border-indigo-200 border-t-indigo-600 animate-spin"></div>
       </div>
-      <h2 class="text-lg font-bold text-slate-800">Construyendo Grafo Lógico...</h2>
-      <p id="processing-status-text" class="text-xs text-slate-500 mt-2 max-w-[260px] leading-relaxed">Eliminando ruido cognitivo y aislando dependencias críticas...</p>
+      <h2 class="text-lg font-bold text-slate-800 mt-6">Ordenando la secuencia lógica</h2>
+      <p id="processing-status-text" class="text-xs text-indigo-600 font-semibold mt-2 animate-pulse">
+        Analizando grafo acíclico dirigido...
+      </p>
     </section>
 
-    <!-- PANTALLA 3: SINGLE-TASK FOCUS VIEWPORT (HOME PRINCIPAL DE FOCO 1-A-1) -->
-    <section id="screen-focus" class="hidden flex-1 flex flex-col p-6 justify-between screen-transition overflow-y-auto">
-      
-      <!-- Top Navigation & Minimal Status -->
-      <div>
-        <div class="flex justify-between items-center mb-3">
-          <div class="neu-flat px-3 py-1 rounded-xl text-xs font-semibold text-slate-700 flex items-center space-x-1.5">
-            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span id="task-progress-indicator">Paso 1 de 3</span>
-          </div>
-
-          <div class="flex items-center space-x-2">
-            <button onclick="openGraphModal()" class="text-xs font-semibold text-slate-600 neu-btn px-2.5 py-1 rounded-xl flex items-center space-x-1" title="Ver Grafo DAG">
-              <span>🗺️</span>
-              <span>Grafo</span>
-            </button>
-            <button onclick="openRescueModal()" class="text-xs font-semibold text-slate-600 neu-btn px-2.5 py-1 rounded-xl flex items-center space-x-1" title="Modo Rescate">
-              <span>🌿</span>
-              <span>Rescate</span>
-            </button>
-          </div>
+    <!-- PANTALLA 6: SINGLE TASK VIEWPORT (1 A 1) -->
+    <section id="screen-focus" class="hidden flex-1 flex flex-col p-6 overflow-y-auto screen-transition justify-between">
+      <!-- Top Navigation & Flow Indicator -->
+      <div class="flex items-center justify-between">
+        <div class="inline-flex items-center px-3 py-1 rounded-full neu-flat-sm text-[11px] font-bold text-emerald-600">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
+          <span id="task-progress-indicator">Paso 1 de 3</span>
         </div>
-        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Estás enfocado en esto ahora:</p>
+        <div class="flex items-center space-x-2">
+          <button onclick="openGraphModal()" class="w-8 h-8 rounded-full neu-btn flex items-center justify-center text-slate-600 text-xs" title="Ver Grafo">🗺️</button>
+          <button onclick="openRescueModal()" class="w-8 h-8 rounded-full neu-btn flex items-center justify-center text-amber-500 text-xs" title="Rescate">🚨</button>
+        </div>
       </div>
 
-      <!-- Neumorphic Single-Task Hero Card (1 a 1) -->
-      <div id="focus-hero-card" class="neu-flat rounded-[32px] p-6 my-auto text-left relative overflow-hidden border border-white/80 transition-all">
-        <div class="w-9 h-1.5 bg-indigo-500 rounded-full mb-4"></div>
-        
-        <div class="flex items-center justify-between mb-1">
-          <span id="task-category" class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Backend & Integración</span>
-          <span id="task-energy-badge" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">🌊 Carga Moderada</span>
+      <!-- Main Focus Task Card (Neumorphic Card) -->
+      <div class="my-auto neu-flat p-6 rounded-3xl space-y-4 relative border border-white/60">
+        <div class="flex items-center justify-between">
+          <span id="task-category" class="text-[10px] uppercase font-bold tracking-wider text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg">
+            DESARROLLO
+          </span>
+          <span class="text-[10px] font-bold text-slate-400">FASE ACTUAL</span>
         </div>
 
-        <h2 id="task-title" class="text-xl font-bold text-slate-800 mt-2 leading-snug">Testear los endpoints en Postman y verificar respuestas JSON</h2>
-        <p id="task-subtext" class="text-xs text-slate-500 mt-3 leading-relaxed">Paso 1 del camino crítico. Sin dependencias activas.</p>
-        
+        <div>
+          <h2 id="task-title" class="text-xl font-extrabold text-slate-800 leading-snug">
+            Testear endpoints del backend en Postman
+          </h2>
+          <p id="task-subtext" class="text-xs text-slate-500 mt-2 leading-relaxed">
+            Verificar respuestas 200 OK y estructurar payloads JSON requeridos.
+          </p>
+        </div>
+
         <!-- Zen Timer Indicator -->
         <div class="mt-6 pt-4 border-t border-slate-200/80 flex items-center justify-between">
           <div class="flex items-center space-x-2">
@@ -215,13 +307,11 @@
 
       <!-- Bottom Interactive Actions -->
       <div class="space-y-3 mt-2">
-        <!-- Complete Action Button (Primary Emerald) -->
         <button onclick="completeTask()" class="w-full py-4 rounded-2xl neu-btn-success font-semibold text-sm flex items-center justify-center space-x-2 shadow-lg">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
           <span>Paso Completado</span>
         </button>
 
-        <!-- Cognitive Rescue Action (Secondary) -->
         <button onclick="openRescueModal()" class="w-full py-3 rounded-2xl neu-btn text-slate-600 font-semibold text-xs flex items-center justify-center space-x-1.5">
           <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
           <span>Estoy Bloqueado / Dividir más</span>
@@ -229,9 +319,9 @@
       </div>
     </section>
 
-    <!-- PANTALLA 4: CELEBRACIÓN DE FLUJO LOGRADO -->
+    <!-- PANTALLA 7: CELEBRACIÓN DE FLUJO LOGRADO -->
     <section id="screen-celebration" class="hidden flex-1 flex flex-col items-center justify-center p-6 text-center screen-transition">
-      <div class="w-24 h-24 rounded-3xl neu-flat flex items-center justify-center text-4xl mb-4 animate-float">
+      <div class="w-24 h-24 rounded-3xl neu-flat flex items-center justify-center text-4xl mb-4 animate-bounce">
         🏆
       </div>
       <h2 class="text-2xl font-bold text-slate-800">¡Objetivo Cumplido!</h2>
@@ -242,24 +332,103 @@
         <button onclick="openGraphModal()" class="w-full py-3 rounded-2xl neu-btn text-xs font-bold text-slate-700">
           Ver Resumen del Grafo
         </button>
-        <button onclick="resetToBeginning()" class="w-full py-4 rounded-2xl neu-btn-primary font-bold text-sm">
+        <button onclick="goToWelcome()" class="w-full py-4 rounded-2xl neu-btn-primary font-bold text-sm">
           Iniciar Nueva Ingesta (Brain Dump)
         </button>
       </div>
     </section>
 
-    <!-- MODAL 1: RESCATE COGNITIVO (BOTTOM SHEET NEUMÓRFICO) -->
+    <!-- PANTALLA 8: PERFIL DE USUARIO -->
+    <section id="screen-profile" class="hidden flex-1 flex flex-col p-6 overflow-y-auto screen-transition">
+      <div class="flex justify-between items-center mb-4">
+        <button onclick="goToWelcome()" class="text-xs text-slate-400 font-semibold hover:text-slate-600">← Volver</button>
+        <h2 class="text-sm font-bold text-slate-800">Perfil de Usuario</h2>
+        <button onclick="goToSettings()" class="text-xs text-slate-500">⚙️</button>
+      </div>
+
+      <div class="text-center my-4">
+        <div class="w-20 h-20 rounded-full neu-flat mx-auto flex items-center justify-center bg-indigo-600 text-white font-bold text-2xl mb-3">
+          NT
+        </div>
+        <h3 class="text-lg font-bold text-slate-800">Usuario NeuroTask</h3>
+        <span class="inline-block mt-1 bg-cyan-100 text-cyan-800 text-[11px] font-bold px-3 py-1 rounded-full">
+          🏆 Nivel 3 — Maestro del Foco
+        </span>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2 my-4">
+        <div class="neu-flat p-3 rounded-2xl text-center">
+          <span class="text-lg font-bold text-emerald-600 block">24</span>
+          <span class="text-[10px] text-slate-400">Tareas</span>
+        </div>
+        <div class="neu-flat p-3 rounded-2xl text-center">
+          <span class="text-lg font-bold text-amber-500 block">5d</span>
+          <span class="text-[10px] text-slate-400">Racha</span>
+        </div>
+        <div class="neu-flat p-3 rounded-2xl text-center">
+          <span class="text-lg font-bold text-indigo-600 block">6.2h</span>
+          <span class="text-[10px] text-slate-400">Foco</span>
+        </div>
+      </div>
+
+      <div class="neu-flat p-4 rounded-2xl space-y-3 mt-2">
+        <div class="flex justify-between items-center text-xs">
+          <span class="font-bold text-slate-700">🏆 Bóveda de Logros</span>
+          <span class="text-indigo-600 font-semibold">4 / 8</span>
+        </div>
+        <p class="text-[11px] text-slate-500">Has desbloqueado trofeos por mantener la calma y completar micro-pasos.</p>
+      </div>
+    </section>
+
+    <!-- PANTALLA 9: CONFIGURACIÓN Y PREFERENCIAS -->
+    <section id="screen-settings" class="hidden flex-1 flex flex-col p-6 overflow-y-auto screen-transition">
+      <div class="flex justify-between items-center mb-6">
+        <button onclick="goToWelcome()" class="text-xs text-slate-400 font-semibold hover:text-slate-600">← Volver</button>
+        <h2 class="text-sm font-bold text-slate-800">Configuración</h2>
+        <span class="w-4"></span>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Apariencia & Sonido</span>
+          <div class="neu-flat p-4 rounded-2xl space-y-3">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-slate-700">Notificaciones de Anclas</span>
+              <input type="checkbox" checked class="accent-indigo-600">
+            </div>
+            <hr class="border-slate-200">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-slate-700">Ruido Marrón Automático</span>
+              <input type="checkbox" class="accent-indigo-600">
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">Información</span>
+          <div class="neu-flat p-4 rounded-2xl space-y-2 text-xs">
+            <div class="flex justify-between">
+              <span class="text-slate-500">Versión</span>
+              <span class="font-bold text-slate-700">1.0.0-beta01</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-500">Motor Algorítmico</span>
+              <span class="font-bold text-indigo-600">DAG Topological Sort</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODAL 1: RESCATE COGNITIVO -->
     <div id="rescue-modal" class="hidden absolute inset-0 bg-slate-900/40 backdrop-blur-xs z-30 flex flex-col justify-end transition-all">
       <div id="rescue-sheet-content" class="w-full bg-soft-paper rounded-t-[36px] p-6 neu-flat border-t border-white/80 space-y-4 max-h-[85%] overflow-y-auto">
         <div class="w-12 h-1 bg-slate-300 rounded-full mx-auto mb-1"></div>
-        
         <div>
           <h3 class="text-base font-bold text-slate-800">Descompresión y Rescate Cognitivo</h3>
           <p class="text-xs text-slate-500">Elegí cómo querés continuar sin culpas ni presiones.</p>
         </div>
-
         <div class="space-y-2.5">
-          <!-- Option 1: Split -->
           <button onclick="executeRescueAction('split')" class="w-full p-3.5 rounded-2xl neu-btn text-left flex items-center space-x-3">
             <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm shrink-0">1</div>
             <div>
@@ -267,8 +436,6 @@
               <div class="text-[11px] text-slate-500">Desarma la tarea en algo minúsculo para bajar fricción.</div>
             </div>
           </button>
-
-          <!-- Option 2: Switch -->
           <button onclick="executeRescueAction('switch')" class="w-full p-3.5 rounded-2xl neu-btn text-left flex items-center space-x-3">
             <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm shrink-0">2</div>
             <div>
@@ -276,28 +443,17 @@
               <div class="text-[11px] text-slate-500">Avanzá por otra rama independiente del proyecto.</div>
             </div>
           </button>
-
-          <!-- Option 3: Low Energy -->
-          <button onclick="executeRescueAction('low-energy')" class="w-full p-3.5 rounded-2xl neu-btn text-left flex items-center space-x-3">
-            <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-sm shrink-0">3</div>
-            <div>
-              <div class="text-xs font-bold text-slate-700">Activar Modo Baja Energía</div>
-              <div class="text-[11px] text-slate-500">Reordenar para hacer únicamente lo menos demandante.</div>
-            </div>
-          </button>
         </div>
-
         <button onclick="closeRescueModal()" class="w-full py-3 text-xs font-bold text-slate-500 text-center hover:text-slate-700">
           Volver a la tarea
         </button>
       </div>
     </div>
 
-    <!-- MODAL 2: GRAFO COMPLETO & MAPA COGNITIVO (ALIVIO DE CAJA NEGRA) -->
+    <!-- MODAL 2: MAPA COGNITIVO DEL GRAFO -->
     <div id="graph-modal" class="hidden absolute inset-0 bg-slate-900/40 backdrop-blur-xs z-30 flex flex-col justify-end transition-all">
       <div class="w-full bg-soft-paper rounded-t-[36px] p-6 neu-flat border-t border-white/80 space-y-4 max-h-[85%] overflow-y-auto">
         <div class="w-12 h-1 bg-slate-300 rounded-full mx-auto mb-1"></div>
-        
         <div class="flex items-center justify-between">
           <div>
             <h3 class="text-base font-bold text-slate-800">Mapa del Grafo (Tus ideas seguras)</h3>
@@ -305,21 +461,11 @@
           </div>
           <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-xl">DAG Engine</span>
         </div>
-
-        <!-- Node List Container -->
-        <div id="graph-nodes-list" class="space-y-2.5 max-h-[300px] overflow-y-auto pr-1">
-          <!-- Populated dynamically via app.js -->
-        </div>
-
+        <div id="graph-nodes-list" class="space-y-2.5 max-h-[300px] overflow-y-auto pr-1"></div>
         <button onclick="closeGraphModal()" class="w-full py-3 text-xs font-bold text-slate-500 text-center hover:text-slate-700">
           Cerrar Mapa
         </button>
       </div>
-    </div>
-
-    <!-- Toast Notification Badge -->
-    <div id="quick-toast" class="absolute top-14 left-6 right-6 p-3 rounded-2xl neu-flat bg-white/95 text-xs font-semibold text-slate-700 text-center shadow-xl opacity-0 pointer-events-none transform translate-y-4 transition-all duration-300 z-40 border border-slate-200">
-      Mensaje
     </div>
 
   </main>

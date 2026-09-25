@@ -1,7 +1,7 @@
 # NT-SPEC-ARCH-005 / ADR-005: Maquetado en Flutter, Restricciones y Usabilidad de un Solo Usuario
 
-- **Estado:** Aprobado y Documentado
-- **Fecha:** 2026-09-14
+- **Estado:** Aprobado y Actualizado
+- **Fecha:** 2026-09-24 (Actualizado tras Implementación de Pantallas y Rutas)
 - **Cátedra:** Desarrollo de Aplicaciones Móviles (DAM) — ITU UNCuyo
 - **Equipo:** Araujo Jonathan, Batiatto Juan Martín, Belardinelli Agustín, Ortega Mateo
 - **Referencia Curricular:** Unidad 2.2.1 — *Maquetado de Interfaces en Flutter y Pruebas de Usabilidad de un Solo Usuario*
@@ -10,7 +10,7 @@
 
 ## 1. Diagnóstico y Visión Técnica
 
-El desarrollo en Flutter y el diseño para dispositivos móviles imponen dos realidades ineludibles:
+El desarrollo en Flutter y el diseño para dispositivos móviles imponen tres realidades ineludibles:
 
 1. **La Regla de Oro del Renderizado en Flutter:**
    > *"Las restricciones bajan. Los tamaños suben. Los padres definen las posiciones."*
@@ -28,13 +28,15 @@ El desarrollo en Flutter y el diseño para dispositivos móviles imponen dos rea
 ### ADR-005.1: Composición de Widgets y Gestión de Restricciones
 - **Decisión:** Construir todos los componentes de interfaz mediante el principio de **composición estricta de bajo nivel**, respetando el flujo unidireccional de restricciones de Flutter:
   - `NeumorphicButton` compone `Material`, `InkWell`, `Padding` y `AnimatedContainer` con doble sombra de luz y sombra.
-  - Para listas con desbordamiento (`ListView.separated` en `AnchorsManagerScreen`), se envuelve en `Expanded` o `LayoutBuilder` para proveer límites acotados al padre y prevenir excepciones de tipo `RenderFlex unbounded height`.
+  - Para listas con desbordamiento (`ListView.separated` en `AnchorsManagerScreen`, `ProfileScreen`, `SettingsScreen`), se envuelve en `Expanded` o `LayoutBuilder` para proveer límites acotados al padre y prevenir excepciones de tipo `RenderFlex unbounded height`.
 - **Impacto:** Cero excepciones de desbordamiento de pantalla en modo portrait y landscape.
 
-### ADR-005.2: Navegación e Itinerarios Estrictamente Lineales
-- **Decisión:** Descartar menús laberínticos en red (cajones laterales profundos o árboles anidados) y estructurar un **itinerario lineal paso a paso**:
-  $$\text{WelcomeScreen} \longrightarrow \text{BrainDumpScreen} \longrightarrow \text{SingleTaskScreen} \longrightarrow \text{SummaryCelebrationScreen}$$
-- **Razón Neurocognitiva:** Reducir la sobrecarga ejecutiva en usuarios con TDAH o fatiga mental. El usuario siempre sabe cuál es el siguiente paso sin tomar decisiones de navegación confusas.
+### ADR-005.2: Navegación e Itinerario Guiado con Rutas Centralizadas (11 Pantallas + 6 Modales)
+- **Decisión:** Implementar un mapa de **rutas nombradas centralizado en `main.dart`** que soporta tanto la secuencia lineal de foco como el acceso a herramientas globales (Perfil, Configuración, Anclas, Logros):
+  - **Secuencia de Inicio:** `Splash (/)` ➔ `Onboarding (/onboarding)` ➔ `Login (/auth)` ➔ `Welcome (/welcome)`
+  - **Secuencia de Foco:** `Welcome` ➔ `BrainDump (/brain-dump)` ➔ `SingleTask (/single-task)` ➔ `Celebration (/celebration)`
+  - **Herramientas Complementarias:** `AnchorsManager (/anchors)`, `AchievementsVault (/achievements)`, `ProfileScreen (/profile)`, `SettingsScreen (/settings)`
+- **Impacto:** Cumplimiento total de la consigna práctica (11 pantallas full-screen + 6 modales = 17 superficies).
 
 ### ADR-005.3: Significadores Táctiles Neumórficos (Affordance sin Cursor)
 - **Decisión:** Debido a la falta de cursor en entornos táctiles, compensar la ausencia de *hover* mediante **significadores táctiles tridimensionales**:
@@ -48,23 +50,26 @@ El desarrollo en Flutter y el diseño para dispositivos móviles imponen dos rea
 
 ---
 
-## 3. Matriz de Cumplimiento Curricular (Unidad 2.2.1)
+## 3. Matriz de Inventario de Superficies (11 Full-Screen + 6 Modales)
 
-| # | Eje Temático del Programa | Evidencia Concreta en NeuroTask |
-|---|---------------------------|----------------------------------|
-| **1** | **Composición y Restricciones** | Widgets desacoplados (`NeumorphicButton`, `NeuroModalSheet`, `NeuroBadge`). Flujo de restricciones acotado con `Expanded` y `LayoutBuilder`. |
-| **2** | **Widgets de Estructura (`Scaffold`, `ListView`, `ListTile`)** | Todas las vistas implementan `Scaffold`. Colecciones implementadas con `ListView.separated` y tarjetas con `ListTile` canónico (`leading`, `title`, `subtitle`, `trailing`, `onTap`). |
-| **3** | **Navegación e Itinerarios Lineales** | Secuencia lineal guiada: Inicio $\rightarrow$ Volcado Mental $\rightarrow$ Tarea Atómica $\rightarrow$ Cierre. Cero laberintos. |
-| **4** | **"No me hagas pensar" (Steve Krug)** | Jerarquía tipográfica inmediata, botones primarios contrastados y descompresión libre sin clasificaciones forzadas. |
-| **5** | **Entorno Táctil: Sin Cursor y Pequeño Espacio** | Foco de 1 sola tarea en pantalla (respeto al pequeño espacio); relieve neumórfico tridimensional para significadores visuales claros sin hover. |
-| **6** | **Evaluar, No Crear** | Medición de fricciones en el flujo real sin agregar características no validadas. |
-| **7** | **Enfoque de Guerrilla de un Solo Usuario** | Metodología de micro-pruebas rápidas con 1 usuario al inicio para prevenir reescrituras costosas cerca de la entrega. |
-| **8** | **Protocolo "Pensar en Voz Alta"** | Guion estandarizado del estudiante como coordinador neutral con preguntas de intervención no directivas. |
-| **9** | **Evitar Debates Religiosos con Datos** | Métricas de comportamiento (tiempo en pantalla, vacilaciones al pulsar, comprensión del rescate cognitivo). |
-| **10** | **Prototipado Previo de Baja Fidelidad** | Trazabilidad completa: wireframes conceptuales (`docs/FIGMA_BLUEPRINT_AND_WIREFRAMES.md`), prototipo web (`web_prototype/`) y aplicación Flutter. |
+| # | Identificador | Nombre de Pantalla / Modal | Ruta | Tipo |
+|---|---------------|----------------------------|------|------|
+| 1 | `SCR_00` | **SplashScreen** | `/` | Full Screen |
+| 2 | `SCR_01` | **OnboardingScreen** | `/onboarding` | Full Screen |
+| 3 | `SCR_02` | **LoginRegisterScreen** | `/auth` | Full Screen |
+| 4 | `SCR_03` | **WelcomeScreen** | `/welcome` | Full Screen |
+| 5 | `SCR_04` | **BrainDumpScreen** | `/brain-dump` | Full Screen |
+| 6 | `SCR_05` | **SingleTaskScreen** | `/single-task` | Full Screen |
+| 7 | `SCR_06` | **SummaryCelebrationScreen** | `/celebration` | Full Screen |
+| 8 | `SCR_07` | **AnchorsManagerScreen** | `/anchors` | Full Screen |
+| 9 | `SCR_08` | **AchievementsVaultScreen** | `/achievements` | Full Screen |
+| 10 | `SCR_09` | **ProfileScreen** | `/profile` | Full Screen |
+| 11 | `SCR_10` | **SettingsScreen** | `/settings` | Full Screen |
+| + | `MDL_01..06` | **VoiceDictation, Processing, CognitiveRescue, GraphOverview, ReportPreview, AchievementDetail** | Modales | BottomSheet / Dialog |
 
 ---
 
 ## 4. Documentos Complementarios
-- Guía y Ficha de Prueba: [docs/PROTOCOLO_PRUEBA_USABILIDAD_1_USUARIO.md](file:///c:/Users/jonat/Downloads/Codigos/NeuroTask_beta00/docs/PROTOCOLO_PRUEBA_USABILIDAD_1_USUARIO.md)
-- Ejecución Inmediata en Celular: [iniciar_con_qr.bat](file:///c:/Users/jonat/Downloads/Codigos/NeuroTask_beta00/iniciar_con_qr.bat)
+- Catálogo Completo de Pantallas: [SCREEN_CATALOG.md](file:///c:/Users/Agus/Desktop/NeuroTask%20Igna/NeuroTask_beta00/SCREEN_CATALOG.md)
+- Guía y Ficha de Prueba de Usabilidad: [docs/PROTOCOLO_PRUEBA_USABILIDAD_1_USUARIO.md](file:///c:/Users/Agus/Desktop/NeuroTask%20Igna/NeuroTask_beta00/docs/PROTOCOLO_PRUEBA_USABILIDAD_1_USUARIO.md)
+- Plan de Implementación: [plan_implementacion.md](file:///C:/Users/Agus/.gemini/antigravity-ide/brain/c3606168-217f-45b4-ad50-3306ad83c729/plan_implementacion.md)

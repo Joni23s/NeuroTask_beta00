@@ -10,6 +10,8 @@ import '../anchors/anchors_manager_screen.dart';
 import '../brain_dump/brain_dump_screen.dart';
 import '../focus/focus_controller.dart';
 import '../focus/single_task_screen.dart';
+import '../profile/profile_screen.dart';
+import '../settings/settings_screen.dart';
 
 class WelcomeScreen extends ConsumerStatefulWidget {
   const WelcomeScreen({super.key});
@@ -90,7 +92,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   NeuroBadge.status(
-                    label: 'DAM — ITU UNCuyo',
+                    label: 'NeuroTask',
                     dotColor: isDark ? AppColors.brandGlowCyan : AppColors.primaryIndigo,
                   ),
                   Row(
@@ -108,8 +110,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
                           },
                           borderRadius: BorderRadius.circular(16),
                           child: Container(
-                            width: 38,
-                            height: 38,
+                            width: 36,
+                            height: 36,
                             decoration: BoxDecoration(
                               color: context.cardSurface,
                               shape: BoxShape.circle,
@@ -117,12 +119,12 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
                               border: Border.all(color: context.borderLight),
                             ),
                             child: const Center(
-                              child: Text('⚓', style: TextStyle(fontSize: 16)),
+                              child: Text('⚓', style: TextStyle(fontSize: 15)),
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 6),
                       Semantics(
                         button: true,
                         label: 'Abrir Baúl de Logros Cognitivos',
@@ -136,8 +138,8 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
                           },
                           borderRadius: BorderRadius.circular(16),
                           child: Container(
-                            width: 38,
-                            height: 38,
+                            width: 36,
+                            height: 36,
                             decoration: BoxDecoration(
                               color: context.cardSurface,
                               shape: BoxShape.circle,
@@ -145,12 +147,68 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
                               border: Border.all(color: context.borderLight),
                             ),
                             child: const Center(
-                              child: Text('🏆', style: TextStyle(fontSize: 16)),
+                              child: Text('🏆', style: TextStyle(fontSize: 15)),
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 6),
+                      Semantics(
+                        button: true,
+                        label: 'Perfil de Usuario',
+                        child: InkWell(
+                          onTap: () {
+                            HapticHelper.lightTap();
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(16),
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: context.cardSurface,
+                              shape: BoxShape.circle,
+                              boxShadow: context.subtleElevation,
+                              border: Border.all(color: context.borderLight),
+                            ),
+                            child: const Center(
+                              child: Icon(Icons.person_outline_rounded, size: 18),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Semantics(
+                        button: true,
+                        label: 'Configuración',
+                        child: InkWell(
+                          onTap: () {
+                            HapticHelper.lightTap();
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                            );
+                          },
+                          borderRadius: BorderRadius.circular(16),
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: context.cardSurface,
+                              shape: BoxShape.circle,
+                              boxShadow: context.subtleElevation,
+                              border: Border.all(color: context.borderLight),
+                            ),
+                            child: const Center(
+                              child: Icon(Icons.settings_outlined, size: 18),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
                       const ThemeToggleButton(),
                     ],
                   ),

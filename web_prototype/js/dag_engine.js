@@ -116,6 +116,19 @@ class DAGTaskEngine {
   }
 
   /**
+   * Marks a task node as completed
+   */
+  markTaskCompleted(nodeId) {
+    const node = this.nodes.get(nodeId);
+    if (node) {
+      node.completed = true;
+      if (!this.completedOrder.includes(nodeId)) {
+        this.completedOrder.push(nodeId);
+      }
+    }
+  }
+
+  /**
    * Reorder for Low Energy Mode (prioritizes easy, low cognitive demand tasks first)
    */
   reorderForLowEnergy() {

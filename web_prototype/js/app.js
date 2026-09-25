@@ -1,6 +1,6 @@
 /**
  * NeuroTask Main Interactive Controller
- * Connects UI, State, DAG Engine, Audio and Voice interactions.
+ * Connects UI, State, DAG Engine, Audio and Voice interactions across 11 screens.
  */
 
 let activeTask = null;
@@ -10,11 +10,38 @@ let isZenTimerRunning = true;
 let isLowEnergyActive = false;
 let isListening = false;
 let recognitionInstance = null;
+let currentScreenId = 'screen-splash';
+let currentOnboardingIndex = 0;
+
+const onboardingData = [
+  {
+    icon: '🎙️',
+    title: 'Volcá tus ideas libremente',
+    desc: 'Hacé un Brain Dump por texto o voz sin preocuparte por fechas, categorías o prioridades.'
+  },
+  {
+    icon: '🌲',
+    title: 'El sistema descompone y ordena',
+    desc: 'NeuroTask convierte tu lista en micro-tareas de 15 min y genera una secuencia clara sin sobrecarga.'
+  },
+  {
+    icon: '🎯',
+    title: 'Una sola tarea a la vez',
+    desc: 'Enfocate exclusivamente en la micro-tarea actual. Si te trabás, el Rescate Cognitivo te ayuda.'
+  }
+];
 
 document.addEventListener('DOMContentLoaded', () => {
   initSpeechRecognition();
   updateClock();
   setInterval(updateClock, 10000);
+
+  // Auto transition from Splash to Onboarding after 2.5s
+  setTimeout(() => {
+    if (currentScreenId === 'screen-splash') {
+      goToOnboarding();
+    }
+  }, 2500);
 });
 
 function updateClock() {
@@ -23,6 +50,120 @@ function updateClock() {
     const now = new Date();
     clockEl.innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
+}
+
+/**
+ * Navigation & Screen Controller
+ */
+function switchScreen(fromId, toId) {
+  const fromEl = document.getElementById(fromId);
+  const toEl = document.getElementById(toId);
+  
+  if (fromEl) fromEl.classList.add('hidden');
+  if (toEl) {
+    toEl.classList.remove('hidden');
+    toEl.classList.add('screen-active');
+  }
+}
+
+function goToOnboarding() {
+  switchScreen(currentScreenId, 'screen-onboarding');
+  currentScreenId = 'screen-onboarding';
+}
+
+function nextOnboardingSlide() {
+  if (window.neuroAudio) window.neuroAudio.playSoftTap();
+  if (currentOnboardingIndex < onboardingData.length - 1) {
+    currentOnboardingIndex++;
+    updateOnboardingUI();
+  } else {
+    goToAuth();
+  }
+}
+
+function updateOnboardingUI() {
+  const slide = onboardingData[currentOnboardingIndex];
+  document.getElementById('ob-icon-card').innerText = slide.icon;
+  document.getElementById('ob-title').innerText = slide.title;
+  document.getElementById('ob-desc').innerText = slide.desc;
+  
+  [0, 1, 2].forEach(i => {
+    const dot = document.getElementById(`dot-${i}`);
+    if (dot) {
+      if (i === currentOnboardingIndex) {
+        dot.className = "w-6 h-2 rounded-full bg-indigo-600 transition-all";
+      } else {
+        dot.className = "w-2 h-2 rounded-full bg-slate-300 transition-all";
+      }
+    }
+  });
+
+  if (currentOnboardingIndex === onboardingData.length - 1) {
+    document.getElementById('ob-btn-text').innerText = "Comenzar";
+  } else {
+    document.getElementById('ob-btn-text').innerText = "Siguiente";
+  }
+}
+
+function goToAuth() {
+  if (window.neuroAudio) window.neuroAudio.playSoftTap();
+  switchScreen(currentScreenId, 'screen-auth');
+  currentScreenId = 'screen-auth';
+}
+
+function setAuthTab(isLogin) {
+  if (window.neuroAudio) window.neuroAudio.playSoftTap();
+  const loginBtn = document.getElementById('tab-login');
+  const regBtn = document.getElementById('tab-register');
+  if (isLogin) {
+    loginBtn.className = "flex-1 py-2 rounded-lg bg-white text-indigo-600 shadow-sm";
+    regBtn.className = "flex-1 py-2 rounded-lg text-slate-500";
+  } else {
+    regBtn.className = "flex-1 py-2 rounded-lg bg-white text-indigo-600 shadow-sm";
+    loginBtn.className = "flex-1 py-2 rounded-lg text-slate-500";
+  }
+}
+
+function goToWelcome() {
+  if (window.neuroAudio) window.neuroAudio.playSoftTap();
+  switchScreen(currentScreenId, 'screen-welcome');
+  currentScreenId = 'screen-welcome';
+}
+
+function goToProfile() {
+  if (window.neuroAudio) window.neuroAudio.playSoftTap();
+  switchScreen(currentScreenId, 'screen-profile');
+  currentScreenId = 'screen-profile';
+}
+
+function goToSettings() {
+  if (window.neuroAudio) window.neuroAudio.playSoftTap();
+  switchScreen(currentScreenId, 'screen-settings');
+  currentScreenId = 'screen-settings';
+}
+
+function enterFromWelcome(skipToFocus = false) {
+  if (window.neuroAudio) window.neuroAudio.playSoftTap();
+  if (skipToFocus && activeTask) {
+    switchScreen(currentScreenId, 'screen-focus');
+    currentScreenId = 'screen-focus';
+  } else {
+    switchScreen(currentScreenId, 'screen-brain-dump');
+    currentScreenId = 'screen-brain-dump';
+  }
+}
+
+function resetToBeginning() {
+  if (window.neuroAudio) window.neuroAudio.playSoftTap();
+  currentOnboardingIndex = 0;
+  updateOnboardingUI();
+  switchScreen(currentScreenId, 'screen-splash');
+  currentScreenId = 'screen-splash';
+  setTimeout(() => {
+    if (currentScreenId === 'screen-splash') {
+      goToOnboarding();
+    }
+  }, 2500);
 }
 
 /**
@@ -56,7 +197,7 @@ function initSpeechRecognition() {
 }
 
 function toggleVoice() {
-  window.neuroAudio.playSoftTap();
+  if (window.neuroAudio) window.neuroAudio.playSoftTap();
   if (isListening) {
     stopVoice();
   } else {
@@ -122,7 +263,7 @@ function stopVoice() {
 }
 
 function loadPresetPrompt(type) {
-  window.neuroAudio.playSoftTap();
+  if (window.neuroAudio) window.neuroAudio.playSoftTap();
   const textarea = document.getElementById('brain-dump-input');
   if (type === 'dam') {
     textarea.value = "Tengo que testear los endpoints del backend en Postman, redactar el resumen ejecutivo de 2 párrafos para el informe y armar las 7 diapositivas visuales en Figma para la entrega de ITU.";
@@ -137,11 +278,12 @@ function loadPresetPrompt(type) {
  * Screen Transitions & Flow
  */
 function startProcessing() {
-  window.neuroAudio.playSoftTap();
+  if (window.neuroAudio) window.neuroAudio.playSoftTap();
   const rawInput = document.getElementById('brain-dump-input').value;
   window.dagEngine.parseBrainDump(rawInput);
 
-  switchScreen('screen-brain-dump', 'screen-processing');
+  switchScreen(currentScreenId, 'screen-processing');
+  currentScreenId = 'screen-processing';
 
   const statusMessages = [
     "Descomprimiendo lenguaje natural...",
@@ -162,20 +304,10 @@ function startProcessing() {
   setTimeout(() => {
     clearInterval(msgInterval);
     switchScreen('screen-processing', 'screen-focus');
+    currentScreenId = 'screen-focus';
     loadCurrentFocusTask();
     startZenTimer();
   }, 1600);
-}
-
-function switchScreen(fromId, toId) {
-  const fromEl = document.getElementById(fromId);
-  const toEl = document.getElementById(toId);
-  
-  if (fromEl) fromEl.classList.add('hidden');
-  if (toEl) {
-    toEl.classList.remove('hidden');
-    toEl.classList.add('screen-active');
-  }
 }
 
 function loadCurrentFocusTask() {
@@ -190,216 +322,123 @@ function loadCurrentFocusTask() {
   const allNodes = window.dagEngine.getTopologicalOrder();
   const total = allNodes.length;
   const completedCount = allNodes.filter(n => n.completed).length;
-  const currentNum = completedCount + 1;
+  const currentNum = Math.min(completedCount + 1, total);
 
-  document.getElementById('task-progress-indicator').innerText = `Paso ${currentNum} de ${total}`;
-  document.getElementById('task-title').innerText = activeTask.title;
-  document.getElementById('task-category').innerText = activeTask.category;
-  document.getElementById('task-subtext').innerText = activeTask.subtext;
-  document.getElementById('task-time-estimate').innerText = `Tiempo de Flujo: ${activeTask.estimatedMinutes} min`;
-  
-  const energyBadge = document.getElementById('task-energy-badge');
-  if (energyBadge) {
-    if (activeTask.energyLevel === 'low') {
-      energyBadge.className = 'text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700';
-      energyBadge.innerText = '🌱 Carga Liviana';
-    } else if (activeTask.energyLevel === 'high') {
-      energyBadge.className = 'text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700';
-      energyBadge.innerText = '⚡ Carga Intensa';
-    } else {
-      energyBadge.className = 'text-[11px] font-semibold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700';
-      energyBadge.innerText = '🌊 Carga Moderada';
-    }
-  }
+  const progEl = document.getElementById('task-progress-indicator');
+  if (progEl) progEl.innerText = `Paso ${currentNum} de ${total}`;
 
-  // Animate card appearance
-  const heroCard = document.getElementById('focus-hero-card');
-  if (heroCard) {
-    heroCard.style.opacity = '0';
-    heroCard.style.transform = 'translateY(8px) scale(0.98)';
-    setTimeout(() => {
-      heroCard.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-      heroCard.style.opacity = '1';
-      heroCard.style.transform = 'translateY(0) scale(1)';
-    }, 50);
-  }
+  const titleEl = document.getElementById('task-title');
+  if (titleEl) titleEl.innerText = activeTask.title;
+
+  const catEl = document.getElementById('task-category');
+  if (catEl) catEl.innerText = activeTask.category;
+
+  const subEl = document.getElementById('task-subtext');
+  if (subEl) subEl.innerText = activeTask.subtext;
+
+  const timeEl = document.getElementById('task-time-estimate');
+  if (timeEl) timeEl.innerText = `Tiempo de Flujo: ${activeTask.estimatedMinutes} min`;
 }
 
-/**
- * Task Completion & Dopamine Flow
- */
 function completeTask() {
-  if (!activeTask) return;
-
-  window.neuroAudio.playZenCompletionChime();
-  activeTask.completed = true;
-
-  const card = document.getElementById('focus-hero-card');
-  if (card) {
-    card.style.transform = 'scale(1.02)';
-    card.style.boxShadow = '0 0 30px rgba(16, 185, 129, 0.4)';
-    setTimeout(() => {
-      card.style.opacity = '0.2';
-      card.style.transform = 'translateY(-12px) scale(0.95)';
-    }, 180);
+  if (window.neuroAudio) {
+    try { window.neuroAudio.playZenChime(); } catch(e) {}
+  }
+  
+  if (!activeTask) {
+    activeTask = window.dagEngine.getCurrentExecutableTask();
+  }
+  
+  if (activeTask) {
+    window.dagEngine.markTaskCompleted(activeTask.id);
+  } else {
+    const all = window.dagEngine.getTopologicalOrder();
+    const next = all.find(n => !n.completed);
+    if (next) window.dagEngine.markTaskCompleted(next.id);
   }
 
-  setTimeout(() => {
-    loadCurrentFocusTask();
-    resetZenTimer();
-  }, 450);
+  showNotificationBadge("✨ Tarea completada con éxito");
+  loadCurrentFocusTask();
 }
 
 function showCompletionCelebration() {
-  switchScreen('screen-focus', 'screen-celebration');
-  window.neuroAudio.playZenCompletionChime();
-}
-
-function enterFromWelcome(startVoice = false) {
-  window.neuroAudio.playSoftTap();
-  switchScreen('screen-welcome', 'screen-brain-dump');
-  if (startVoice) {
-    setTimeout(() => {
-      startVoice();
-    }, 300);
+  if (window.neuroAudio) {
+    try { window.neuroAudio.playZenChime(); } catch(e) {}
   }
-}
-
-function resetToBeginning() {
-  window.neuroAudio.playSoftTap();
+  switchScreen(currentScreenId, 'screen-celebration');
+  currentScreenId = 'screen-celebration';
   stopZenTimer();
-  window.dagEngine._loadDefaultPreset();
-  isLowEnergyActive = false;
-  document.getElementById('brain-dump-input').value = "";
-  
-  // Hide other screens and return to Welcome
-  ['screen-focus', 'screen-celebration', 'screen-processing', 'screen-brain-dump'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.classList.add('hidden');
-  });
-  
-  const welcome = document.getElementById('screen-welcome');
-  if (welcome) {
-    welcome.classList.remove('hidden');
-    welcome.classList.add('screen-active');
-  }
 }
 
-/**
- * Zen Breathing Timer
- */
 function startZenTimer() {
   zenSecondsElapsed = 0;
-  isZenTimerRunning = true;
-  updateZenTimerDisplay();
-  if (zenTimerInterval) clearInterval(zenTimerInterval);
+  clearInterval(zenTimerInterval);
   zenTimerInterval = setInterval(() => {
-    if (isZenTimerRunning) {
-      zenSecondsElapsed++;
-      updateZenTimerDisplay();
-    }
+    zenSecondsElapsed++;
+    const mins = Math.floor(zenSecondsElapsed / 60).toString().padStart(2, '0');
+    const secs = (zenSecondsElapsed % 60).toString().padStart(2, '0');
+    const timerEl = document.getElementById('zen-timer-count');
+    if (timerEl) timerEl.innerText = `${mins}:${secs}`;
   }, 1000);
 }
 
-function resetZenTimer() {
-  zenSecondsElapsed = 0;
-  updateZenTimerDisplay();
-}
-
 function stopZenTimer() {
-  if (zenTimerInterval) clearInterval(zenTimerInterval);
+  clearInterval(zenTimerInterval);
 }
 
-function updateZenTimerDisplay() {
-  const el = document.getElementById('zen-timer-count');
-  if (el) {
-    const mins = Math.floor(zenSecondsElapsed / 60);
-    const secs = zenSecondsElapsed % 60;
-    el.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  }
-}
-
-/**
- * Cognitive Rescue Modal Actions
- */
 function openRescueModal() {
-  window.neuroAudio.playSoftTap();
-  const modal = document.getElementById('rescue-modal');
-  if (modal) {
-    modal.classList.remove('hidden');
-    const sheet = document.getElementById('rescue-sheet-content');
-    if (sheet) {
-      sheet.style.transform = 'translateY(100%)';
-      setTimeout(() => {
-        sheet.style.transition = 'transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)';
-        sheet.style.transform = 'translateY(0)';
-      }, 10);
-    }
+  if (window.neuroAudio) {
+    try { window.neuroAudio.playSoftTap(); } catch(e) {}
   }
+  const modal = document.getElementById('rescue-modal');
+  if (modal) modal.classList.remove('hidden');
 }
 
 function closeRescueModal() {
-  window.neuroAudio.playSoftTap();
-  const sheet = document.getElementById('rescue-sheet-content');
-  if (sheet) {
-    sheet.style.transform = 'translateY(100%)';
-    setTimeout(() => {
-      const modal = document.getElementById('rescue-modal');
-      if (modal) modal.classList.add('hidden');
-    }, 280);
-  } else {
-    const modal = document.getElementById('rescue-modal');
-    if (modal) modal.classList.add('hidden');
+  if (window.neuroAudio) {
+    try { window.neuroAudio.playSoftTap(); } catch(e) {}
   }
+  const modal = document.getElementById('rescue-modal');
+  if (modal) modal.classList.add('hidden');
 }
 
-function executeRescueAction(actionType) {
-  window.neuroAudio.playSoftTap();
+function executeRescueAction(type) {
   closeRescueModal();
-
-  if (actionType === 'split' && activeTask) {
-    const microNode = window.dagEngine.splitTaskIntoMicroSteps(activeTask.id);
-    if (microNode) {
-      loadCurrentFocusTask();
-      showNotificationBadge("✨ Tarea dividida en micro-pasos de 3 min");
-    }
-  } else if (actionType === 'low-energy') {
-    isLowEnergyActive = true;
-    const reordered = window.dagEngine.reorderForLowEnergy();
-    if (reordered.length > 0) {
-      loadCurrentFocusTask();
-      showNotificationBadge("🌱 Modo Baja Energía Activo: Priorizando lo liviano");
-    }
-  } else if (actionType === 'switch') {
-    // Switch to next unblocked task
-    const all = window.dagEngine.getTopologicalOrder().filter(n => !n.completed);
-    if (all.length > 1) {
-      const currentIdx = all.findIndex(n => n.id === activeTask.id);
-      const nextIdx = (currentIdx + 1) % all.length;
-      activeTask = all[nextIdx];
-      
-      document.getElementById('task-title').innerText = activeTask.title;
-      document.getElementById('task-category').innerText = activeTask.category;
-      document.getElementById('task-subtext').innerText = activeTask.subtext;
-      showNotificationBadge("🔀 Saltando a rama alternativa");
-    } else {
-      showNotificationBadge("ℹ️ Solo queda esta tarea en el camino");
-    }
+  if (window.neuroAudio) {
+    try { window.neuroAudio.playSoftTap(); } catch(e) {}
   }
+  
+  if (!activeTask) {
+    activeTask = window.dagEngine.getCurrentExecutableTask();
+  }
+
+  if (type === 'split') {
+    if (activeTask) {
+      window.dagEngine.splitTaskIntoMicroSteps(activeTask.id);
+      showNotificationBadge("🔹 Tarea dividida en micro-pasos de 3 minutos");
+    }
+  } else if (type === 'switch') {
+    if (activeTask) {
+      window.dagEngine.markTaskCompleted(activeTask.id);
+      showNotificationBadge("🔀 Saltaste a la siguiente tarea disponible");
+    }
+  } else if (type === 'low-energy') {
+    window.dagEngine.reorderForLowEnergy();
+    showNotificationBadge("⚡ Modo Baja Energía activado");
+  }
+  
+  loadCurrentFocusTask();
 }
 
-/**
- * DAG Graph Inspector Modal
- */
 function openGraphModal() {
-  window.neuroAudio.playSoftTap();
+  if (window.neuroAudio) window.neuroAudio.playSoftTap();
   renderGraphNodes();
   const modal = document.getElementById('graph-modal');
   if (modal) modal.classList.remove('hidden');
 }
 
 function closeGraphModal() {
-  window.neuroAudio.playSoftTap();
+  if (window.neuroAudio) window.neuroAudio.playSoftTap();
   const modal = document.getElementById('graph-modal');
   if (modal) modal.classList.add('hidden');
 }
@@ -443,13 +482,9 @@ function renderGraphNodes() {
   });
 }
 
-/**
- * Ambient Audio Toggle
- */
 function toggleAmbientSound() {
   const isPlaying = window.neuroAudio.toggleAmbientNoise();
   const btn = document.getElementById('ambient-btn');
-  const icon = document.getElementById('ambient-btn-icon');
   if (btn) {
     if (isPlaying) {
       btn.classList.add('neu-pressed', 'text-indigo-600');
@@ -463,9 +498,6 @@ function toggleAmbientSound() {
   }
 }
 
-/**
- * Sound FX Mute Toggle
- */
 function toggleMuteFX() {
   const isMuted = window.neuroAudio.toggleMute();
   const btn = document.getElementById('mute-fx-btn');
@@ -475,17 +507,11 @@ function toggleMuteFX() {
   }
 }
 
-/**
- * Fullscreen simulator toggle
- */
 function toggleSimulatorFullscreen() {
-  window.neuroAudio.playSoftTap();
+  if (window.neuroAudio) window.neuroAudio.playSoftTap();
   document.body.classList.toggle('fullscreen-app');
 }
 
-/**
- * Temporary Toast Notification Badge
- */
 function showNotificationBadge(msg) {
   const toast = document.getElementById('quick-toast');
   if (toast) {
