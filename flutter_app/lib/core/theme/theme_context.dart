@@ -13,6 +13,12 @@ extension ThemeContext on BuildContext {
   Color get textMuted => isDarkMode ? AppColors.darkTextMuted : AppColors.textMuted;
   Color get borderLight => isDarkMode ? const Color(0x1AFFFFFF) : AppColors.borderLight;
 
+  // Aliases para compatibilidad
+  Color get surfaceColor => cardSurface;
+  Color get textMainColor => textMain;
+  Color get textSecondaryColor => textSecondary;
+  Color get textMutedColor => textMuted;
+
   List<BoxShadow> get softElevation => isDarkMode ? NeumorphicTheme.darkSoftElevation : NeumorphicTheme.softElevation;
   List<BoxShadow> get subtleElevation => isDarkMode ? NeumorphicTheme.darkSubtleElevation : NeumorphicTheme.subtleElevation;
   List<BoxShadow> get pressedElevation => isDarkMode ? NeumorphicTheme.darkPressedElevation : NeumorphicTheme.pressedElevation;

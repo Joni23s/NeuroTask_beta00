@@ -18,6 +18,7 @@ class NeumorphicButton extends StatefulWidget {
   final EdgeInsetsGeometry padding;
   final double? width;
   final double? height;
+  final Color? backgroundColor;
 
   const NeumorphicButton({
     super.key,
@@ -28,6 +29,7 @@ class NeumorphicButton extends StatefulWidget {
     this.padding = const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
     this.width,
     this.height,
+    this.backgroundColor,
   });
 
   @override

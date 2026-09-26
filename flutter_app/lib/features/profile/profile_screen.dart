@@ -91,7 +91,7 @@ class ProfileScreen extends StatelessWidget {
                   const NeuroBadge(
                     label: 'Nivel 3 — Maestro del Foco',
                     icon: Icons.workspace_premium_rounded,
-                    color: AppColors.brandGlowCyan,
+                    textColor: AppColors.brandGlowCyan,
                   ),
                 ],
               ),
