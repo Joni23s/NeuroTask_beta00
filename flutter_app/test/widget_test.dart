@@ -5,7 +5,7 @@ import 'package:neurotask/main.dart';
 import 'package:neurotask/core/domain/models/task_node.dart';
 import 'package:neurotask/core/domain/models/task_graph.dart';
 import 'package:neurotask/core/domain/services/topological_sorter.dart';
-import 'package:neurotask/features/onboarding/welcome_screen.dart';
+import 'package:neurotask/features/onboarding/onboarding_screen.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -73,17 +73,16 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('WelcomeScreen renders main hero elements', (WidgetTester tester) async {
+    testWidgets('OnboardingScreen renders slides', (WidgetTester tester) async {
       await tester.pumpWidget(
         const ProviderScope(
           child: MaterialApp(
-            home: WelcomeScreen(),
+            home: OnboardingScreen(),
           ),
         ),
       );
 
-      expect(find.text('NEUROTASK'), findsOneWidget);
-      expect(find.text('MOTOR DE FOCO'), findsOneWidget);
+      expect(find.text('Volcá tus ideas libremente'), findsOneWidget);
     });
   });
 }
