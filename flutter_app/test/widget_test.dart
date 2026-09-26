@@ -1,9 +1,11 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:neurotask/main.dart';
 import 'package:neurotask/core/domain/models/task_node.dart';
 import 'package:neurotask/core/domain/models/task_graph.dart';
 import 'package:neurotask/core/domain/services/topological_sorter.dart';
+import 'package:neurotask/features/onboarding/welcome_screen.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -55,16 +57,33 @@ void main() {
   });
 
   group('Widget UI Smoke Tests', () {
-    testWidgets('NeuroTaskApp initial welcome screen smoke test', (WidgetTester tester) async {
+    testWidgets('NeuroTaskApp initial splash screen smoke test', (WidgetTester tester) async {
       await tester.pumpWidget(
         const ProviderScope(
           child: NeuroTaskApp(),
         ),
       );
 
+      // Verify SplashScreen renders initially
+      expect(find.text('NeuroTask'), findsOneWidget);
+      expect(find.text('Cero carga cognitiva. Foco puro.'), findsOneWidget);
+
+      // Advance timer for splash transition to complete without pending timers
+      await tester.pump(const Duration(milliseconds: 3000));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('WelcomeScreen renders main hero elements', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: WelcomeScreen(),
+          ),
+        ),
+      );
+
       expect(find.text('NEUROTASK'), findsOneWidget);
       expect(find.text('MOTOR DE FOCO'), findsOneWidget);
-      expect(find.text('Tocá el cerebro para descomprimir tu mente'), findsOneWidget);
     });
   });
 }
