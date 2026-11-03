@@ -35,19 +35,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   static const List<OnboardingSlide> _slides = [
     OnboardingSlide(
       title: 'Volcá tus ideas libremente',
-      description: 'Hacé un Brain Dump por texto o voz sin preocuparte por fechas, categorías o prioridades.',
+      description:
+          'Hacé un Brain Dump por texto o voz sin preocuparte por fechas, categorías o prioridades.',
       icon: Icons.mic_external_on_rounded,
       accentColor: AppColors.primaryIndigo,
     ),
     OnboardingSlide(
       title: 'El sistema descompone y ordena',
-      description: 'NeuroTask convierte tu lista en micro-tareas de 15 min y genera una secuencia clara sin sobrecarga.',
+      description:
+          'NeuroTask convierte tu lista en micro-tareas de 15 min y genera una secuencia clara sin sobrecarga.',
       icon: Icons.account_tree_rounded,
       accentColor: AppColors.brandGlowCyan,
     ),
     OnboardingSlide(
       title: 'Una sola tarea a la vez',
-      description: 'Enfocate exclusivamente en la micro-tarea actual. Si te trabás, el Rescate Cognitivo te ayuda.',
+      description:
+          'Enfocate exclusivamente en la micro-tarea actual. Si te trabás, el Rescate Cognitivo te ayuda.',
       icon: Icons.center_focus_strong_rounded,
       accentColor: AppColors.successEmerald,
     ),
@@ -87,7 +90,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.psychology_rounded, color: AppColors.primaryIndigo, size: 28),
+                      const Icon(Icons.psychology_rounded,
+                          color: AppColors.primaryIndigo, size: 28),
                       const SizedBox(width: 8),
                       Text(
                         'NeuroTask',
@@ -187,7 +191,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         decoration: BoxDecoration(
                           color: _currentPage == index
                               ? AppColors.primaryIndigo
-                              : context.textMutedColor.withOpacity(0.3),
+                              : context.textMutedColor.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -205,7 +209,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            _currentPage == _slides.length - 1 ? 'Comenzar' : 'Siguiente',
+                            _currentPage == _slides.length - 1
+                                ? 'Comenzar'
+                                : 'Siguiente',
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,

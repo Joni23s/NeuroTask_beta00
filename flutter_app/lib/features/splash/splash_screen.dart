@@ -12,7 +12,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
@@ -31,7 +32,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.6, curve: Curves.easeIn)),
+      CurvedAnimation(
+          parent: _controller,
+          curve: const Interval(0.0, 0.6, curve: Curves.easeIn)),
     );
 
     _controller.forward();
@@ -40,8 +43,10 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       if (mounted) {
         Navigator.of(context).pushReplacement(
           PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) => const OnboardingScreen(),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                const OnboardingScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
               return FadeTransition(opacity: animation, child: child);
             },
             transitionDuration: const Duration(milliseconds: 600),
@@ -84,12 +89,16 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         color: context.surfaceColor,
                         boxShadow: [
                           BoxShadow(
-                            color: isDark ? AppColors.darkShadowDark : AppColors.shadowDark,
+                            color: isDark
+                                ? AppColors.darkShadowDark
+                                : AppColors.shadowDark,
                             offset: const Offset(8, 8),
                             blurRadius: 16,
                           ),
                           BoxShadow(
-                            color: isDark ? AppColors.darkShadowLight : AppColors.shadowLight,
+                            color: isDark
+                                ? AppColors.darkShadowLight
+                                : AppColors.shadowLight,
                             offset: const Offset(-8, -8),
                             blurRadius: 16,
                           ),
@@ -99,7 +108,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         child: Container(
                           width: 86,
                           height: 86,
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             shape: BoxShape.circle,
                             gradient: LinearGradient(
                               colors: [
@@ -142,7 +151,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     ),
                     const SizedBox(height: 48),
                     // Loading indicator minimalista
-                    SizedBox(
+                    const SizedBox(
                       width: 24,
                       height: 24,
                       child: CircularProgressIndicator(

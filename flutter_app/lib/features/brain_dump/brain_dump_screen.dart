@@ -78,7 +78,8 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
       builder: (context) {
         return Dialog(
           backgroundColor: context.cardSurface,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
             child: Column(
@@ -88,7 +89,10 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                 const SizedBox(height: 24),
                 Text(
                   'Construyendo Grafo Lógico...',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: context.textMain),
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: context.textMain),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -108,6 +112,8 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
 
     await ref.read(focusProvider.notifier).loadFromRawText(rawText);
     ref.read(brainDumpProvider.notifier).setProcessing(false);
+
+    if (!mounted) return;
 
     Navigator.pop(context); // Close dialog
     Navigator.pushReplacement(
@@ -139,7 +145,8 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
     }
 
     // Para textos más extensos: borrado regresivo palabra por palabra / tokens
-    final tokens = RegExp(r'\S+\s*').allMatches(trimmed).map((m) => m.group(0)!).toList();
+    final tokens =
+        RegExp(r'\S+\s*').allMatches(trimmed).map((m) => m.group(0)!).toList();
     if (tokens.length <= 4) {
       // 2 a 4 palabras: borrado en pequeños bloques de 2 caracteres para granularidad visible
       final snapshots = <String>[];
@@ -190,7 +197,7 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
       // Curva de aceleración algorítmica:
       // Comienza pausado y deliberado (85ms) y adquiere velocidad exponencial (hasta 8ms)
       const double maxDelay = 85.0; // ms por paso al inicio
-      const double minDelay = 8.0;  // ms por paso al final
+      const double minDelay = 8.0; // ms por paso al final
 
       for (int i = 0; i < totalSteps; i++) {
         if (!mounted) return;
@@ -208,7 +215,9 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
 
         // Progresión no lineal con aceleración cúbica/exponencial
         final progress = totalSteps == 1 ? 1.0 : i / (totalSteps - 1);
-        final delayMs = (minDelay + (maxDelay - minDelay) * math.pow(1.0 - progress, 2.4)).round();
+        final delayMs =
+            (minDelay + (maxDelay - minDelay) * math.pow(1.0 - progress, 2.4))
+                .round();
 
         await Future.delayed(Duration(milliseconds: delayMs));
       }
@@ -238,9 +247,12 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
     final dumpState = ref.watch(brainDumpProvider);
     final isDark = context.isDarkMode;
 
-    if (!_isClearing && dumpState.text != _textController.text && dumpState.text.isNotEmpty) {
+    if (!_isClearing &&
+        dumpState.text != _textController.text &&
+        dumpState.text.isNotEmpty) {
       _textController.text = dumpState.text;
-      _textController.selection = TextSelection.fromPosition(TextPosition(offset: _textController.text.length));
+      _textController.selection = TextSelection.fromPosition(
+          TextPosition(offset: _textController.text.length));
     }
 
     return Scaffold(
@@ -255,7 +267,8 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                   minHeight: constraints.maxHeight,
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 24.0, vertical: 16.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -276,7 +289,9 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                                     child: InkWell(
                                       onTap: () {
                                         HapticHelper.lightTap();
-                                        ref.read(brainDumpProvider.notifier).updateText(_textController.text);
+                                        ref
+                                            .read(brainDumpProvider.notifier)
+                                            .updateText(_textController.text);
                                         Navigator.pop(context);
                                       },
                                       borderRadius: BorderRadius.circular(16),
@@ -287,9 +302,11 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                                           color: context.cardSurface,
                                           shape: BoxShape.circle,
                                           boxShadow: context.subtleElevation,
-                                          border: Border.all(color: context.borderLight),
+                                          border: Border.all(
+                                              color: context.borderLight),
                                         ),
-                                        child: Icon(Icons.arrow_back_rounded, color: context.textMain, size: 19),
+                                        child: Icon(Icons.arrow_back_rounded,
+                                            color: context.textMain, size: 19),
                                       ),
                                     ),
                                   ),
@@ -308,10 +325,14 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                                     child: InkWell(
                                       onTap: () {
                                         HapticHelper.lightTap();
-                                        ref.read(brainDumpProvider.notifier).updateText(_textController.text);
+                                        ref
+                                            .read(brainDumpProvider.notifier)
+                                            .updateText(_textController.text);
                                         Navigator.push(
                                           context,
-                                          MaterialPageRoute(builder: (_) => const AnchorsManagerScreen()),
+                                          MaterialPageRoute(
+                                              builder: (_) =>
+                                                  const AnchorsManagerScreen()),
                                         );
                                       },
                                       borderRadius: BorderRadius.circular(16),
@@ -322,10 +343,12 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                                           color: context.cardSurface,
                                           shape: BoxShape.circle,
                                           boxShadow: context.subtleElevation,
-                                          border: Border.all(color: context.borderLight),
+                                          border: Border.all(
+                                              color: context.borderLight),
                                         ),
                                         child: const Center(
-                                          child: Text('⚓', style: TextStyle(fontSize: 16)),
+                                          child: Text('⚓',
+                                              style: TextStyle(fontSize: 16)),
                                         ),
                                       ),
                                     ),
@@ -341,19 +364,28 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                           // Title & Subtitle
                           Text(
                             '¿Qué ronda por tu cabeza?',
-                            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: context.textMain, height: 1.2),
+                            style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: context.textMain,
+                                height: 1.2),
                           ),
                           const SizedBox(height: 6),
                           Text(
                             'Escribí o dictá libremente. El sistema ordenará el camino lógico.',
-                            style: TextStyle(fontSize: 12, color: context.textSecondary),
+                            style: TextStyle(
+                                fontSize: 12, color: context.textSecondary),
                           ),
                           const SizedBox(height: 14),
 
                           // Demo quick presets
                           Row(
                             children: [
-                              Text('Ejemplos: ', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: context.textMuted)),
+                              Text('Ejemplos: ',
+                                  style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: context.textMuted)),
                               const SizedBox(width: 6),
                               NeuroBadge.chip(
                                 label: '🎓 Entrega DAM',
@@ -377,19 +409,26 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                         padding: const EdgeInsets.all(18),
                         borderRadius: 28,
                         border: _showEmptyHint
-                            ? Border.all(color: AppColors.amberWarning.withValues(alpha: 0.6), width: 1.5)
+                            ? Border.all(
+                                color: AppColors.amberWarning
+                                    .withValues(alpha: 0.6),
+                                width: 1.5)
                             : null,
                         child: Stack(
                           children: [
                             Semantics(
-                              label: 'Campo de texto libre para volcado de ideas',
+                              label:
+                                  'Campo de texto libre para volcado de ideas',
                               textField: true,
                               child: TextField(
                                 controller: _textController,
                                 focusNode: _focusNode,
                                 maxLines: null,
                                 expands: true,
-                                style: TextStyle(fontSize: 14, color: context.textMain, height: 1.5),
+                                style: TextStyle(
+                                    fontSize: 14,
+                                    color: context.textMain,
+                                    height: 1.5),
                                 onChanged: (val) {
                                   if (_showEmptyHint && val.trim().isNotEmpty) {
                                     setState(() {
@@ -398,10 +437,13 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                                   }
                                 },
                                 decoration: InputDecoration(
-                                  hintText: 'Ej: Tengo que testear los endpoints en Postman, redactar el resumen ejecutivo del informe y armar las 7 diapositivas en Figma...',
-                                  hintStyle: TextStyle(color: context.textMuted, fontSize: 13),
+                                  hintText:
+                                      'Ej: Tengo que testear los endpoints en Postman, redactar el resumen ejecutivo del informe y armar las 7 diapositivas en Figma...',
+                                  hintStyle: TextStyle(
+                                      color: context.textMuted, fontSize: 13),
                                   border: InputBorder.none,
-                                  contentPadding: const EdgeInsets.only(bottom: 48, right: 48),
+                                  contentPadding: const EdgeInsets.only(
+                                      bottom: 48, right: 48),
                                 ),
                               ),
                             ),
@@ -422,7 +464,10 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                                       builder: (_) => VoiceDictationSheet(
                                         textController: _textController,
                                         onAppendText: (text) {
-                                          ref.read(achievementsProvider.notifier).recordVoiceDictation();
+                                          ref
+                                              .read(
+                                                  achievementsProvider.notifier)
+                                              .recordVoiceDictation();
                                           setState(() {});
                                         },
                                       ),
@@ -435,9 +480,12 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                                       color: context.cardSurface,
                                       borderRadius: BorderRadius.circular(14),
                                       boxShadow: context.subtleElevation,
-                                      border: Border.all(color: context.borderLight),
+                                      border: Border.all(
+                                          color: context.borderLight),
                                     ),
-                                    child: const Icon(Icons.mic_rounded, color: AppColors.primaryIndigo, size: 22),
+                                    child: const Icon(Icons.mic_rounded,
+                                        color: AppColors.primaryIndigo,
+                                        size: 22),
                                   ),
                                 ),
                               ),
@@ -448,11 +496,13 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
 
                       // Helper bar: Word count + Smooth Clear Action Button
                       AnimatedOpacity(
-                        opacity: _textController.text.trim().isNotEmpty ? 1.0 : 0.0,
+                        opacity:
+                            _textController.text.trim().isNotEmpty ? 1.0 : 0.0,
                         duration: const Duration(milliseconds: 250),
                         curve: Curves.easeInOut,
                         child: Padding(
-                          padding: const EdgeInsets.only(top: 8.0, left: 4.0, right: 4.0),
+                          padding: const EdgeInsets.only(
+                              top: 8.0, left: 4.0, right: 4.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -468,17 +518,23 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                                 button: true,
                                 label: 'Limpiar todo el texto',
                                 child: InkWell(
-                                  onTap: (_isClearing || _textController.text.trim().isEmpty) ? null : _onClearText,
+                                  onTap: (_isClearing ||
+                                          _textController.text.trim().isEmpty)
+                                      ? null
+                                      : _onClearText,
                                   borderRadius: BorderRadius.circular(12),
                                   child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 5),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Icon(
                                           Icons.clear_all_rounded,
                                           size: 16,
-                                          color: isDark ? AppColors.brandGlowCyan : AppColors.primaryIndigo,
+                                          color: isDark
+                                              ? AppColors.brandGlowCyan
+                                              : AppColors.primaryIndigo,
                                         ),
                                         const SizedBox(width: 4),
                                         Text(
@@ -486,7 +542,9 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                                           style: TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.bold,
-                                            color: isDark ? AppColors.brandGlowCyan : AppColors.primaryIndigo,
+                                            color: isDark
+                                                ? AppColors.brandGlowCyan
+                                                : AppColors.primaryIndigo,
                                           ),
                                         ),
                                       ],
@@ -505,12 +563,17 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                           padding: const EdgeInsets.only(top: 8.0),
                           child: Row(
                             children: [
-                              const Icon(Icons.info_outline_rounded, color: AppColors.amberDark, size: 16),
+                              const Icon(Icons.info_outline_rounded,
+                                  color: AppColors.amberDark, size: 16),
                               const SizedBox(width: 6),
                               Expanded(
                                 child: Text(
                                   'Escribí algunas palabras o elegí un ejemplo arriba 👆 para comenzar.',
-                                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.amberDark.withValues(alpha: 0.9)),
+                                  style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.amberDark
+                                          .withValues(alpha: 0.9)),
                                 ),
                               ),
                             ],
@@ -531,9 +594,14 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                           child: const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text('Descomprimir y Secuenciar', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
+                              Text('Descomprimir y Secuenciar',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold)),
                               SizedBox(width: 8),
-                              Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 18),
+                              Icon(Icons.arrow_forward_rounded,
+                                  color: Colors.white, size: 18),
                             ],
                           ),
                         ),

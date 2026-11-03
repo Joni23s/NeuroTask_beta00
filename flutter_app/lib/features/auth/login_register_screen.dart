@@ -14,7 +14,8 @@ class LoginRegisterScreen extends ConsumerStatefulWidget {
   const LoginRegisterScreen({super.key});
 
   @override
-  ConsumerState<LoginRegisterScreen> createState() => _LoginRegisterScreenState();
+  ConsumerState<LoginRegisterScreen> createState() =>
+      _LoginRegisterScreenState();
 }
 
 class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
@@ -80,11 +81,11 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
             children: [
               const SizedBox(height: 20),
               // Brand Icon
-              Center(
+              const Center(
                 child: NeumorphicCard(
-                  padding: const EdgeInsets.all(20),
+                  padding: EdgeInsets.all(20),
                   borderRadius: 24,
-                  child: const Icon(
+                  child: Icon(
                     Icons.psychology_rounded,
                     size: 54,
                     color: AppColors.primaryIndigo,
@@ -131,14 +132,18 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
                           duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           decoration: BoxDecoration(
-                            color: _isLogin ? context.surfaceColor : Colors.transparent,
+                            color: _isLogin
+                                ? context.surfaceColor
+                                : Colors.transparent,
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: _isLogin
                                 ? [
                                     BoxShadow(
                                       color: context.isDarkMode
-                                          ? AppColors.darkShadowDark.withValues(alpha: 0.3)
-                                          : AppColors.shadowDark.withValues(alpha: 0.2),
+                                          ? AppColors.darkShadowDark
+                                              .withValues(alpha: 0.3)
+                                          : AppColors.shadowDark
+                                              .withValues(alpha: 0.2),
                                       blurRadius: 6,
                                       offset: const Offset(0, 2),
                                     )
@@ -149,8 +154,11 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
                             'Iniciar Sesión',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontWeight: _isLogin ? FontWeight.bold : FontWeight.w500,
-                              color: _isLogin ? AppColors.primaryIndigo : context.textSecondaryColor,
+                              fontWeight:
+                                  _isLogin ? FontWeight.bold : FontWeight.w500,
+                              color: _isLogin
+                                  ? AppColors.primaryIndigo
+                                  : context.textSecondaryColor,
                             ),
                           ),
                         ),
@@ -166,14 +174,18 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
                           duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           decoration: BoxDecoration(
-                            color: !_isLogin ? context.surfaceColor : Colors.transparent,
+                            color: !_isLogin
+                                ? context.surfaceColor
+                                : Colors.transparent,
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: !_isLogin
                                 ? [
                                     BoxShadow(
                                       color: context.isDarkMode
-                                          ? AppColors.darkShadowDark.withValues(alpha: 0.3)
-                                          : AppColors.shadowDark.withValues(alpha: 0.2),
+                                          ? AppColors.darkShadowDark
+                                              .withValues(alpha: 0.3)
+                                          : AppColors.shadowDark
+                                              .withValues(alpha: 0.2),
                                       blurRadius: 6,
                                       offset: const Offset(0, 2),
                                     )
@@ -184,8 +196,11 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
                             'Registrarse',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontWeight: !_isLogin ? FontWeight.bold : FontWeight.w500,
-                              color: !_isLogin ? AppColors.primaryIndigo : context.textSecondaryColor,
+                              fontWeight:
+                                  !_isLogin ? FontWeight.bold : FontWeight.w500,
+                              color: !_isLogin
+                                  ? AppColors.primaryIndigo
+                                  : context.textSecondaryColor,
                             ),
                           ),
                         ),
@@ -215,10 +230,12 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
                   child: Center(
                     child: TextField(
                       controller: _nameController,
-                      style: TextStyle(color: context.textMainColor, fontSize: 14),
+                      style:
+                          TextStyle(color: context.textMainColor, fontSize: 14),
                       decoration: InputDecoration(
                         hintText: 'Tu nombre o apodo',
-                        hintStyle: TextStyle(color: context.textMutedColor, fontSize: 14),
+                        hintStyle: TextStyle(
+                            color: context.textMutedColor, fontSize: 14),
                         border: InputBorder.none,
                       ),
                     ),
@@ -245,10 +262,12 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
                   child: TextField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    style: TextStyle(color: context.textMainColor, fontSize: 14),
+                    style:
+                        TextStyle(color: context.textMainColor, fontSize: 14),
                     decoration: InputDecoration(
                       hintText: 'ejemplo@correo.com',
-                      hintStyle: TextStyle(color: context.textMutedColor, fontSize: 14),
+                      hintStyle: TextStyle(
+                          color: context.textMutedColor, fontSize: 14),
                       border: InputBorder.none,
                     ),
                   ),
@@ -275,10 +294,12 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
                   child: TextField(
                     controller: _passwordController,
                     obscureText: true,
-                    style: TextStyle(color: context.textMainColor, fontSize: 14),
+                    style:
+                        TextStyle(color: context.textMainColor, fontSize: 14),
                     decoration: InputDecoration(
                       hintText: '••••••••',
-                      hintStyle: TextStyle(color: context.textMutedColor, fontSize: 14),
+                      hintStyle: TextStyle(
+                          color: context.textMutedColor, fontSize: 14),
                       border: InputBorder.none,
                     ),
                   ),
@@ -329,7 +350,8 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Text(
                       'o bien',
-                      style: TextStyle(fontSize: 12, color: context.textMutedColor),
+                      style: TextStyle(
+                          fontSize: 12, color: context.textMutedColor),
                     ),
                   ),
                   Expanded(
@@ -349,7 +371,8 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.face_5_outlined, color: context.textMainColor, size: 20),
+                      Icon(Icons.face_5_outlined,
+                          color: context.textMainColor, size: 20),
                       const SizedBox(width: 8),
                       Text(
                         'Continuar como Invitado',

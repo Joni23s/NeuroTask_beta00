@@ -1,7 +1,6 @@
 import 'package:neurotask/core/domain/models/user_profile.dart';
 import 'package:neurotask/data/repositories/task_repository.dart';
 import 'package:neurotask/data/repositories/anchor_repository.dart';
-import 'package:neurotask/data/repositories/user_repository.dart';
 
 void main() async {
   print('--- TEST 1: UserProfile Serialization & Named Constructors ---');
@@ -24,7 +23,8 @@ void main() async {
 
   final restoredUser = UserProfile.fromObject(map);
   assert(restoredUser.id == user.id, 'Restored User ID must match');
-  assert(restoredUser.formattedFocusHours == '6.2 h', 'Formatted focus hours must be 6.2 h');
+  assert(restoredUser.formattedFocusHours == '6.2 h',
+      'Formatted focus hours must be 6.2 h');
   print('✓ UserProfile toMap() and fromObject() OK');
 
   print('--- TEST 2: TaskRepository Data & Presets ---');
@@ -36,16 +36,17 @@ void main() async {
 
   final initialGraph = await taskRepo.getInitialTaskGraph();
   assert(initialGraph.nodes.isNotEmpty, 'Initial task graph must not be empty');
-  print('✓ TaskRepository initial graph OK: ${initialGraph.nodes.length} nodes');
+  print(
+      '✓ TaskRepository initial graph OK: ${initialGraph.nodes.length} nodes');
 
   print('--- TEST 3: AnchorRepository Activities & Days ---');
   final anchorRepo = AnchorRepository();
   final mondayAnchors = await anchorRepo.getAnchorsForWeekday(1); // Lunes
   assert(mondayAnchors.isNotEmpty, 'Monday anchors must not be empty');
-  print('✓ AnchorRepository Monday activities OK: ${mondayAnchors.length} activities');
+  print(
+      '✓ AnchorRepository Monday activities OK: ${mondayAnchors.length} activities');
 
   print('========================================');
   print('ALL REPOSITORY & DATA LAYER TESTS PASSED! 100%');
   print('========================================');
 }
-

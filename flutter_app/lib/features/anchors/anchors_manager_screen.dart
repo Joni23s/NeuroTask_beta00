@@ -1,24 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/domain/models/time_anchor.dart';
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/theme_context.dart';
 import '../../core/utils/haptic_helper.dart';
 import '../../core/widgets/neumorphic_button.dart';
 import '../../core/widgets/neuro_badge.dart';
 import '../../core/widgets/neuro_modal_sheet.dart';
-import '../../util/date_time_formatter.dart';
 import 'anchors_controller.dart';
 
 class AnchorsManagerScreen extends ConsumerStatefulWidget {
   const AnchorsManagerScreen({super.key});
 
   @override
-  ConsumerState<AnchorsManagerScreen> createState() => _AnchorsManagerScreenState();
+  ConsumerState<AnchorsManagerScreen> createState() =>
+      _AnchorsManagerScreenState();
 }
 
 class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
-  final List<String> _weekdaysShort = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+  final List<String> _weekdaysShort = [
+    'Lun',
+    'Mar',
+    'Mié',
+    'Jue',
+    'Vie',
+    'Sáb',
+    'Dom'
+  ];
   final List<String> _weekdaysFull = [
     'LUNES',
     'MARTES',
@@ -33,7 +40,6 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
   static const int _startHour = 9;
   static const int _endHour = 22;
   static const double _axisX = 66.0;
-
 
   void _onOpenAddAnchorSheet({String? initialStartTime}) {
     HapticHelper.lightTap();
@@ -51,14 +57,18 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
               SnackBar(
                 content: Row(
                   children: [
-                    const Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
+                    const Icon(Icons.check_circle_rounded,
+                        color: Colors.white, size: 18),
                     const SizedBox(width: 8),
-                    Expanded(child: Text('Actividad "${anchor.title}" agendada en la Malla')),
+                    Expanded(
+                        child: Text(
+                            'Actividad "${anchor.title}" agendada en la Malla')),
                   ],
                 ),
                 behavior: SnackBarBehavior.floating,
                 backgroundColor: const Color(0xFF45A59E),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
                 duration: const Duration(seconds: 3),
               ),
             );
@@ -104,7 +114,8 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
                   NeuroBadge(
                     label: category,
                     textColor: const Color(0xFF45A59E),
-                    backgroundColor: const Color(0xFF45A59E).withValues(alpha: 0.15),
+                    backgroundColor:
+                        const Color(0xFF45A59E).withValues(alpha: 0.15),
                   ),
                   const SizedBox(width: 8),
                   const NeuroBadge.status(
@@ -116,12 +127,18 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
               const SizedBox(height: 16),
               Text(
                 'Horario asignado:',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: context.textSecondary),
+                style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: context.textSecondary),
               ),
               const SizedBox(height: 4),
               Text(
                 '$startTime — $endTime',
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: context.textMain),
+                style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: context.textMain),
               ),
               const SizedBox(height: 24),
               Row(
@@ -132,11 +149,14 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.redAccent,
                           side: const BorderSide(color: Colors.redAccent),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16)),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
-                        icon: const Icon(Icons.delete_outline_rounded, size: 18),
-                        label: const Text('Eliminar', style: TextStyle(fontWeight: FontWeight.bold)),
+                        icon:
+                            const Icon(Icons.delete_outline_rounded, size: 18),
+                        label: const Text('Eliminar',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
                         onPressed: () {
                           Navigator.pop(ctx);
                           _onDeleteAnchor(realAnchor);
@@ -152,7 +172,11 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
                       height: 48,
                       onPressed: () => Navigator.pop(ctx),
                       child: const Center(
-                        child: Text('Cerrar', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                        child: Text('Cerrar',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13)),
                       ),
                     ),
                   ),
@@ -205,7 +229,8 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
           children: [
             // Header Superior: Botón Volver, Logo Neurotask Centrado y Botón Agregar (+)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 8.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 18.0, vertical: 8.0),
               child: Stack(
                 alignment: Alignment.center,
                 children: [
@@ -227,9 +252,11 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
                           decoration: BoxDecoration(
                             color: Colors.white.withValues(alpha: 0.08),
                             shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+                            border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.15)),
                           ),
-                          child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20),
+                          child: const Icon(Icons.arrow_back_rounded,
+                              color: Colors.white, size: 20),
                         ),
                       ),
                     ),
@@ -247,7 +274,8 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0xFF38BDF8).withValues(alpha: 0.35),
+                              color: const Color(0xFF38BDF8)
+                                  .withValues(alpha: 0.35),
                               blurRadius: 18,
                               spreadRadius: 2,
                             ),
@@ -259,7 +287,8 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
                             width: 52,
                             height: 52,
                             fit: BoxFit.contain,
-                            errorBuilder: (_, __, ___) => const Text('💡', style: TextStyle(fontSize: 32)),
+                            errorBuilder: (_, __, ___) => const Text('💡',
+                                style: TextStyle(fontSize: 32)),
                           ),
                         ),
                       ),
@@ -289,11 +318,15 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF45A59E).withValues(alpha: 0.3),
+                            color:
+                                const Color(0xFF45A59E).withValues(alpha: 0.3),
                             shape: BoxShape.circle,
-                            border: Border.all(color: const Color(0xFF45A59E).withValues(alpha: 0.6)),
+                            border: Border.all(
+                                color: const Color(0xFF45A59E)
+                                    .withValues(alpha: 0.6)),
                           ),
-                          child: const Icon(Icons.add_rounded, color: Colors.white, size: 24),
+                          child: const Icon(Icons.add_rounded,
+                              color: Colors.white, size: 24),
                         ),
                       ),
                     ),
@@ -318,12 +351,15 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
                     child: InkWell(
                       onTap: () {
                         HapticHelper.selectionClick();
-                        ref.read(anchorsProvider.notifier).selectWeekday(dayNum);
+                        ref
+                            .read(anchorsProvider.notifier)
+                            .selectWeekday(dayNum);
                       },
                       borderRadius: BorderRadius.circular(14),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
                         decoration: BoxDecoration(
                           color: isSelected
                               ? const Color(0xFF45A59E)
@@ -356,8 +392,8 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final totalHours = (_endHour - _startHour + 1);
-                  final timelineContentHeight = totalHours * _hourHeight + 80.0;
+                  const totalHours = (_endHour - _startHour + 1);
+                  const timelineContentHeight = totalHours * _hourHeight + 80.0;
                   final availableWidth = constraints.maxWidth;
                   final rightAreaWidth = availableWidth - _axisX - 20;
                   final cardWidth = (rightAreaWidth - 14) / 2;
@@ -461,7 +497,8 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
                                     right: 12,
                                     child: Container(
                                       height: 1.0,
-                                      color: const Color(0xFF1B4160).withValues(alpha: 0.85),
+                                      color: const Color(0xFF1B4160)
+                                          .withValues(alpha: 0.85),
                                     ),
                                   ),
                                 ],
@@ -471,10 +508,14 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
 
                           // 4. Tarjetas redondeadas de Actividades (Malla Temporal)
                           ...displayedItems.map((item) {
-                            final minutesFromStart = item.startMinutes - (_startHour * 60);
-                            if (minutesFromStart < -30) return const SizedBox.shrink();
+                            final minutesFromStart =
+                                item.startMinutes - (_startHour * 60);
+                            if (minutesFromStart < -30) {
+                              return const SizedBox.shrink();
+                            }
 
-                            final cardTop = 60.0 + (minutesFromStart * (_hourHeight / 60.0));
+                            final cardTop = 60.0 +
+                                (minutesFromStart * (_hourHeight / 60.0));
                             final cardLeft = item.isRightLane
                                 ? _axisX + 12.0 + cardWidth + 10.0
                                 : _axisX + 10.0;
@@ -487,9 +528,12 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
                                 ? const Color(0xFF28182E)
                                 : const Color(0xFF132B33);
 
-                            final endMin = item.startMinutes + item.durationMinutes;
-                            final startTimeStr = TimeAnchor.minutesToTimeString(item.startMinutes);
-                            final endTimeStr = TimeAnchor.minutesToTimeString(endMin);
+                            final endMin =
+                                item.startMinutes + item.durationMinutes;
+                            final startTimeStr = TimeAnchor.minutesToTimeString(
+                                item.startMinutes);
+                            final endTimeStr =
+                                TimeAnchor.minutesToTimeString(endMin);
 
                             return Positioned(
                               top: cardTop,
@@ -497,7 +541,8 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
                               width: cardWidth.clamp(115.0, 150.0),
                               child: Semantics(
                                 button: true,
-                                label: 'Actividad ${item.title.replaceAll('\n', ' ')}, de $startTimeStr a $endTimeStr',
+                                label:
+                                    'Actividad ${item.title.replaceAll('\n', ' ')}, de $startTimeStr a $endTimeStr',
                                 child: InkWell(
                                   onTap: () => _onShowItemDetails(
                                     title: item.title,
@@ -508,19 +553,22 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
                                   ),
                                   borderRadius: BorderRadius.circular(15),
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 11),
                                     decoration: BoxDecoration(
                                       color: cardBg,
                                       borderRadius: BorderRadius.circular(15),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.22),
+                                          color: Colors.black
+                                              .withValues(alpha: 0.22),
                                           blurRadius: 8,
                                           offset: const Offset(0, 3),
                                         ),
                                       ],
                                       border: Border.all(
-                                        color: Colors.white.withValues(alpha: 0.18),
+                                        color: Colors.white
+                                            .withValues(alpha: 0.18),
                                         width: 1,
                                       ),
                                     ),
@@ -594,7 +642,14 @@ class _AddAnchorFormState extends State<_AddAnchorForm> {
   String _category = 'Proyecto';
   final List<int> _selectedDays = [1, 2, 3, 4, 5];
 
-  final List<String> _categories = ['Proyecto', 'Reunión', 'Foco', 'Facultad', 'Gimnasio', 'General'];
+  final List<String> _categories = [
+    'Proyecto',
+    'Reunión',
+    'Foco',
+    'Facultad',
+    'Gimnasio',
+    'General'
+  ];
 
   @override
   void initState() {
@@ -641,7 +696,11 @@ class _AddAnchorFormState extends State<_AddAnchorForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Nombre de la actividad:', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: context.textSecondary)),
+            Text('Nombre de la actividad:',
+                style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: context.textSecondary)),
             const SizedBox(height: 6),
             TextFormField(
               controller: _titleController,
@@ -660,13 +719,29 @@ class _AddAnchorFormState extends State<_AddAnchorForm> {
                 hintStyle: TextStyle(fontSize: 13, color: context.textMuted),
                 filled: true,
                 fillColor: isDark ? Colors.white10 : context.cardSurface,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: context.borderLight)),
-                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: context.borderLight)),
-                focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Color(0xFF45A59E), width: 1.5)),
-                errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Colors.redAccent)),
-                focusedErrorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Colors.redAccent, width: 1.5)),
-                errorStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.redAccent),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: context.borderLight)),
+                enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: context.borderLight)),
+                focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide:
+                        const BorderSide(color: Color(0xFF45A59E), width: 1.5)),
+                errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(color: Colors.redAccent)),
+                focusedErrorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide:
+                        const BorderSide(color: Colors.redAccent, width: 1.5)),
+                errorStyle: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.redAccent),
               ),
             ),
             const SizedBox(height: 16),
@@ -678,11 +753,16 @@ class _AddAnchorFormState extends State<_AddAnchorForm> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Hora Inicio (HH:mm):', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: context.textSecondary)),
+                      Text('Hora Inicio (HH:mm):',
+                          style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: context.textSecondary)),
                       const SizedBox(height: 6),
                       _TimeSelectorPill(
                         time: _startTime,
-                        onChanged: (newVal) => setState(() => _startTime = newVal),
+                        onChanged: (newVal) =>
+                            setState(() => _startTime = newVal),
                       ),
                     ],
                   ),
@@ -692,11 +772,16 @@ class _AddAnchorFormState extends State<_AddAnchorForm> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Hora Fin (HH:mm):', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: context.textSecondary)),
+                      Text('Hora Fin (HH:mm):',
+                          style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: context.textSecondary)),
                       const SizedBox(height: 6),
                       _TimeSelectorPill(
                         time: _endTime,
-                        onChanged: (newVal) => setState(() => _endTime = newVal),
+                        onChanged: (newVal) =>
+                            setState(() => _endTime = newVal),
                       ),
                     ],
                   ),
@@ -706,7 +791,11 @@ class _AddAnchorFormState extends State<_AddAnchorForm> {
             const SizedBox(height: 16),
 
             // Selector de Categoría
-            Text('Categoría:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: context.textSecondary)),
+            Text('Categoría:',
+                style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: context.textSecondary)),
             const SizedBox(height: 6),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -716,7 +805,12 @@ class _AddAnchorFormState extends State<_AddAnchorForm> {
                   return Padding(
                     padding: const EdgeInsets.only(right: 6.0),
                     child: ChoiceChip(
-                      label: Text(cat, style: TextStyle(fontSize: 11, color: isSelected ? Colors.white : context.textSecondary)),
+                      label: Text(cat,
+                          style: TextStyle(
+                              fontSize: 11,
+                              color: isSelected
+                                  ? Colors.white
+                                  : context.textSecondary)),
                       selected: isSelected,
                       selectedColor: const Color(0xFF45A59E),
                       backgroundColor: context.cardSurface,
@@ -737,7 +831,11 @@ class _AddAnchorFormState extends State<_AddAnchorForm> {
               height: 50,
               onPressed: _onSave,
               child: const Center(
-                child: Text('Guardar en Malla Temporal', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14)),
+                child: Text('Guardar en Malla Temporal',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14)),
               ),
             ),
             const SizedBox(height: 16),
@@ -759,7 +857,8 @@ class _TimeSelectorPill extends StatelessWidget {
     return InkWell(
       onTap: () async {
         final parts = time.split(':');
-        final current = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+        final current =
+            TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
         final picked = await showTimePicker(
           context: context,
           initialTime: current,
@@ -781,8 +880,13 @@ class _TimeSelectorPill extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(time, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: context.textMain)),
-            const Icon(Icons.access_time_rounded, size: 16, color: Color(0xFF45A59E)),
+            Text(time,
+                style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: context.textMain)),
+            const Icon(Icons.access_time_rounded,
+                size: 16, color: Color(0xFF45A59E)),
           ],
         ),
       ),

@@ -58,7 +58,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               borderRadius: 20,
               child: SwitchListTile(
                 secondary: Icon(
-                  themeState.isDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+                  themeState.isDarkMode
+                      ? Icons.dark_mode_rounded
+                      : Icons.light_mode_rounded,
                   color: AppColors.primaryIndigo,
                 ),
                 title: Text(
@@ -70,10 +72,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 subtitle: Text(
                   'Soft Slate para reducir la fatiga visual',
-                  style: TextStyle(fontSize: 12, color: context.textSecondaryColor),
+                  style: TextStyle(
+                      fontSize: 12, color: context.textSecondaryColor),
                 ),
                 value: themeState.isDarkMode,
-                activeColor: AppColors.primaryIndigo,
+                activeThumbColor: AppColors.primaryIndigo,
                 onChanged: (val) {
                   themeNotifier.toggleTheme();
                 },
@@ -90,7 +93,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: Column(
                 children: [
                   SwitchListTile(
-                    secondary: const Icon(Icons.anchor_rounded, color: AppColors.brandGlowCyan),
+                    secondary: const Icon(Icons.anchor_rounded,
+                        color: AppColors.brandGlowCyan),
                     title: Text(
                       'Alertas de Anclas Horarias',
                       style: TextStyle(
@@ -100,18 +104,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                     subtitle: Text(
                       'Recordar clases, reuniones o compromisos fijos',
-                      style: TextStyle(fontSize: 12, color: context.textSecondaryColor),
+                      style: TextStyle(
+                          fontSize: 12, color: context.textSecondaryColor),
                     ),
                     value: _anchorNotifications,
-                    activeColor: AppColors.brandGlowCyan,
+                    activeThumbColor: AppColors.brandGlowCyan,
                     onChanged: (val) {
                       HapticHelper.lightTap();
                       setState(() => _anchorNotifications = val);
                     },
                   ),
-                  Divider(height: 1, color: context.textMutedColor.withOpacity(0.15)),
+                  Divider(
+                      height: 1,
+                      color: context.textMutedColor.withValues(alpha: 0.15)),
                   SwitchListTile(
-                    secondary: const Icon(Icons.waves_rounded, color: AppColors.primaryIndigo),
+                    secondary: const Icon(Icons.waves_rounded,
+                        color: AppColors.primaryIndigo),
                     title: Text(
                       'Ruido Marrón Automático',
                       style: TextStyle(
@@ -121,18 +129,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                     subtitle: Text(
                       'Iniciar sonido ambiente al arrancar la sesión de foco',
-                      style: TextStyle(fontSize: 12, color: context.textSecondaryColor),
+                      style: TextStyle(
+                          fontSize: 12, color: context.textSecondaryColor),
                     ),
                     value: _autoBrownNoise,
-                    activeColor: AppColors.primaryIndigo,
+                    activeThumbColor: AppColors.primaryIndigo,
                     onChanged: (val) {
                       HapticHelper.lightTap();
                       setState(() => _autoBrownNoise = val);
                     },
                   ),
-                  Divider(height: 1, color: context.textMutedColor.withOpacity(0.15)),
+                  Divider(
+                      height: 1,
+                      color: context.textMutedColor.withValues(alpha: 0.15)),
                   SwitchListTile(
-                    secondary: const Icon(Icons.vibration_rounded, color: AppColors.amberWarning),
+                    secondary: const Icon(Icons.vibration_rounded,
+                        color: AppColors.amberWarning),
                     title: Text(
                       'Vibración Háptica',
                       style: TextStyle(
@@ -142,10 +154,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                     subtitle: Text(
                       'Retroalimentación táctil al arrastrar o completar tareas',
-                      style: TextStyle(fontSize: 12, color: context.textSecondaryColor),
+                      style: TextStyle(
+                          fontSize: 12, color: context.textSecondaryColor),
                     ),
                     value: _hapticFeedback,
-                    activeColor: AppColors.amberWarning,
+                    activeThumbColor: AppColors.amberWarning,
                     onChanged: (val) {
                       HapticHelper.lightTap();
                       setState(() => _hapticFeedback = val);
@@ -169,11 +182,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     children: [
                       Text(
                         'Versión del prototipo',
-                        style: TextStyle(color: context.textMainColor, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                            color: context.textMainColor,
+                            fontWeight: FontWeight.w500),
                       ),
                       Text(
                         '1.0.0-beta01',
-                        style: TextStyle(color: context.textSecondaryColor, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            color: context.textSecondaryColor,
+                            fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -183,11 +200,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     children: [
                       Text(
                         'Motor de ordenamiento',
-                        style: TextStyle(color: context.textMainColor, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                            color: context.textMainColor,
+                            fontWeight: FontWeight.w500),
                       ),
-                      Text(
+                      const Text(
                         'DAG Topological Sort',
-                        style: TextStyle(color: AppColors.primaryIndigo, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            color: AppColors.primaryIndigo,
+                            fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
