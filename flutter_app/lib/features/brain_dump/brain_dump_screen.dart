@@ -106,7 +106,7 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
     await Future.delayed(const Duration(milliseconds: 1300));
     if (!mounted) return;
 
-    ref.read(focusProvider.notifier).loadFromRawText(rawText);
+    await ref.read(focusProvider.notifier).loadFromRawText(rawText);
     ref.read(brainDumpProvider.notifier).setProcessing(false);
 
     Navigator.pop(context); // Close dialog
@@ -116,12 +116,12 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
     );
   }
 
-  void _loadPreset(String presetKey) {
+  void _loadPreset(String presetKey) async {
     HapticHelper.lightTap();
     setState(() {
       _showEmptyHint = false;
     });
-    ref.read(brainDumpProvider.notifier).loadPreset(presetKey);
+    await ref.read(brainDumpProvider.notifier).loadPreset(presetKey);
   }
 
   /// Algoritmo de desconstrucción regresiva progresiva (retroceso de palabras/caracteres)

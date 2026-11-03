@@ -6,3 +6,5 @@ export '../core/domain/models/time_anchor.dart';
 export '../core/domain/models/task_node.dart';
 export '../core/domain/models/task_graph.dart';
 export '../core/domain/models/achievement.dart';
+export '../core/domain/models/user_profile.dart';
+export '../core/domain/models/focus_state.dart';

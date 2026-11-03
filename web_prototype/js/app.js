@@ -142,6 +142,12 @@ function goToSettings() {
   currentScreenId = 'screen-settings';
 }
 
+function goToMalla() {
+  if (window.neuroAudio) window.neuroAudio.playSoftTap();
+  switchScreen(currentScreenId, 'screen-malla');
+  currentScreenId = 'screen-malla';
+}
+
 function enterFromWelcome(skipToFocus = false) {
   if (window.neuroAudio) window.neuroAudio.playSoftTap();
   if (skipToFocus && activeTask) {

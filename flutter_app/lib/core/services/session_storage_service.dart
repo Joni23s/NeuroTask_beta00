@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../features/focus/focus_controller.dart';
+import '../domain/models/focus_state.dart';
 import '../domain/models/task_graph.dart';
 import '../domain/models/task_node.dart';
 

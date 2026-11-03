@@ -25,7 +25,7 @@
 | `MDL_04` | **`GraphOverviewModal`** | BottomSheet en `SCR_05`/`SCR_07` | Modal BottomSheet | Árbol 2D interactivo del grafo (`DagCanvasWidget`) + toggle a vista de lista. |
 | `SCR_06` | **`SummaryCelebrationScreen`**| `/celebration` | Full Screen | 🏆 Tarjeta Hero de logro, métricas reales, `CognitiveInsightCard` y exportación de reporte. |
 | `MDL_05` | **`ReportPreviewDialog`** | Dialog en `SCR_06` | Modal Dialog | Previsualización de texto en formato monospace y copiado a portapapeles. |
-| `SCR_07` | **`AnchorsManagerScreen`** | `/anchors` | Full Screen | Gestión de anclas horarias y compromisos fijos con scheduler fitter. |
+| `SCR_07` | **`AnchorsManagerScreen` (Malla Temporal)** | `/anchors` | Full Screen | Malla Temporal visual con eje horario vertical, indicador de fecha (Lunes 24 Oct) y tarjetas escalonadas de actividades (Teal & Lavender). |
 | `SCR_08` | **`AchievementsVaultScreen`**| `/achievements` | Full Screen | Barra de progreso, chips de filtro y 10 tarjetas de trofeos cognitivos. |
 | `MDL_06` | **`AchievementDetailDialog`** | Dialog en `SCR_08` | Modal Dialog | Círculo de trofeo, pill de estado de desbloqueo e insight de impacto cognitivo. |
 | `SCR_09` | **`ProfileScreen`** | `/profile` | Full Screen | Avatar neumórfico, nivel ("Maestro del Foco"), tarjetas de estadísticas y acceso a logros. |

@@ -1,96 +1,54 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/domain/models/focus_state.dart';
 import '../../core/domain/models/task_graph.dart';
 import '../../core/domain/models/task_node.dart';
 import '../../core/domain/models/time_anchor.dart';
 import '../../core/domain/services/anchor_schedule_fitter.dart';
 import '../../core/domain/services/topological_sorter.dart';
-import '../../core/services/session_storage_service.dart';
+import '../../data/repositories/providers.dart';
 
-class FocusState {
-  final TaskGraph graph;
-  final List<TaskNode> executionQueue;
-  final int currentIndex;
-  final bool isLowEnergyMode;
-  final bool isCompletedAll;
-  final bool isRestoredFromStorage;
-  final DateTime? sessionStartTime;
-  final int elapsedSeconds;
+export '../../core/domain/models/focus_state.dart';
 
-  const FocusState({
-    required this.graph,
-    required this.executionQueue,
-    this.currentIndex = 0,
-    this.isLowEnergyMode = false,
-    this.isCompletedAll = false,
-    this.isRestoredFromStorage = false,
-    this.sessionStartTime,
-    this.elapsedSeconds = 0,
-  });
-
-  TaskNode? get currentTask {
-    if (currentIndex >= 0 && currentIndex < executionQueue.length) {
-      return executionQueue[currentIndex];
-    }
-    return null;
-  }
-
-  int get totalSteps => executionQueue.length;
-  int get currentStepNumber => currentIndex + 1;
-  bool get hasActiveSession => executionQueue.isNotEmpty && !isCompletedAll;
-
-  int get totalEstimatedMinutes =>
-      executionQueue.fold<int>(0, (sum, item) => sum + item.estimatedMinutes);
-
-  String get formattedRealTime {
-    final mins = elapsedSeconds ~/ 60;
-    final secs = elapsedSeconds % 60;
-    if (mins == 0) {
-      return '${secs > 0 ? secs : 1}s';
-    } else if (secs == 0) {
-      return '${mins}m';
-    } else {
-      return '${mins}m ${secs}s';
-    }
-  }
-
-  FocusState copyWith({
-    TaskGraph? graph,
-    List<TaskNode>? executionQueue,
-    int? currentIndex,
-    bool? isLowEnergyMode,
-    bool? isCompletedAll,
-    bool? isRestoredFromStorage,
-    DateTime? sessionStartTime,
-    int? elapsedSeconds,
-  }) {
-    return FocusState(
-      graph: graph ?? this.graph,
-      executionQueue: executionQueue ?? this.executionQueue,
-      currentIndex: currentIndex ?? this.currentIndex,
-      isLowEnergyMode: isLowEnergyMode ?? this.isLowEnergyMode,
-      isCompletedAll: isCompletedAll ?? this.isCompletedAll,
-      isRestoredFromStorage: isRestoredFromStorage ?? this.isRestoredFromStorage,
-      sessionStartTime: sessionStartTime ?? this.sessionStartTime,
-      elapsedSeconds: elapsedSeconds ?? this.elapsedSeconds,
-    );
-  }
-}
-
+/// Controlador del Flujo de Foco y Ejecución Paso a Paso (Capa de Lógica/Estado).
+///
+/// Consume datos puramente a través de los Repositorios de datos dinámicos
+/// ([TaskRepository], [AnchorRepository], [UserRepository], [AchievementRepository]),
+/// desacoplando la persistencia de las vistas visuales y cumpliendo el Tema 1 (DAM).
 class FocusNotifier extends Notifier<FocusState> {
   @override
   FocusState build() {
-    Future.microtask(() => restoreFromStorage());
-    return _initialState();
+    // Estado inicial seguro mientras se resuelven las promesas asíncronas de la capa de datos
+    Future.microtask(() => restoreOrLoadFromRepository());
+    return const FocusState(
+      graph: TaskGraph(),
+      executionQueue: [],
+      currentIndex: 0,
+      elapsedSeconds: 0,
+    );
   }
 
-  static FocusState _initialState() {
-    final graph = TopologicalSorter.defaultSampleGraph();
+  /// Carga la sesión desde la persistencia o consulta el grafo inicial del TaskRepository
+  Future<void> restoreOrLoadFromRepository() async {
+    final taskRepo = ref.read(taskRepositoryProvider);
+    final anchorRepo = ref.read(anchorRepositoryProvider);
+
+    // 1. Intentar restaurar sesión activa guardada
+    final saved = await taskRepo.restoreActiveSession();
+    if (saved != null && saved.executionQueue.isNotEmpty && !saved.isCompletedAll) {
+      state = saved.copyWith(isRestoredFromStorage: true);
+      return;
+    }
+
+    // 2. Si no hay sesión previa, cargar el grafo de tareas inicial dinámico desde el repositorio
+    final graph = await taskRepo.getInitialTaskGraph();
     final sorted = TopologicalSorter.sort(graph);
+    final anchors = await anchorRepo.getAllAnchors();
     final fit = AnchorScheduleFitter.fitTasks(
       tasks: sorted,
-      anchors: TimeAnchor.initialPresets(),
+      anchors: anchors,
     );
-    return FocusState(
+
+    state = FocusState(
       graph: graph,
       executionQueue: fit.scheduledTasks,
       currentIndex: 0,
@@ -99,20 +57,19 @@ class FocusNotifier extends Notifier<FocusState> {
     );
   }
 
-  Future<void> restoreFromStorage() async {
-    final saved = await SessionStorageService.loadSavedSession();
-    if (saved != null) {
-      state = saved.copyWith(isRestoredFromStorage: true);
-    }
-  }
+  /// Procesa texto libre de volcado mental mediante el repositorio y construye el camino crítico
+  Future<void> loadFromRawText(String text) async {
+    final taskRepo = ref.read(taskRepositoryProvider);
+    final anchorRepo = ref.read(anchorRepositoryProvider);
 
-  void loadFromRawText(String text) {
-    final graph = TopologicalSorter.parseRawText(text);
+    final graph = await taskRepo.parseAndStoreBrainDump(text);
     final sorted = TopologicalSorter.sort(graph);
+    final anchors = await anchorRepo.getAllAnchors();
     final fit = AnchorScheduleFitter.fitTasks(
       tasks: sorted,
-      anchors: TimeAnchor.initialPresets(),
+      anchors: anchors,
     );
+
     state = FocusState(
       graph: graph,
       executionQueue: fit.scheduledTasks,
@@ -123,23 +80,32 @@ class FocusNotifier extends Notifier<FocusState> {
       sessionStartTime: DateTime.now(),
       elapsedSeconds: 0,
     );
-    SessionStorageService.saveSession(state);
+
+    await taskRepo.saveActiveSession(state);
   }
 
-  void applyAnchorSchedule(List<TimeAnchor> anchors) {
+  /// Aplica una nueva configuración de anclas horarias al cronograma actual
+  Future<void> applyAnchorSchedule(List<TimeAnchor> anchors) async {
+    final taskRepo = ref.read(taskRepositoryProvider);
     final fit = AnchorScheduleFitter.fitTasks(
       tasks: state.executionQueue,
       anchors: anchors,
     );
     state = state.copyWith(executionQueue: fit.scheduledTasks);
-    SessionStorageService.saveSession(state);
+    await taskRepo.saveActiveSession(state);
   }
 
   void updateElapsedSeconds(int seconds) {
     state = state.copyWith(elapsedSeconds: seconds);
   }
 
-  void completeCurrentTask() {
+  /// Marca la tarea actual como completada, avanzando el puntero de foco
+  /// y registrando el impacto en las métricas del [UserRepository] y [AchievementRepository].
+  Future<void> completeCurrentTask() async {
+    final taskRepo = ref.read(taskRepositoryProvider);
+    final userRepo = ref.read(userRepositoryProvider);
+    final achievementRepo = ref.read(achievementRepositoryProvider);
+
     int currentElapsed = state.elapsedSeconds;
     if (state.sessionStartTime != null) {
       final diff = DateTime.now().difference(state.sessionStartTime!).inSeconds;
@@ -148,10 +114,17 @@ class FocusNotifier extends Notifier<FocusState> {
       }
     }
 
+    final currentTask = state.currentTask;
+    final taskMinutes = currentTask?.estimatedMinutes ?? 15;
+
+    // Actualizar métricas dinámicas del perfil de usuario en el UserRepository
+    await userRepo.recordTaskCompletion(minutes: taskMinutes);
+
     if (state.currentIndex < state.executionQueue.length - 1) {
-      // Mark current completed
+      // Marcar actual completada y avanzar
       final updatedQueue = List<TaskNode>.from(state.executionQueue);
-      updatedQueue[state.currentIndex] = updatedQueue[state.currentIndex].copyWith(isCompleted: true);
+      updatedQueue[state.currentIndex] =
+          updatedQueue[state.currentIndex].copyWith(isCompleted: true);
 
       state = state.copyWith(
         executionQueue: updatedQueue,
@@ -159,20 +132,27 @@ class FocusNotifier extends Notifier<FocusState> {
         elapsedSeconds: currentElapsed,
       );
     } else {
+      // Flujo completado en su totalidad
       final updatedQueue = List<TaskNode>.from(state.executionQueue);
       if (updatedQueue.isNotEmpty) {
-        updatedQueue[state.currentIndex] = updatedQueue[state.currentIndex].copyWith(isCompleted: true);
+        updatedQueue[state.currentIndex] =
+            updatedQueue[state.currentIndex].copyWith(isCompleted: true);
       }
       state = state.copyWith(
         executionQueue: updatedQueue,
         isCompletedAll: true,
         elapsedSeconds: currentElapsed > 0 ? currentElapsed : 1,
       );
+
+      // Registrar finalización en logros
+      await achievementRepo.recordFlowCompleted();
     }
-    SessionStorageService.saveSession(state);
+
+    await taskRepo.saveActiveSession(state);
   }
 
-  void splitCurrentTask() {
+  /// Rescate cognitivo: Divide la tarea actual en 2 micro-pasos inmediatos sin fricción
+  Future<void> splitCurrentTask() async {
     final current = state.currentTask;
     if (current == null) return;
 
@@ -204,10 +184,12 @@ class FocusNotifier extends Notifier<FocusState> {
     state = state.copyWith(
       executionQueue: updatedQueue,
     );
-    SessionStorageService.saveSession(state);
+
+    await ref.read(taskRepositoryProvider).saveActiveSession(state);
   }
 
-  void activateLowEnergyMode() {
+  /// Reorganiza la cola de ejecución priorizando tareas de baja energía
+  Future<void> activateLowEnergyMode() async {
     final remaining = state.executionQueue.sublist(state.currentIndex);
     remaining.sort((a, b) => a.energyLevel.index.compareTo(b.energyLevel.index));
 
@@ -220,12 +202,15 @@ class FocusNotifier extends Notifier<FocusState> {
       executionQueue: newQueue,
       isLowEnergyMode: true,
     );
-    SessionStorageService.saveSession(state);
+
+    await ref.read(taskRepositoryProvider).saveActiveSession(state);
   }
 
-  void reset() {
-    SessionStorageService.clearSession();
-    state = _initialState();
+  /// Resetea la sesión actual y restaura los datos iniciales del repositorio
+  Future<void> reset() async {
+    final taskRepo = ref.read(taskRepositoryProvider);
+    await taskRepo.clearActiveSession();
+    await restoreOrLoadFromRepository();
   }
 }
 

@@ -52,6 +52,16 @@ class SingleTaskScreen extends ConsumerWidget {
     final audioState = ref.watch(audioServiceProvider);
     final isDark = context.isDarkMode;
 
+    // Si está cargando la sesión inicial desde el TaskRepository
+    if (focusState.executionQueue.isEmpty && !focusState.isCompletedAll) {
+      return Scaffold(
+        backgroundColor: context.backgroundColor,
+        body: const Center(
+          child: CircularProgressIndicator(color: AppColors.primaryIndigo),
+        ),
+      );
+    }
+
     // If completed all tasks, navigate to the celebratory summary screen
     if (focusState.isCompletedAll || focusState.currentTask == null) {
       return const SummaryCelebrationScreen();

@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/domain/models/time_anchor.dart';
-import '../../core/services/anchors_storage_service.dart';
+import '../../data/repositories/providers.dart';
 
 class AnchorsState {
   final List<TimeAnchor> anchors;
@@ -43,56 +43,61 @@ class AnchorsNotifier extends Notifier<AnchorsState> {
     final today = DateTime.now().weekday;
     Future.microtask(() => loadAnchors());
     return AnchorsState(
-      anchors: TimeAnchor.initialPresets(),
+      anchors: const [],
       isLoading: true,
       selectedWeekday: today,
     );
   }
 
+  /// Carga las anclas y actividades dinámicamente desde el AnchorRepository
   Future<void> loadAnchors() async {
     state = state.copyWith(isLoading: true);
-    final list = await AnchorsStorageService.loadAnchors();
+    final repo = ref.read(anchorRepositoryProvider);
+    final list = await repo.getAllAnchors();
     state = state.copyWith(anchors: list, isLoading: false);
   }
 
+  /// Inserta una nueva ancla a través del repositorio
   Future<void> addAnchor(TimeAnchor anchor) async {
-    final updated = List<TimeAnchor>.from(state.anchors)..add(anchor);
-    state = state.copyWith(anchors: updated);
-    await AnchorsStorageService.saveAnchors(updated);
+    final repo = ref.read(anchorRepositoryProvider);
+    await repo.insertAnchor(anchor);
+    await loadAnchors();
   }
 
+  /// Actualiza un ancla a través del repositorio
   Future<void> updateAnchor(TimeAnchor updatedAnchor) async {
-    final updated = state.anchors.map((a) => a.id == updatedAnchor.id ? updatedAnchor : a).toList();
-    state = state.copyWith(anchors: updated);
-    await AnchorsStorageService.saveAnchors(updated);
+    final repo = ref.read(anchorRepositoryProvider);
+    await repo.updateAnchor(updatedAnchor);
+    await loadAnchors();
   }
 
+  /// Elimina un ancla a través del repositorio
   Future<void> deleteAnchor(String id) async {
-    final updated = state.anchors.where((a) => a.id != id).toList();
-    state = state.copyWith(anchors: updated);
-    await AnchorsStorageService.saveAnchors(updated);
+    final repo = ref.read(anchorRepositoryProvider);
+    await repo.deleteAnchor(id);
+    await loadAnchors();
   }
 
+  /// Conmuta estado activo/inactivo a través del repositorio
   Future<void> toggleActive(String id) async {
-    final updated = state.anchors.map((a) {
-      if (a.id == id) {
-        return a.copyWith(isActive: !a.isActive);
-      }
-      return a;
-    }).toList();
-    state = state.copyWith(anchors: updated);
-    await AnchorsStorageService.saveAnchors(updated);
+    final repo = ref.read(anchorRepositoryProvider);
+    await repo.toggleActive(id);
+    await loadAnchors();
   }
 
   void selectWeekday(int weekday) {
     state = state.copyWith(selectedWeekday: weekday);
   }
 
+  /// Restaura los valores por defecto desde el repositorio
   Future<void> resetToDefaults() async {
     state = state.copyWith(isLoading: true);
-    final defaults = await AnchorsStorageService.resetToDefaults();
+    final repo = ref.read(anchorRepositoryProvider);
+    final defaults = await repo.resetToDefaults();
     state = state.copyWith(anchors: defaults, isLoading: false);
   }
 }
 
-final anchorsProvider = NotifierProvider<AnchorsNotifier, AnchorsState>(AnchorsNotifier.new);
+final anchorsProvider = NotifierProvider<AnchorsNotifier, AnchorsState>(
+  AnchorsNotifier.new,
+);
