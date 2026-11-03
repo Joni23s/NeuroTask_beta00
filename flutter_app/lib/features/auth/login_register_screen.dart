@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/theme_context.dart';
 import '../../core/utils/haptic_helper.dart';
 import '../../core/widgets/neumorphic_button.dart';
 import '../../core/widgets/neumorphic_card.dart';
 import '../../core/widgets/neuro_inset_container.dart';
+import '../../data/repositories/providers.dart';
 import '../onboarding/welcome_screen.dart';
 
-/// Pantalla estática de Login/Registro con estética neumórfica para el prototipo.
-class LoginRegisterScreen extends StatefulWidget {
+/// Pantalla de Login/Registro con estética neumórfica y conexión al [UserRepository].
+class LoginRegisterScreen extends ConsumerStatefulWidget {
   const LoginRegisterScreen({super.key});
 
   @override
-  State<LoginRegisterScreen> createState() => _LoginRegisterScreenState();
+  ConsumerState<LoginRegisterScreen> createState() => _LoginRegisterScreenState();
 }
 
-class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
+class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
   bool _isLogin = true;
+  bool _isLoading = false;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
@@ -29,12 +32,40 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
     super.dispose();
   }
 
-  void _onAuthenticate() {
+  Future<void> _onAuthenticate() async {
     HapticHelper.mediumImpact();
-    // Navega al flujo principal (WelcomeScreen / Home)
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-    );
+    setState(() => _isLoading = true);
+
+    final userRepo = ref.read(userRepositoryProvider);
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    final name = _nameController.text.trim();
+
+    if (_isLogin) {
+      final success = await userRepo.login(
+        email.isNotEmpty ? email : 'estudiante.dam@itu.uncuyo.edu.ar',
+        password.isNotEmpty ? password : 'demo',
+      );
+      if (!success && mounted) {
+        setState(() => _isLoading = false);
+        return;
+      }
+    } else {
+      await userRepo.register(
+        name.isNotEmpty ? name : 'Estudiante DAM',
+        email.isNotEmpty ? email : 'estudiante@itu.uncuyo.edu.ar',
+        password.isNotEmpty ? password : 'demo',
+      );
+    }
+
+    ref.invalidate(currentUserProfileProvider);
+
+    if (mounted) {
+      setState(() => _isLoading = false);
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+      );
+    }
   }
 
   @override
@@ -53,7 +84,7 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                 child: NeumorphicCard(
                   padding: const EdgeInsets.all(20),
                   borderRadius: 24,
-                  child: Icon(
+                  child: const Icon(
                     Icons.psychology_rounded,
                     size: 54,
                     color: AppColors.primaryIndigo,
@@ -74,8 +105,8 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
               const SizedBox(height: 8),
               Text(
                 _isLogin
-                    ? 'Ingresá para continuar despejando tu mente'
-                    : 'Unite a NeuroTask y reducí la sobrecarga cognitiva',
+                    ? 'Ingresá para continuar tu camino de foco sereno.'
+                    : 'Personalizá tu experiencia y cuidá tu atención.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
@@ -84,10 +115,10 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
               ),
               const SizedBox(height: 32),
 
-              // Selector de pestaña (Login / Registro)
-              NeuroInsetContainer(
-                borderRadius: 16,
+              // Tab Switcher (Login / Register)
+              NeumorphicCard(
                 padding: const EdgeInsets.all(4),
+                borderRadius: 16,
                 child: Row(
                   children: [
                     Expanded(
@@ -106,8 +137,8 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                                 ? [
                                     BoxShadow(
                                       color: context.isDarkMode
-                                          ? AppColors.darkShadowDark.withOpacity(0.3)
-                                          : AppColors.shadowDark.withOpacity(0.2),
+                                          ? AppColors.darkShadowDark.withValues(alpha: 0.3)
+                                          : AppColors.shadowDark.withValues(alpha: 0.2),
                                       blurRadius: 6,
                                       offset: const Offset(0, 2),
                                     )
@@ -141,8 +172,8 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                                 ? [
                                     BoxShadow(
                                       color: context.isDarkMode
-                                          ? AppColors.darkShadowDark.withOpacity(0.3)
-                                          : AppColors.shadowDark.withOpacity(0.2),
+                                          ? AppColors.darkShadowDark.withValues(alpha: 0.3)
+                                          : AppColors.shadowDark.withValues(alpha: 0.2),
                                       blurRadius: 6,
                                       offset: const Offset(0, 2),
                                     )
@@ -163,9 +194,10 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 28),
 
-              // Formulario
+              const SizedBox(height: 24),
+
+              // Campo Nombre (Solo registro)
               if (!_isLogin) ...[
                 Text(
                   'Nombre completo',
@@ -175,48 +207,57 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                     color: context.textMainColor,
                   ),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 NeuroInsetContainer(
+                  height: 48,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   borderRadius: 14,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  child: TextField(
-                    controller: _nameController,
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: 'Tu nombre',
-                      hintStyle: TextStyle(color: context.textMutedColor),
-                      icon: Icon(Icons.person_outline_rounded, color: context.textSecondaryColor),
+                  child: Center(
+                    child: TextField(
+                      controller: _nameController,
+                      style: TextStyle(color: context.textMainColor, fontSize: 14),
+                      decoration: InputDecoration(
+                        hintText: 'Tu nombre o apodo',
+                        hintStyle: TextStyle(color: context.textMutedColor, fontSize: 14),
+                        border: InputBorder.none,
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
               ],
 
+              // Campo Email
               Text(
-                'Correo electrónico',
+                'Correo Electrónico',
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: context.textMainColor,
                 ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
               NeuroInsetContainer(
+                height: 48,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 borderRadius: 14,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                child: TextField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: 'ejemplo@correo.com',
-                    hintStyle: TextStyle(color: context.textMutedColor),
-                    icon: Icon(Icons.email_outlined, color: context.textSecondaryColor),
+                child: Center(
+                  child: TextField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    style: TextStyle(color: context.textMainColor, fontSize: 14),
+                    decoration: InputDecoration(
+                      hintText: 'ejemplo@correo.com',
+                      hintStyle: TextStyle(color: context.textMutedColor, fontSize: 14),
+                      border: InputBorder.none,
+                    ),
                   ),
                 ),
               ),
+
               const SizedBox(height: 16),
 
+              // Campo Contraseña
               Text(
                 'Contraseña',
                 style: TextStyle(
@@ -225,18 +266,21 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                   color: context.textMainColor,
                 ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 8),
               NeuroInsetContainer(
+                height: 48,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 borderRadius: 14,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                child: TextField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: '••••••••',
-                    hintStyle: TextStyle(color: context.textMutedColor),
-                    icon: Icon(Icons.lock_outline_rounded, color: context.textSecondaryColor),
+                child: Center(
+                  child: TextField(
+                    controller: _passwordController,
+                    obscureText: true,
+                    style: TextStyle(color: context.textMainColor, fontSize: 14),
+                    decoration: InputDecoration(
+                      hintText: '••••••••',
+                      hintStyle: TextStyle(color: context.textMutedColor, fontSize: 14),
+                      border: InputBorder.none,
+                    ),
                   ),
                 ),
               ),
@@ -247,16 +291,27 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
               SizedBox(
                 height: 52,
                 child: NeumorphicButton(
-                  onPressed: _onAuthenticate,
+                  onPressed: _isLoading ? () {} : _onAuthenticate,
                   backgroundColor: AppColors.primaryIndigo,
-                  child: Text(
-                    _isLogin ? 'Ingresar a NeuroTask' : 'Crear mi Cuenta',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
+                  child: _isLoading
+                      ? const Center(
+                          child: SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          ),
+                        )
+                      : Text(
+                          _isLogin ? 'Ingresar a NeuroTask' : 'Crear mi Cuenta',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
               ),
 
@@ -265,7 +320,11 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
               // Separador o acceso directo como invitado
               Row(
                 children: [
-                  Expanded(child: Divider(color: context.textMutedColor.withOpacity(0.3))),
+                  Expanded(
+                    child: Divider(
+                      color: context.textMutedColor.withValues(alpha: 0.3),
+                    ),
+                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Text(
@@ -273,7 +332,11 @@ class _LoginRegisterScreenState extends State<LoginRegisterScreen> {
                       style: TextStyle(fontSize: 12, color: context.textMutedColor),
                     ),
                   ),
-                  Expanded(child: Divider(color: context.textMutedColor.withOpacity(0.3))),
+                  Expanded(
+                    child: Divider(
+                      color: context.textMutedColor.withValues(alpha: 0.3),
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 20),

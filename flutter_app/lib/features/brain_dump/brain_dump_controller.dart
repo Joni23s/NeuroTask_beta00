@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../data/repositories/providers.dart';
 
 class BrainDumpState {
   final String text;
@@ -34,15 +35,13 @@ class BrainDumpNotifier extends Notifier<BrainDumpState> {
     state = state.copyWith(text: val);
   }
 
-  void loadPreset(String type) {
-    if (type == 'dam') {
-      state = state.copyWith(
-        text: 'Testear los endpoints del backend en Postman, redactar el resumen ejecutivo de 2 párrafos para el informe y armar las 7 diapositivas visuales en Figma para la entrega de ITU.',
-      );
-    } else if (type == 'flutter') {
-      state = state.copyWith(
-        text: 'Definir los tokens de color Soft Paper en Dart, armar la NeumorphicCard reutilizable y programar la pantalla de foco 1 a 1 con Riverpod.',
-      );
+  /// Carga presets de volcado mental dinámicamente desde el TaskRepository
+  /// eliminando strings hardcodeados dentro del controlador.
+  Future<void> loadPreset(String type) async {
+    final taskRepo = ref.read(taskRepositoryProvider);
+    final presetText = await taskRepo.getPresetText(type);
+    if (presetText != null && presetText.isNotEmpty) {
+      state = state.copyWith(text: presetText);
     }
   }
 
