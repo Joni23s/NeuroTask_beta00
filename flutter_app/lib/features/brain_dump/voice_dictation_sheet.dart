@@ -46,6 +46,7 @@ class _VoiceDictationSheetState extends ConsumerState<VoiceDictationSheet> with 
   @override
   void dispose() {
     _pulseController.dispose();
+    ref.read(speechServiceProvider.notifier).stopListening();
     super.dispose();
   }
 
@@ -137,6 +138,7 @@ class _VoiceDictationSheetState extends ConsumerState<VoiceDictationSheet> with 
           // Central Microphone Button & Pulsating Ambient Glow (Isolated with RepaintBoundary)
           RepaintBoundary(
             child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
               onTap: isAvailable ? _toggleListening : _runAssistedDemo,
               child: AnimatedBuilder(
                 animation: _pulseController,
@@ -198,20 +200,48 @@ class _VoiceDictationSheetState extends ConsumerState<VoiceDictationSheet> with 
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 12, color: context.textSecondary, height: 1.35),
           ),
+          if (speechState.errorMessage != null && !isListening) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.amber.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.amber.withValues(alpha: 0.35)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.info_outline_rounded, size: 16, color: Colors.amber),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      speechState.errorMessage!,
+                      style: const TextStyle(fontSize: 12, color: Colors.amber, fontWeight: FontWeight.w600),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
 
           // Real-time Soundwave Bars reacting to live mic input
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(14, (index) {
+              final idleRipple = isListening
+                  ? (math.sin((_pulseController.value * 2 * math.pi) + (index * 0.45)).abs() * 8.0)
+                  : 0.0;
               final waveHeight = isListening
-                  ? 8.0 + (_micLevel * 32.0 * (1.0 + math.sin(index * 0.8)).abs())
+                  ? (8.0 + idleRipple + (_micLevel * 28.0 * (1.0 + math.sin(index * 0.8)).abs())).clamp(6.0, 42.0)
                   : 6.0;
 
               return AnimatedContainer(
                 duration: const Duration(milliseconds: 70),
                 width: 4,
-                height: waveHeight.clamp(6.0, 42.0),
+                height: waveHeight,
                 margin: const EdgeInsets.symmetric(horizontal: 2.5),
                 decoration: BoxDecoration(
                   color: isListening

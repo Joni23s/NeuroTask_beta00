@@ -1,15 +1,14 @@
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 
-@JS('window')
-external JSObject get _window;
-
 bool isWebSpeechSupported() {
   try {
-    if (_window.hasProperty('NeuroTaskVoice'.toJS).toDart) {
-      final voiceObj = _window.getProperty('NeuroTaskVoice'.toJS) as JSObject;
+    if (globalContext.hasProperty('NeuroTaskVoice'.toJS).toDart) {
+      final voiceObj = globalContext.getProperty('NeuroTaskVoice'.toJS) as JSObject;
       final res = voiceObj.callMethod('isSupported'.toJS);
-      return (res as JSBoolean).toDart;
+      if (res != null) {
+        return (res as JSBoolean).toDart;
+      }
     }
   } catch (e) {
     // fallback
@@ -24,8 +23,8 @@ void startWebSpeech({
   required Function() onEnd,
 }) {
   try {
-    if (_window.hasProperty('NeuroTaskVoice'.toJS).toDart) {
-      final voiceObj = _window.getProperty('NeuroTaskVoice'.toJS) as JSObject;
+    if (globalContext.hasProperty('NeuroTaskVoice'.toJS).toDart) {
+      final voiceObj = globalContext.getProperty('NeuroTaskVoice'.toJS) as JSObject;
 
       final onResultJs = ((JSString text) {
         onResult(text.toDart);
@@ -58,8 +57,8 @@ void startWebSpeech({
 
 void stopWebSpeech() {
   try {
-    if (_window.hasProperty('NeuroTaskVoice'.toJS).toDart) {
-      final voiceObj = _window.getProperty('NeuroTaskVoice'.toJS) as JSObject;
+    if (globalContext.hasProperty('NeuroTaskVoice'.toJS).toDart) {
+      final voiceObj = globalContext.getProperty('NeuroTaskVoice'.toJS) as JSObject;
       voiceObj.callMethod('stop'.toJS);
     }
   } catch (_) {}

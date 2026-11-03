@@ -141,7 +141,15 @@ class SpeechNotifier extends Notifier<SpeechState> {
         },
         onError: (err) {
           debugPrint('Web Speech error: $err');
-          state = state.copyWith(isListening: false, soundLevel: 0.0, errorMessage: err);
+          String friendly = err;
+          if (err.contains('not-allowed')) {
+            friendly = 'Permiso de micrófono no habilitado en Chrome.';
+          } else if (err.contains('audio-capture')) {
+            friendly = 'Micrófono no detectado o en uso por otra app.';
+          } else if (err.contains('network')) {
+            friendly = 'Error de conexión con el servicio de voz.';
+          }
+          state = state.copyWith(isListening: false, soundLevel: 0.0, errorMessage: friendly);
         },
         onEnd: () {
           state = state.copyWith(isListening: false, soundLevel: 0.0);
