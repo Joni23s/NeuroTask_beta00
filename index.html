@@ -48,9 +48,30 @@
     window.NeuroTaskVoice = {
       recognition: null,
       isListening: false,
+      audioStream: null,
+      audioCtx: null,
+      animFrameId: null,
+      accumulatedTranscript: '',
       
       isSupported: function() {
         return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+      },
+
+      _stopAudioMeter: function() {
+        if (this.animFrameId) {
+          cancelAnimationFrame(this.animFrameId);
+          this.animFrameId = null;
+        }
+        if (this.audioStream) {
+          try {
+            this.audioStream.getTracks().forEach(function(t) { t.stop(); });
+          } catch(e) {}
+          this.audioStream = null;
+        }
+        if (this.audioCtx) {
+          try { this.audioCtx.close(); } catch(e) {}
+          this.audioCtx = null;
+        }
       },
 
       start: function(onResult, onSoundLevel, onError, onEnd) {
@@ -60,44 +81,105 @@
           return;
         }
 
-        try {
-          if (window.NeuroTaskVoice.recognition) {
-            try { window.NeuroTaskVoice.recognition.abort(); } catch(e) {}
-          }
+        // Clean up any existing recognition instance to avoid event collisions
+        if (this.recognition) {
+          const oldRec = this.recognition;
+          this.recognition = null;
+          oldRec.onresult = null;
+          oldRec.onerror = null;
+          oldRec.onend = null;
+          try { oldRec.abort(); } catch(e) {}
+        }
+        this._stopAudioMeter();
 
+        this.accumulatedTranscript = '';
+        this.isListening = true;
+
+        const self = this;
+
+        try {
           const rec = new SpeechRecognition();
           rec.continuous = true;
           rec.interimResults = true;
-          rec.lang = 'es-ES';
+          rec.lang = (navigator.language && navigator.language.startsWith('es')) ? navigator.language : 'es-ES';
 
           rec.onresult = function(event) {
-            let fullTranscript = '';
+            let sessionFinal = '';
+            let interim = '';
             for (let i = 0; i < event.results.length; ++i) {
-              fullTranscript += event.results[i][0].transcript;
+              const res = event.results[i];
+              const text = res[0].transcript;
+              if (res.isFinal) {
+                sessionFinal += (sessionFinal ? ' ' : '') + text.trim();
+              } else {
+                interim += text;
+              }
             }
-            if (onResult) onResult(fullTranscript);
+
+            let full = self.accumulatedTranscript;
+            if (sessionFinal) {
+              full += (full ? ' ' : '') + sessionFinal;
+            }
+            if (interim) {
+              full += (full ? ' ' : '') + interim.trim();
+            }
+
+            if (onResult) onResult(full);
           };
 
           rec.onerror = function(event) {
             console.warn("Web Speech error:", event.error);
+            // 'no-speech' is triggered when the speaker pauses. Never abort on silence!
+            if (event.error === 'no-speech') {
+              return;
+            }
+            // 'aborted' is triggered during restarts or intentional stops. Ignore.
+            if (event.error === 'aborted') {
+              return;
+            }
+
+            // Fatal errors (e.g. 'not-allowed', 'audio-capture', 'service-not-allowed')
+            self.isListening = false;
+            self._stopAudioMeter();
             if (onError) onError(event.error);
           };
 
           rec.onend = function() {
-            window.NeuroTaskVoice.isListening = false;
-            if (onEnd) onEnd();
+            // Chrome closes continuous recognition automatically on pause or timeouts.
+            // If the user hasn't stopped it, seamlessly keep listening!
+            if (self.isListening) {
+              try {
+                rec.start();
+              } catch (err) {
+                setTimeout(function() {
+                  if (self.isListening) {
+                    try { rec.start(); } catch(e) {
+                      console.warn("Could not restart SpeechRecognition:", e);
+                    }
+                  }
+                }, 200);
+              }
+            } else {
+              self._stopAudioMeter();
+              if (onEnd) onEnd();
+            }
           };
 
           rec.start();
-          window.NeuroTaskVoice.recognition = rec;
-          window.NeuroTaskVoice.isListening = true;
+          this.recognition = rec;
 
-          // Microphone sound level meter using Web Audio API
+          // Sound level analyzer using Web Audio API (isolated & non-blocking)
           if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
+              if (!self.isListening) {
+                stream.getTracks().forEach(function(t) { t.stop(); });
+                return;
+              }
+              self.audioStream = stream;
               try {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
                 const ctx = new AudioContext();
+                self.audioCtx = ctx;
                 const src = ctx.createMediaStreamSource(stream);
                 const analyser = ctx.createAnalyser();
                 analyser.fftSize = 64;
@@ -105,13 +187,7 @@
                 const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
                 function checkAudio() {
-                  if (!window.NeuroTaskVoice.isListening) {
-                    try {
-                      stream.getTracks().forEach(function(t) { t.stop(); });
-                      ctx.close();
-                    } catch(e) {}
-                    return;
-                  }
+                  if (!self.isListening || !self.audioStream) return;
                   analyser.getByteFrequencyData(dataArray);
                   let sum = 0;
                   for (let i = 0; i < dataArray.length; i++) {
@@ -119,27 +195,35 @@
                   }
                   const avg = (sum / dataArray.length) / 255.0; // 0.0 to 1.0
                   if (onSoundLevel) onSoundLevel(avg);
-                  requestAnimationFrame(checkAudio);
+                  self.animFrameId = requestAnimationFrame(checkAudio);
                 }
-                checkAudio();
+                self.animFrameId = requestAnimationFrame(checkAudio);
               } catch (e) {
                 console.warn("Audio meter context error:", e);
               }
             }).catch(function(err) {
-              console.warn("Microphone stream error:", err);
+              console.warn("Microphone stream error (audio level meter):", err);
             });
           }
         } catch (err) {
           console.error("SpeechRecognition start error:", err);
+          self.isListening = false;
+          self._stopAudioMeter();
           if (onError) onError(err.toString());
         }
       },
 
       stop: function() {
-        window.NeuroTaskVoice.isListening = false;
-        if (window.NeuroTaskVoice.recognition) {
+        this.isListening = false;
+        this._stopAudioMeter();
+        if (this.recognition) {
+          const rec = this.recognition;
+          this.recognition = null;
+          rec.onresult = null;
+          rec.onerror = null;
+          rec.onend = null;
           try {
-            window.NeuroTaskVoice.recognition.stop();
+            rec.stop();
           } catch(e) {}
         }
       }
