@@ -183,7 +183,7 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> with SingleTicker
                       const SizedBox(width: 6),
                       Semantics(
                         button: true,
-                        label: 'Configuración',
+                        label: 'Ajustes y Configuración',
                         child: InkWell(
                           onTap: () {
                             HapticHelper.lightTap();
