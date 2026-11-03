@@ -7,9 +7,10 @@ import '../../core/widgets/neumorphic_button.dart';
 import '../../core/widgets/neumorphic_card.dart';
 import '../../core/widgets/neuro_inset_container.dart';
 import '../../data/repositories/providers.dart';
+import '../../data/repositories/user_repository.dart';
 import '../onboarding/welcome_screen.dart';
 
-/// Pantalla de Login/Registro con estética neumórfica y conexión al [UserRepository].
+/// Pantalla de Login/Registro con estética neumórfica, validación activa y conexión al [UserRepository].
 class LoginRegisterScreen extends ConsumerStatefulWidget {
   const LoginRegisterScreen({super.key});
 
@@ -21,6 +22,10 @@ class LoginRegisterScreen extends ConsumerStatefulWidget {
 class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
   bool _isLogin = true;
   bool _isLoading = false;
+  bool _obscurePassword = true;
+  String? _errorMessage;
+  String? _successMessage;
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
@@ -33,8 +38,60 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
     super.dispose();
   }
 
+  /// Valida las entradas del usuario antes de proceder a la autenticación.
+  bool _validateInputs() {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    final name = _nameController.text.trim();
+
+    if (!_isLogin) {
+      if (name.isEmpty) {
+        setState(() => _errorMessage = 'Por favor ingresá tu nombre completo.');
+        return false;
+      }
+      if (name.length < 2) {
+        setState(() => _errorMessage = 'El nombre debe tener al menos 2 caracteres.');
+        return false;
+      }
+    }
+
+    if (email.isEmpty) {
+      setState(() => _errorMessage = 'Por favor ingresá tu correo electrónico.');
+      return false;
+    }
+
+    final emailRegex = RegExp(r'^[\w\.\-]+@([\w\-]+\.)+[\w\-]{2,4}$');
+    if (!emailRegex.hasMatch(email)) {
+      setState(() => _errorMessage = 'Ingresá un correo electrónico válido (ej: nombre@correo.com).');
+      return false;
+    }
+
+    if (password.isEmpty) {
+      setState(() => _errorMessage = 'Por favor ingresá tu contraseña.');
+      return false;
+    }
+
+    if (password.length < 6) {
+      setState(() => _errorMessage = 'La contraseña debe tener al menos 6 caracteres.');
+      return false;
+    }
+
+    return true;
+  }
+
+  /// Maneja el flujo de Inicio de Sesión o Registro validado.
   Future<void> _onAuthenticate() async {
     HapticHelper.mediumImpact();
+    setState(() {
+      _errorMessage = null;
+      _successMessage = null;
+    });
+
+    if (!_validateInputs()) {
+      HapticHelper.lightTap();
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     final userRepo = ref.read(userRepositoryProvider);
@@ -43,21 +100,67 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
     final name = _nameController.text.trim();
 
     if (_isLogin) {
-      final success = await userRepo.login(
-        email.isNotEmpty ? email : 'estudiante.dam@itu.uncuyo.edu.ar',
-        password.isNotEmpty ? password : 'demo',
-      );
-      if (!success && mounted) {
-        setState(() => _isLoading = false);
+      final result = await userRepo.login(email, password);
+      if (!result.success) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _errorMessage = result.errorMessage ?? 'Error al iniciar sesión.';
+          });
+          HapticHelper.lightTap();
+        }
         return;
       }
+
+      ref.invalidate(currentUserProfileProvider);
+
+      if (mounted) {
+        setState(() => _isLoading = false);
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+        );
+      }
     } else {
-      await userRepo.register(
-        name.isNotEmpty ? name : 'Estudiante DAM',
-        email.isNotEmpty ? email : 'estudiante@itu.uncuyo.edu.ar',
-        password.isNotEmpty ? password : 'demo',
+      final result = await userRepo.register(
+        name: name,
+        email: email,
+        password: password,
       );
+      if (!result.success) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+            _errorMessage = result.errorMessage ?? 'Error al registrar la cuenta.';
+          });
+          HapticHelper.lightTap();
+        }
+        return;
+      }
+
+      // Registro exitoso: cambiamos al tab Iniciar Sesión con las credenciales auto-completadas
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _isLogin = true;
+          _errorMessage = null;
+          _successMessage = '¡Bienvenido/a, $name! Tu cuenta fue creada con éxito. Presioná "Ingresar a NeuroTask" para comenzar.';
+          _nameController.clear();
+        });
+        HapticHelper.mediumImpact();
+      }
     }
+  }
+
+  /// Flujo independiente para ingresar como Invitado de evaluación.
+  Future<void> _onGuestLogin() async {
+    HapticHelper.mediumImpact();
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    final userRepo = ref.read(userRepositoryProvider);
+    await userRepo.loginAsGuest();
 
     ref.invalidate(currentUserProfileProvider);
 
@@ -79,7 +182,7 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
               // Brand Icon
               const Center(
                 child: NeumorphicCard(
@@ -114,7 +217,7 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
                   color: context.textSecondaryColor,
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 28),
 
               // Tab Switcher (Login / Register)
               NeumorphicCard(
@@ -126,7 +229,11 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
                       child: GestureDetector(
                         onTap: () {
                           HapticHelper.lightTap();
-                          setState(() => _isLogin = true);
+                          setState(() {
+                            _isLogin = true;
+                            _errorMessage = null;
+                            _successMessage = null;
+                          });
                         },
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
@@ -168,7 +275,11 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
                       child: GestureDetector(
                         onTap: () {
                           HapticHelper.lightTap();
-                          setState(() => _isLogin = false);
+                          setState(() {
+                            _isLogin = false;
+                            _errorMessage = null;
+                            _successMessage = null;
+                          });
                         },
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
@@ -210,7 +321,85 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
+
+              // Banner de Éxito Visual
+              if (_successMessage != null) ...[
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: AppColors.successEmerald.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppColors.successEmerald.withValues(alpha: 0.5),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.check_circle_outline_rounded,
+                        color: AppColors.successEmerald,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          _successMessage!,
+                          style: TextStyle(
+                            color: context.isDarkMode
+                                ? AppColors.successEmerald
+                                : AppColors.successEmeraldDark,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+
+              // Banner de Error Visual
+              if (_errorMessage != null) ...[
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 250),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFEF4444).withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFFEF4444).withValues(alpha: 0.4),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.error_outline_rounded,
+                        color: Color(0xFFEF4444),
+                        size: 20,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          _errorMessage!,
+                          style: const TextStyle(
+                            color: Color(0xFFEF4444),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
 
               // Campo Nombre (Solo registro)
               if (!_isLogin) ...[
@@ -230,10 +419,18 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
                   child: Center(
                     child: TextField(
                       controller: _nameController,
+                      onChanged: (_) {
+                        if (_errorMessage != null || _successMessage != null) {
+                          setState(() {
+                            _errorMessage = null;
+                            _successMessage = null;
+                          });
+                        }
+                      },
                       style:
                           TextStyle(color: context.textMainColor, fontSize: 14),
                       decoration: InputDecoration(
-                        hintText: 'Tu nombre o apodo',
+                        hintText: 'Tu nombre completo',
                         hintStyle: TextStyle(
                             color: context.textMutedColor, fontSize: 14),
                         border: InputBorder.none,
@@ -262,6 +459,14 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
                   child: TextField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
+                    onChanged: (_) {
+                      if (_errorMessage != null || _successMessage != null) {
+                        setState(() {
+                          _errorMessage = null;
+                          _successMessage = null;
+                        });
+                      }
+                    },
                     style:
                         TextStyle(color: context.textMainColor, fontSize: 14),
                     decoration: InputDecoration(
@@ -288,27 +493,50 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
               const SizedBox(height: 8),
               NeuroInsetContainer(
                 height: 48,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.only(left: 16, right: 6),
                 borderRadius: 14,
                 child: Center(
                   child: TextField(
                     controller: _passwordController,
-                    obscureText: true,
+                    obscureText: _obscurePassword,
+                    onChanged: (_) {
+                      if (_errorMessage != null || _successMessage != null) {
+                        setState(() {
+                          _errorMessage = null;
+                          _successMessage = null;
+                        });
+                      }
+                    },
                     style:
                         TextStyle(color: context.textMainColor, fontSize: 14),
                     decoration: InputDecoration(
-                      hintText: '••••••••',
+                      hintText: 'Mínimo 6 caracteres',
                       hintStyle: TextStyle(
                           color: context.textMutedColor, fontSize: 14),
                       border: InputBorder.none,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          size: 20,
+                          color: context.textMutedColor,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
                     ),
                   ),
                 ),
               ),
 
-              const SizedBox(height: 32),
 
-              // Botón Principal
+              const SizedBox(height: 28),
+
+              // Botón Principal (Ingresar / Registrarse)
               SizedBox(
                 height: 52,
                 child: NeumorphicButton(
@@ -338,7 +566,7 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
 
               const SizedBox(height: 20),
 
-              // Separador o acceso directo como invitado
+              // Separador "o bien"
               Row(
                 children: [
                   Expanded(
@@ -363,11 +591,11 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
               ),
               const SizedBox(height: 20),
 
-              // Botón de Invitado
+              // Botón de Invitado (Flujo Independiente)
               SizedBox(
                 height: 50,
                 child: NeumorphicButton(
-                  onPressed: _onAuthenticate,
+                  onPressed: _isLoading ? () {} : _onGuestLogin,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
