@@ -292,7 +292,7 @@ class _LoginRegisterScreenState extends ConsumerState<LoginRegisterScreen> {
                 height: 52,
                 child: NeumorphicButton(
                   onPressed: _isLoading ? () {} : _onAuthenticate,
-                  backgroundColor: AppColors.primaryIndigo,
+                  variant: NeumorphicButtonVariant.primary,
                   child: _isLoading
                       ? const Center(
                           child: SizedBox(
