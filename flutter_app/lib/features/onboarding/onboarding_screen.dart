@@ -200,7 +200,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     height: 54,
                     child: NeumorphicButton(
                       onPressed: _onNext,
-                      backgroundColor: AppColors.primaryIndigo,
+                      variant: NeumorphicButtonVariant.primary,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [

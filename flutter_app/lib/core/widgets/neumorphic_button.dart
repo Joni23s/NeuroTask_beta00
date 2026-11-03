@@ -98,11 +98,15 @@ class _NeumorphicButtonState extends State<NeumorphicButton> {
         );
         break;
       case NeumorphicButtonVariant.flat:
+        final baseColor = widget.backgroundColor ??
+            (_isPressed ? context.pressedSurface : context.cardSurface);
         decoration = BoxDecoration(
-          color: _isPressed ? context.pressedSurface : context.cardSurface,
+          color: baseColor,
           borderRadius: BorderRadius.circular(widget.borderRadius),
           boxShadow: _isPressed ? context.pressedElevation : context.subtleElevation,
-          border: Border.all(color: context.borderLight),
+          border: widget.backgroundColor != null
+              ? null
+              : Border.all(color: context.borderLight),
         );
         break;
     }
