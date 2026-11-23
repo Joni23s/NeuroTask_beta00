@@ -13,6 +13,8 @@ import '../achievements/achievements_controller.dart';
 import '../anchors/anchors_manager_screen.dart';
 import '../focus/focus_controller.dart';
 import '../focus/single_task_screen.dart';
+import '../settings/settings_controller.dart';
+import '../settings/settings_screen.dart';
 import 'brain_dump_controller.dart';
 import 'voice_dictation_sheet.dart';
 
@@ -68,6 +70,7 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
     });
 
     HapticHelper.lightTap();
+    final isAiActive = ref.read(settingsProvider).isAiActive;
     ref.read(brainDumpProvider.notifier).setProcessing(true);
     ref.read(achievementsProvider.notifier).recordBrainDump();
 
@@ -88,7 +91,9 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                 const CircularProgressIndicator(color: AppColors.primaryIndigo),
                 const SizedBox(height: 24),
                 Text(
-                  'Construyendo Grafo Lógico...',
+                  isAiActive
+                      ? 'Descomprimiendo con IA...'
+                      : 'Construyendo Grafo Lógico...',
                   style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -96,7 +101,9 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Eliminando ruido cognitivo y aislando tu primer paso...',
+                  isAiActive
+                      ? 'Analizando dependencias causales, micro-pasos y orden topológico...'
+                      : 'Aplicando NLP local, micro-tasking atómico y eliminando ruido cognitivo...',
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 12, color: context.textSecondary),
                 ),
@@ -245,6 +252,7 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
   @override
   Widget build(BuildContext context) {
     final dumpState = ref.watch(brainDumpProvider);
+    final settingsState = ref.watch(settingsProvider);
     final isDark = context.isDarkMode;
 
     if (!_isClearing &&
@@ -378,23 +386,38 @@ class _BrainDumpScreenState extends ConsumerState<BrainDumpScreen> {
                           ),
                           const SizedBox(height: 14),
 
-                          // Demo quick presets
-                          Row(
+                          // Demo quick presets & active engine chip
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            crossAxisAlignment: WrapCrossAlignment.center,
                             children: [
                               Text('Ejemplos: ',
                                   style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.bold,
                                       color: context.textMuted)),
-                              const SizedBox(width: 6),
                               NeuroBadge.chip(
                                 label: '🎓 Entrega DAM',
                                 onTap: () => _loadPreset('dam'),
                               ),
-                              const SizedBox(width: 8),
                               NeuroBadge.chip(
                                 label: '📱 Flutter',
                                 onTap: () => _loadPreset('flutter'),
+                              ),
+                              NeuroBadge.chip(
+                                label: settingsState.isAiActive
+                                    ? '✨ IA Gemini + DAG'
+                                    : '🧠 NLP Local + Micro-Tasking',
+                                onTap: () {
+                                  HapticHelper.lightTap();
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const SettingsScreen(),
+                                    ),
+                                  );
+                                },
                               ),
                             ],
                           ),

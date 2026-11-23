@@ -1,5 +1,6 @@
 import '../models/task_graph.dart';
 import '../models/task_node.dart';
+import 'cognitive_decompression_engine.dart';
 
 class TopologicalSorter {
   /// Resolves execution order using Kahn's Algorithm on Directed Acyclic Graph
@@ -53,99 +54,9 @@ class TopologicalSorter {
   }
 
   /// Parses natural language Brain Dump into an intelligent branching DAG graph
+  /// delegando al [CognitiveDecompressionEngine] local.
   static TaskGraph parseRawText(String text) {
-    final clean = text.trim();
-    if (clean.isEmpty) {
-      return defaultSampleGraph();
-    }
-
-    final clauses = clean
-        .split(RegExp(r'(?:,|\.|\n| y luego| después| primero| por último| pero antes| antes de| además| también| y tengo que| y debo)', caseSensitive: false))
-        .map((s) => s.trim())
-        .where((s) => s.length > 5)
-        .toList();
-
-    if (clauses.isEmpty) {
-      return defaultSampleGraph();
-    }
-
-    final List<TaskNode> nodes = [];
-    final List<TaskEdge> edges = [];
-
-    // Parse clauses into nodes
-    for (var i = 0; i < clauses.length && i < 6; i++) {
-      final id = 'node_${i + 1}';
-      final clause = clauses[i];
-      final lower = clause.toLowerCase();
-
-      String category = 'Ejecución';
-      int mins = 15;
-      EnergyLevel energy = EnergyLevel.medium;
-
-      if (lower.contains('inglés') || lower.contains('estudiar') || lower.contains('leer') || lower.contains('vocabulario') || lower.contains('repasar')) {
-        category = 'Estudio & Idiomas';
-        mins = 20;
-        energy = EnergyLevel.medium;
-      } else if (lower.contains('test') || lower.contains('postman') || lower.contains('endpoint') || lower.contains('api') || lower.contains('back') || lower.contains('backend') || lower.contains('código')) {
-        category = 'Backend & Dev';
-        mins = 15;
-        energy = EnergyLevel.medium;
-      } else if (lower.contains('informe') || lower.contains('resumen') || lower.contains('redactar') || lower.contains('escribir') || lower.contains('doc') || lower.contains('notas')) {
-        category = 'Documentación';
-        mins = 20;
-        energy = EnergyLevel.high;
-      } else if (lower.contains('slide') || lower.contains('figma') || lower.contains('diapositiva') || lower.contains('diseño') || lower.contains('ui') || lower.contains('pantalla')) {
-        category = 'Diseño & UI';
-        mins = 15;
-        energy = EnergyLevel.low;
-      } else if (lower.contains('organizar') || lower.contains('limpiar') || lower.contains('llamar') || lower.contains('mail') || lower.contains('enviar')) {
-        category = 'Gestión Rápida';
-        mins = 10;
-        energy = EnergyLevel.low;
-      }
-
-      nodes.add(
-        TaskNode(
-          id: id,
-          title: clause[0].toUpperCase() + clause.substring(1),
-          category: category,
-          subtext: i == 0 ? 'Paso de arranque del camino lógico.' : 'Sub-nodo del árbol de tareas.',
-          estimatedMinutes: mins,
-          energyLevel: energy,
-          dependencies: [],
-        ),
-      );
-    }
-
-    // Intelligent Branching Edge Construction
-    if (nodes.length == 1) {
-      return TaskGraph(nodes: nodes, edges: const []);
-    } else if (nodes.length == 2) {
-      // 2 nodes: direct connection
-      edges.add(TaskEdge(fromId: nodes[0].id, toId: nodes[1].id));
-    } else if (nodes.length == 3) {
-      // 3 nodes: Root branching into 2 parallel or sequential sub-paths
-      final sameCategory = nodes[1].category == nodes[2].category;
-      if (sameCategory) {
-        edges.add(TaskEdge(fromId: nodes[0].id, toId: nodes[1].id));
-        edges.add(TaskEdge(fromId: nodes[1].id, toId: nodes[2].id));
-      } else {
-        // Bifurcation: Node 1 splits into Node 2 and Node 3
-        edges.add(TaskEdge(fromId: nodes[0].id, toId: nodes[1].id));
-        edges.add(TaskEdge(fromId: nodes[0].id, toId: nodes[2].id));
-      }
-    } else {
-      // 4+ nodes: Tree structure with root and multiple branches
-      edges.add(TaskEdge(fromId: nodes[0].id, toId: nodes[1].id));
-      edges.add(TaskEdge(fromId: nodes[0].id, toId: nodes[2].id));
-      for (int i = 3; i < nodes.length; i++) {
-        // Alternate branches
-        final parentIndex = (i % 2 == 1) ? 1 : 2;
-        edges.add(TaskEdge(fromId: nodes[parentIndex].id, toId: nodes[i].id));
-      }
-    }
-
-    return TaskGraph(nodes: nodes, edges: edges);
+    return CognitiveDecompressionEngine.decompressLocal(text);
   }
 
   static TaskGraph defaultSampleGraph() {

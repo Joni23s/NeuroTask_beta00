@@ -158,6 +158,74 @@ class SettingsScreen extends ConsumerWidget {
 
             const SizedBox(height: 24),
 
+            // Sección Motor de Descompresión Cognitiva
+            _buildSectionHeader(context, 'Motor de Descompresión Cognitiva'),
+            NeumorphicCard(
+              padding: const EdgeInsets.all(8),
+              borderRadius: 20,
+              child: Column(
+                children: [
+                  SwitchListTile(
+                    secondary: const Icon(Icons.auto_awesome_rounded,
+                        color: AppColors.brandGlowCyan),
+                    title: Text(
+                      'Descompresión Híbrida con IA (Gemini)',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: context.textMainColor,
+                      ),
+                    ),
+                    subtitle: Text(
+                      settingsState.hasGeminiApiKey
+                          ? 'Usa Gemini con respaldo automático del motor NLP local'
+                          : 'Modo NLP Local activo; configurá una clave para activar IA',
+                      style: TextStyle(
+                          fontSize: 12, color: context.textSecondaryColor),
+                    ),
+                    value: settingsState.useAiDecompression,
+                    activeThumbColor: AppColors.brandGlowCyan,
+                    onChanged: (val) =>
+                        settingsNotifier.toggleUseAiDecompression(val),
+                  ),
+                  Divider(
+                      height: 1,
+                      color: context.textMutedColor.withValues(alpha: 0.15)),
+                  ListTile(
+                    leading: const Icon(Icons.key_rounded,
+                        color: AppColors.primaryIndigo),
+                    title: Text(
+                      'Clave de API de Google Gemini (Opcional)',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: context.textMainColor,
+                      ),
+                    ),
+                    subtitle: Text(
+                      settingsState.hasGeminiApiKey
+                          ? 'Configurada (${_maskApiKey(settingsState.geminiApiKey)}) · Tocá para editar'
+                          : 'Opcional: sin clave funciona el Motor NLP Heurístico + Micro-Tasking Offline',
+                      style: TextStyle(
+                          fontSize: 12, color: context.textSecondaryColor),
+                    ),
+                    trailing: Icon(Icons.chevron_right_rounded,
+                        color: context.textSecondaryColor),
+                    onTap: () {
+                      HapticHelper.lightTap();
+                      showDialog<void>(
+                        context: context,
+                        builder: (_) => _GeminiApiKeyDialog(
+                          initialKey: settingsState.geminiApiKey,
+                          onSave: settingsNotifier.setGeminiApiKey,
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
             // Sección Información de la App
             _buildSectionHeader(context, 'Acerca de NeuroTask'),
             NeumorphicCard(
@@ -192,9 +260,11 @@ class SettingsScreen extends ConsumerWidget {
                             color: context.textMainColor,
                             fontWeight: FontWeight.w500),
                       ),
-                      const Text(
-                        'DAG Topological Sort',
-                        style: TextStyle(
+                      Text(
+                        settingsState.isAiActive
+                            ? 'Híbrido IA + Kahn DAG'
+                            : 'NLP Heurístico + Kahn DAG',
+                        style: const TextStyle(
                             color: AppColors.primaryIndigo,
                             fontWeight: FontWeight.bold),
                       ),
@@ -209,6 +279,12 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
+  static String _maskApiKey(String key) {
+    final trimmed = key.trim();
+    if (trimmed.length <= 8) return '••••';
+    return '${trimmed.substring(0, 4)}••••${trimmed.substring(trimmed.length - 4)}';
+  }
+
   Widget _buildSectionHeader(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.only(left: 4, bottom: 8),
@@ -221,6 +297,119 @@ class SettingsScreen extends ConsumerWidget {
           color: context.textSecondaryColor,
         ),
       ),
+    );
+  }
+}
+
+class _GeminiApiKeyDialog extends StatefulWidget {
+  final String initialKey;
+  final Future<void> Function(String) onSave;
+
+  const _GeminiApiKeyDialog({
+    required this.initialKey,
+    required this.onSave,
+  });
+
+  @override
+  State<_GeminiApiKeyDialog> createState() => _GeminiApiKeyDialogState();
+}
+
+class _GeminiApiKeyDialogState extends State<_GeminiApiKeyDialog> {
+  late final TextEditingController _controller;
+  bool _obscure = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialKey);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: context.cardSurface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      title: Text(
+        'API Key de Google Gemini',
+        style: TextStyle(
+          fontSize: 17,
+          fontWeight: FontWeight.bold,
+          color: context.textMainColor,
+        ),
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Opcional: conectá tu clave para descompresión semántica con Gemini 2.5 Flash. Sin clave funciona 100% el Motor NLP Local.',
+            style: TextStyle(fontSize: 12, color: context.textSecondaryColor),
+          ),
+          const SizedBox(height: 14),
+          TextField(
+            controller: _controller,
+            obscureText: _obscure,
+            style: TextStyle(fontSize: 13, color: context.textMainColor),
+            decoration: InputDecoration(
+              hintText: 'AIza...',
+              filled: true,
+              fillColor: context.pressedSurface,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide.none,
+              ),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscure
+                      ? Icons.visibility_rounded
+                      : Icons.visibility_off_rounded,
+                  color: context.textSecondaryColor,
+                ),
+                onPressed: () => setState(() => _obscure = !_obscure),
+              ),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        if (widget.initialKey.trim().isNotEmpty)
+          TextButton(
+            onPressed: () async {
+              await widget.onSave('');
+              if (context.mounted) Navigator.pop(context);
+            },
+            child: const Text(
+              'Borrar clave',
+              style: TextStyle(color: AppColors.amberWarning),
+            ),
+          ),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(
+            'Cancelar',
+            style: TextStyle(color: context.textSecondaryColor),
+          ),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primaryIndigo,
+            foregroundColor: Colors.white,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+          onPressed: () async {
+            await widget.onSave(_controller.text);
+            if (context.mounted) Navigator.pop(context);
+          },
+          child: const Text('Guardar'),
+        ),
+      ],
     );
   }
 }

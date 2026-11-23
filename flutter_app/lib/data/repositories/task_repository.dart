@@ -2,7 +2,7 @@ import 'dart:async';
 import '../../core/domain/models/focus_state.dart';
 import '../../core/domain/models/task_graph.dart';
 import '../../core/domain/models/task_node.dart';
-import '../../core/domain/services/topological_sorter.dart';
+import '../../core/domain/services/cognitive_decompression_engine.dart';
 import '../../core/services/session_storage_service.dart';
 
 /// Repositorio de Tareas y Grafos de Ejecución (Capa de Datos).
@@ -113,10 +113,18 @@ class TaskRepository {
     return TaskGraph(nodes: initialNodes, edges: edges);
   }
 
-  /// Transforma texto sin procesar en un grafo tipado y lo almacena
-  Future<TaskGraph> parseAndStoreBrainDump(String rawText) async {
-    await Future.delayed(const Duration(milliseconds: 350));
-    final graph = TopologicalSorter.parseRawText(rawText);
+  /// Transforma texto sin procesar en un grafo tipado mediante el motor híbrido y lo almacena
+  Future<TaskGraph> parseAndStoreBrainDump(
+    String rawText, {
+    String? geminiApiKey,
+    bool useAi = false,
+  }) async {
+    await Future.delayed(const Duration(milliseconds: 250));
+    final graph = await CognitiveDecompressionEngine.decompress(
+      rawText,
+      geminiApiKey: geminiApiKey,
+      useAiIfAvailable: useAi,
+    );
 
     // Guardar los nodos en la tabla mock para que estén disponibles
     for (final node in graph.nodes) {

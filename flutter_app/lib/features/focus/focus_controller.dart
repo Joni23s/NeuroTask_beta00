@@ -6,6 +6,7 @@ import '../../core/domain/models/time_anchor.dart';
 import '../../core/domain/services/anchor_schedule_fitter.dart';
 import '../../core/domain/services/topological_sorter.dart';
 import '../../data/repositories/providers.dart';
+import '../settings/settings_controller.dart';
 
 export '../../core/domain/models/focus_state.dart';
 
@@ -61,8 +62,13 @@ class FocusNotifier extends Notifier<FocusState> {
   Future<void> loadFromRawText(String text) async {
     final taskRepo = ref.read(taskRepositoryProvider);
     final anchorRepo = ref.read(anchorRepositoryProvider);
+    final settings = ref.read(settingsProvider);
 
-    final graph = await taskRepo.parseAndStoreBrainDump(text);
+    final graph = await taskRepo.parseAndStoreBrainDump(
+      text,
+      geminiApiKey: settings.geminiApiKey,
+      useAi: settings.isAiActive,
+    );
     final sorted = TopologicalSorter.sort(graph);
     final anchors = await anchorRepo.getAllAnchors();
     final fit = AnchorScheduleFitter.fitTasks(

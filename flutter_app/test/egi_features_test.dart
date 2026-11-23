@@ -1,6 +1,11 @@
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:neurotask/core/domain/services/cognitive_decompression_engine.dart';
+import 'package:neurotask/core/domain/services/topological_sorter.dart';
 import 'package:neurotask/core/services/achievements_storage_service.dart';
 import 'package:neurotask/core/utils/haptic_helper.dart';
 import 'package:neurotask/data/repositories/user_repository.dart';
@@ -77,7 +82,7 @@ void main() {
       addTearDown(container.dispose);
 
       final notifier = container.read(focusProvider.notifier);
-      await notifier.loadFromRawText('Resolver ejercicio único de Flutter');
+      await notifier.loadFromRawText('Resolver ejercicio puntual en 5 min');
 
       expect(container.read(focusProvider).executionQueue.length, equals(1));
       final skipped = await notifier.skipCurrentTaskToAlternativeBranch();
@@ -181,6 +186,133 @@ void main() {
       expect(latest.totalTasksCompleted, equals(10));
       expect(latest.level, equals(2));
       expect(latest.levelTitle, equals('Practicante Resiliente'));
+    });
+  });
+
+  group('CognitiveDecompressionEngine & Hybrid AI Settings', () {
+    test('Automatically decomposes a single macro-task into 3-4 atomic micro-steps', () {
+      final graph = CognitiveDecompressionEngine.decompressLocal(
+        'Estudiar para el parcial de programación',
+      );
+      final sorted = TopologicalSorter.sort(graph);
+
+      expect(sorted.length, inInclusiveRange(3, 4));
+      expect(sorted.every((n) => n.isAtomicSubstep), isTrue);
+      expect(sorted.first.dependencies, isEmpty);
+      expect(sorted.last.dependencies, isNotEmpty);
+      expect(graph.edges, isNotEmpty);
+    });
+
+    test('Cleans fillers, extracts explicit durations, splits "y + verb" and applies causal inversion', () {
+      final multiGraph = CognitiveDecompressionEngine.decompressLocal(
+        'Hoy tengo que armar slides en Figma 25 min y pagar internet media hora',
+      );
+      expect(multiGraph.nodes.length, equals(2));
+      expect(multiGraph.nodes[0].title, startsWith('Armar slides'));
+      expect(multiGraph.nodes[0].title.toLowerCase(), isNot(contains('hoy tengo que')));
+      expect(multiGraph.nodes[0].estimatedMinutes, equals(25));
+      expect(multiGraph.nodes[1].title, startsWith('Pagar internet'));
+      expect(multiGraph.nodes[1].estimatedMinutes, equals(30));
+
+      final causalGraph = CognitiveDecompressionEngine.decompressLocal(
+        'Enviar el informe pero antes revisar la ortografía',
+      );
+      final causalSorted = TopologicalSorter.sort(causalGraph);
+      expect(causalSorted.length, equals(2));
+      expect(causalSorted.first.title.toLowerCase(), contains('revisar'));
+      expect(causalSorted.last.title.toLowerCase(), contains('enviar el informe'));
+      expect(causalSorted.last.dependencies, contains(causalSorted.first.id));
+    });
+
+    test('Persists Gemini AI settings and handles valid AI response or offline fallback safely', () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final notifier = container.read(settingsProvider.notifier);
+      await notifier.loadSettings();
+
+      expect(container.read(settingsProvider).isAiActive, isFalse);
+
+      await notifier.setGeminiApiKey('AIzaTestKey123456');
+      await notifier.toggleUseAiDecompression(true);
+      expect(container.read(settingsProvider).hasGeminiApiKey, isTrue);
+      expect(container.read(settingsProvider).isAiActive, isTrue);
+
+      final reloadedContainer = ProviderContainer();
+      addTearDown(reloadedContainer.dispose);
+      await reloadedContainer.read(settingsProvider.notifier).loadSettings();
+      expect(
+        reloadedContainer.read(settingsProvider).geminiApiKey,
+        equals('AIzaTestKey123456'),
+      );
+      expect(reloadedContainer.read(settingsProvider).isAiActive, isTrue);
+
+      final mockSuccessClient = MockClient((request) async {
+        return http.Response(
+          jsonEncode({
+            'candidates': [
+              {
+                'content': {
+                  'parts': [
+                    {
+                      'text': jsonEncode({
+                        'nodes': [
+                          {
+                            'id': 'ai_1',
+                            'title': 'Preparar resumen teórico IA',
+                            'category': 'Estudio & Idiomas',
+                            'subtext': 'Generado por Gemini AI.',
+                            'estimatedMinutes': 10,
+                            'energyLevel': 0,
+                            'dependencies': [],
+                            'isAtomicSubstep': true,
+                          },
+                          {
+                            'id': 'ai_2',
+                            'title': 'Practicar ejercicios clave',
+                            'category': 'Estudio & Idiomas',
+                            'subtext': 'Segundo micro-paso IA.',
+                            'estimatedMinutes': 15,
+                            'energyLevel': 1,
+                            'dependencies': ['ai_1'],
+                            'isAtomicSubstep': true,
+                          },
+                        ],
+                        'edges': [
+                          {'fromId': 'ai_1', 'toId': 'ai_2'}
+                        ],
+                      }),
+                    }
+                  ],
+                },
+              }
+            ],
+          }),
+          200,
+        );
+      });
+
+      final aiGraph = await CognitiveDecompressionEngine.decompress(
+        'Estudiar algoritmo de grafos',
+        geminiApiKey: 'AIzaTestKey123456',
+        useAiIfAvailable: true,
+        client: mockSuccessClient,
+      );
+      expect(aiGraph.nodes.length, equals(2));
+      expect(aiGraph.nodes.first.title, equals('Preparar resumen teórico IA'));
+
+      final mockErrorClient = MockClient((request) async {
+        return http.Response('{"error": "rate_limit"}', 500);
+      });
+
+      final fallbackGraph = await CognitiveDecompressionEngine.decompress(
+        'Estudiar para el parcial de programación',
+        geminiApiKey: 'AIzaTestKey123456',
+        useAiIfAvailable: true,
+        client: mockErrorClient,
+      );
+      expect(fallbackGraph.nodes.length, inInclusiveRange(3, 4));
+      expect(fallbackGraph.nodes.every((n) => n.isAtomicSubstep), isTrue);
     });
   });
 }

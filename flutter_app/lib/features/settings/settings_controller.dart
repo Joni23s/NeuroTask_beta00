@@ -6,25 +6,36 @@ class SettingsState {
   final bool anchorNotifications;
   final bool autoBrownNoise;
   final bool hapticFeedback;
+  final bool useAiDecompression;
+  final String geminiApiKey;
   final bool isLoaded;
 
   const SettingsState({
     this.anchorNotifications = true,
     this.autoBrownNoise = false,
     this.hapticFeedback = true,
+    this.useAiDecompression = true,
+    this.geminiApiKey = '',
     this.isLoaded = false,
   });
+
+  bool get hasGeminiApiKey => geminiApiKey.trim().isNotEmpty;
+  bool get isAiActive => useAiDecompression && hasGeminiApiKey;
 
   SettingsState copyWith({
     bool? anchorNotifications,
     bool? autoBrownNoise,
     bool? hapticFeedback,
+    bool? useAiDecompression,
+    String? geminiApiKey,
     bool? isLoaded,
   }) {
     return SettingsState(
       anchorNotifications: anchorNotifications ?? this.anchorNotifications,
       autoBrownNoise: autoBrownNoise ?? this.autoBrownNoise,
       hapticFeedback: hapticFeedback ?? this.hapticFeedback,
+      useAiDecompression: useAiDecompression ?? this.useAiDecompression,
+      geminiApiKey: geminiApiKey ?? this.geminiApiKey,
       isLoaded: isLoaded ?? this.isLoaded,
     );
   }
@@ -37,6 +48,10 @@ class SettingsNotifier extends Notifier<SettingsState> {
       'neurotask_settings_auto_brown_noise_v1';
   static const String _keyHapticFeedback =
       'neurotask_settings_haptic_feedback_v1';
+  static const String _keyUseAiDecompression =
+      'neurotask_settings_use_ai_v1';
+  static const String _keyGeminiApiKey =
+      'neurotask_settings_gemini_api_key_v1';
 
   @override
   SettingsState build() {
@@ -51,6 +66,8 @@ class SettingsNotifier extends Notifier<SettingsState> {
       final anchorAlerts = prefs.getBool(_keyAnchorNotifications) ?? true;
       final autoNoise = prefs.getBool(_keyAutoBrownNoise) ?? false;
       final haptic = prefs.getBool(_keyHapticFeedback) ?? true;
+      final useAi = prefs.getBool(_keyUseAiDecompression) ?? true;
+      final apiKey = prefs.getString(_keyGeminiApiKey) ?? '';
 
       HapticHelper.enabled = haptic;
 
@@ -58,6 +75,8 @@ class SettingsNotifier extends Notifier<SettingsState> {
         anchorNotifications: anchorAlerts,
         autoBrownNoise: autoNoise,
         hapticFeedback: haptic,
+        useAiDecompression: useAi,
+        geminiApiKey: apiKey,
         isLoaded: true,
       );
     } catch (_) {
@@ -95,6 +114,31 @@ class SettingsNotifier extends Notifier<SettingsState> {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_keyHapticFeedback, val);
+    } catch (_) {}
+  }
+
+  /// Activa o desactiva la descompresión asistida con Gemini API cuando hay clave.
+  Future<void> toggleUseAiDecompression(bool val) async {
+    HapticHelper.lightTap();
+    state = state.copyWith(useAiDecompression: val, isLoaded: true);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_keyUseAiDecompression, val);
+    } catch (_) {}
+  }
+
+  /// Guarda o elimina la API key opcional de Google Gemini en SharedPreferences.
+  Future<void> setGeminiApiKey(String key) async {
+    final trimmed = key.trim();
+    HapticHelper.lightTap();
+    state = state.copyWith(geminiApiKey: trimmed, isLoaded: true);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (trimmed.isEmpty) {
+        await prefs.remove(_keyGeminiApiKey);
+      } else {
+        await prefs.setString(_keyGeminiApiKey, trimmed);
+      }
     } catch (_) {}
   }
 }
