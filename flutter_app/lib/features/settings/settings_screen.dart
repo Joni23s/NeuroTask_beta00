@@ -5,24 +5,18 @@ import '../../core/theme/theme_context.dart';
 import '../../core/theme/theme_controller.dart';
 import '../../core/utils/haptic_helper.dart';
 import '../../core/widgets/neumorphic_card.dart';
+import 'settings_controller.dart';
 
 /// Pantalla de Configuración de NeuroTask (Modo Oscuro, Sonido, Notificaciones e Info).
-class SettingsScreen extends ConsumerStatefulWidget {
+class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
-  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
-}
-
-class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  bool _anchorNotifications = true;
-  bool _autoBrownNoise = false;
-  bool _hapticFeedback = true;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final themeState = ref.watch(themeProvider);
     final themeNotifier = ref.read(themeProvider.notifier);
+    final settingsState = ref.watch(settingsProvider);
+    final settingsNotifier = ref.read(settingsProvider.notifier);
 
     return Scaffold(
       backgroundColor: context.surfaceColor,
@@ -107,12 +101,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       style: TextStyle(
                           fontSize: 12, color: context.textSecondaryColor),
                     ),
-                    value: _anchorNotifications,
+                    value: settingsState.anchorNotifications,
                     activeThumbColor: AppColors.brandGlowCyan,
-                    onChanged: (val) {
-                      HapticHelper.lightTap();
-                      setState(() => _anchorNotifications = val);
-                    },
+                    onChanged: (val) =>
+                        settingsNotifier.toggleAnchorNotifications(val),
                   ),
                   Divider(
                       height: 1,
@@ -132,12 +124,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       style: TextStyle(
                           fontSize: 12, color: context.textSecondaryColor),
                     ),
-                    value: _autoBrownNoise,
+                    value: settingsState.autoBrownNoise,
                     activeThumbColor: AppColors.primaryIndigo,
-                    onChanged: (val) {
-                      HapticHelper.lightTap();
-                      setState(() => _autoBrownNoise = val);
-                    },
+                    onChanged: (val) =>
+                        settingsNotifier.toggleAutoBrownNoise(val),
                   ),
                   Divider(
                       height: 1,
@@ -157,12 +147,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       style: TextStyle(
                           fontSize: 12, color: context.textSecondaryColor),
                     ),
-                    value: _hapticFeedback,
+                    value: settingsState.hapticFeedback,
                     activeThumbColor: AppColors.amberWarning,
-                    onChanged: (val) {
-                      HapticHelper.lightTap();
-                      setState(() => _hapticFeedback = val);
-                    },
+                    onChanged: (val) =>
+                        settingsNotifier.toggleHapticFeedback(val),
                   ),
                 ],
               ),
@@ -181,13 +169,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Versión del prototipo',
+                        'Versión de la app',
                         style: TextStyle(
                             color: context.textMainColor,
                             fontWeight: FontWeight.w500),
                       ),
                       Text(
-                        '1.0.0-beta01',
+                        '1.0.0',
                         style: TextStyle(
                             color: context.textSecondaryColor,
                             fontWeight: FontWeight.bold),

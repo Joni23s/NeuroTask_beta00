@@ -15,10 +15,19 @@ import 'focus_controller.dart';
 import 'summary_celebration_screen.dart';
 import 'widgets/cognitive_rescue_sheet.dart';
 import 'widgets/graph_overview_modal.dart';
+import '../anchors/anchors_controller.dart';
 import '../anchors/schedule_overview_modal.dart';
+import '../settings/settings_controller.dart';
 
-class SingleTaskScreen extends ConsumerWidget {
+class SingleTaskScreen extends ConsumerStatefulWidget {
   const SingleTaskScreen({super.key});
+
+  @override
+  ConsumerState<SingleTaskScreen> createState() => _SingleTaskScreenState();
+}
+
+class _SingleTaskScreenState extends ConsumerState<SingleTaskScreen> {
+  bool _didApplyAutoNoise = false;
 
   void _openRescueSheet(BuildContext context) {
     HapticHelper.lightTap();
@@ -47,10 +56,39 @@ class SingleTaskScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final focusState = ref.watch(focusProvider);
     final audioState = ref.watch(audioServiceProvider);
+    final settingsState = ref.watch(settingsProvider);
+    final anchorsState = ref.watch(anchorsProvider);
     final isDark = context.isDarkMode;
+
+    if (settingsState.isLoaded &&
+        settingsState.autoBrownNoise &&
+        !_didApplyAutoNoise) {
+      _didApplyAutoNoise = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final currentAudio = ref.read(audioServiceProvider);
+        if (currentAudio.ambientType == AmbientSoundType.none &&
+            !currentAudio.isMuted) {
+          ref
+              .read(audioServiceProvider.notifier)
+              .toggleAmbient(AmbientSoundType.brownNoise);
+        }
+      });
+    }
+
+    final now = DateTime.now();
+    final todayAnchors = anchorsState.anchors
+        .where((a) => a.appliesToWeekday(now.weekday))
+        .toList()
+      ..sort((a, b) => a.startMinutes.compareTo(b.startMinutes));
+    final nowMinutes = now.hour * 60 + now.minute;
+    final nextAnchor = todayAnchors.isEmpty
+        ? null
+        : (todayAnchors.where((a) => a.endMinutes > nowMinutes).firstOrNull ??
+            todayAnchors.first);
 
     // Si está cargando la sesión inicial desde el TaskRepository
     if (focusState.executionQueue.isEmpty && !focusState.isCompletedAll) {
@@ -144,6 +182,45 @@ class SingleTaskScreen extends ConsumerWidget {
                   color: context.textMuted,
                 ),
               ),
+              if (settingsState.anchorNotifications && nextAnchor != null) ...[
+                const SizedBox(height: 8),
+                InkWell(
+                  onTap: () => _openScheduleModal(context),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                    decoration: BoxDecoration(
+                      color: AppColors.brandSteelBlue.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: AppColors.brandSteelBlue.withValues(alpha: 0.35),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text('⚓', style: TextStyle(fontSize: 12)),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            'Próxima ancla: ${nextAnchor.title} (${nextAnchor.startTime} - ${nextAnchor.endTime})',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                              color: isDark
+                                  ? AppColors.brandGlowCyan
+                                  : AppColors.brandDeepBlue,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
               const Spacer(),
 
               // Swipe-to-Complete Interactive Hero Card

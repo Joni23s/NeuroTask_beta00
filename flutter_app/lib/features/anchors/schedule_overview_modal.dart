@@ -9,6 +9,7 @@ import '../../core/widgets/neumorphic_button.dart';
 import '../../core/widgets/neuro_inset_container.dart';
 import '../../core/widgets/neuro_modal_sheet.dart';
 import '../focus/focus_controller.dart';
+import '../settings/settings_controller.dart';
 import 'anchors_controller.dart';
 import 'anchors_manager_screen.dart';
 
@@ -19,6 +20,7 @@ class ScheduleOverviewModal extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final focusState = ref.watch(focusProvider);
     final anchorsState = ref.watch(anchorsProvider);
+    final settingsState = ref.watch(settingsProvider);
     final isDark = context.isDarkMode;
 
     final tasks = focusState.executionQueue;
@@ -40,45 +42,57 @@ class ScheduleOverviewModal extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Status bar informativa sobre viabilidad y horas
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              margin: const EdgeInsets.only(bottom: 12),
-              decoration: BoxDecoration(
-                color: scheduleResult.isOverloaded
-                    ? AppColors.amberWarning.withValues(alpha: 0.12)
-                    : (isDark ? Colors.white10 : AppColors.primaryIndigo.withValues(alpha: 0.06)),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
+            if (settingsState.anchorNotifications)
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
                   color: scheduleResult.isOverloaded
-                      ? AppColors.amberWarning.withValues(alpha: 0.5)
-                      : (isDark ? AppColors.brandGlowCyan.withValues(alpha: 0.3) : AppColors.primaryIndigo.withValues(alpha: 0.2)),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    scheduleResult.isOverloaded ? Icons.warning_amber_rounded : Icons.check_circle_outline_rounded,
-                    size: 18,
+                      ? AppColors.amberWarning.withValues(alpha: 0.12)
+                      : (isDark
+                          ? Colors.white10
+                          : AppColors.primaryIndigo.withValues(alpha: 0.06)),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
                     color: scheduleResult.isOverloaded
-                        ? AppColors.amberDark
-                        : (isDark ? AppColors.brandGlowCyan : AppColors.primaryIndigo),
+                        ? AppColors.amberWarning.withValues(alpha: 0.5)
+                        : (isDark
+                            ? AppColors.brandGlowCyan.withValues(alpha: 0.3)
+                            : AppColors.primaryIndigo.withValues(alpha: 0.2)),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      scheduleResult.statusMessage,
-                      style: TextStyle(
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w600,
-                        color: scheduleResult.isOverloaded
-                            ? AppColors.amberDark
-                            : (isDark ? AppColors.darkTextMain : AppColors.textMain),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      scheduleResult.isOverloaded
+                          ? Icons.warning_amber_rounded
+                          : Icons.check_circle_outline_rounded,
+                      size: 18,
+                      color: scheduleResult.isOverloaded
+                          ? AppColors.amberDark
+                          : (isDark
+                              ? AppColors.brandGlowCyan
+                              : AppColors.primaryIndigo),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        scheduleResult.statusMessage,
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w600,
+                          color: scheduleResult.isOverloaded
+                              ? AppColors.amberDark
+                              : (isDark
+                                  ? AppColors.darkTextMain
+                                  : AppColors.textMain),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
 
             // Inset Container con la lista cronológica de tareas y anclas intermedias
             NeuroInsetContainer(
