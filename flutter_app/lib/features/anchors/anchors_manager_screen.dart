@@ -41,17 +41,29 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
   static const int _endHour = 23;
   static const double _axisX = 66.0;
 
-  void _onOpenAddAnchorSheet({String? initialStartTime}) {
+  void _onOpenAddAnchorSheet(
+      {String? initialStartTime, TimeAnchor? existingAnchor}) {
     HapticHelper.lightTap();
+    final isEditing = existingAnchor != null;
+    final currentWeekday = ref.read(anchorsProvider).selectedWeekday;
+
     showNeuroModalSheet(
       context: context,
       builder: (ctx) => NeuroModalSheet(
-        title: 'Nueva Actividad / Ancla',
-        subtitle: 'Bloqueá un espacio en tu Malla Temporal de hoy',
+        title: isEditing ? 'Editar Actividad / Ancla' : 'Nueva Actividad / Ancla',
+        subtitle: isEditing
+            ? 'Modificá horario, días o categoría en tu Malla Temporal'
+            : 'Bloqueá un espacio en tu Malla Temporal de hoy',
         child: _AddAnchorForm(
           initialStartTime: initialStartTime,
+          initialWeekday: currentWeekday,
+          existingAnchor: existingAnchor,
           onSave: (anchor) {
-            ref.read(anchorsProvider.notifier).addAnchor(anchor);
+            if (isEditing) {
+              ref.read(anchorsProvider.notifier).updateAnchor(anchor);
+            } else {
+              ref.read(anchorsProvider.notifier).addAnchor(anchor);
+            }
             Navigator.pop(ctx);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -61,8 +73,9 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
                         color: Colors.white, size: 18),
                     const SizedBox(width: 8),
                     Expanded(
-                        child: Text(
-                            'Actividad "${anchor.title}" agendada en la Malla')),
+                        child: Text(isEditing
+                            ? 'Actividad "${anchor.title}" actualizada'
+                            : 'Actividad "${anchor.title}" agendada en la Malla')),
                   ],
                 ),
                 behavior: SnackBarBehavior.floating,
@@ -147,6 +160,25 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
                     Expanded(
                       child: OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF45A59E),
+                          side: const BorderSide(color: Color(0xFF45A59E)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16)),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        icon: const Icon(Icons.edit_outlined, size: 18),
+                        label: const Text('Editar',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          _onOpenAddAnchorSheet(existingAnchor: realAnchor);
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.redAccent,
                           side: const BorderSide(color: Colors.redAccent),
                           shape: RoundedRectangleBorder(
@@ -163,7 +195,7 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
                         },
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 8),
                   ],
                   Expanded(
                     child: NeumorphicButton(
@@ -644,8 +676,15 @@ class _MallaCardItem {
 class _AddAnchorForm extends StatefulWidget {
   final ValueChanged<TimeAnchor> onSave;
   final String? initialStartTime;
+  final int initialWeekday;
+  final TimeAnchor? existingAnchor;
 
-  const _AddAnchorForm({required this.onSave, this.initialStartTime});
+  const _AddAnchorForm({
+    required this.onSave,
+    this.initialStartTime,
+    required this.initialWeekday,
+    this.existingAnchor,
+  });
 
   @override
   State<_AddAnchorForm> createState() => _AddAnchorFormState();
@@ -657,7 +696,18 @@ class _AddAnchorFormState extends State<_AddAnchorForm> {
   late String _startTime;
   String _endTime = '11:00';
   String _category = 'Proyecto';
-  final List<int> _selectedDays = [1, 2, 3, 4, 5];
+  late List<int> _selectedDays;
+  String? _validationError;
+
+  static const List<String> _dayLabels = [
+    'Lun',
+    'Mar',
+    'Mié',
+    'Jue',
+    'Vie',
+    'Sáb',
+    'Dom',
+  ];
 
   final List<String> _categories = [
     'Proyecto',
@@ -665,13 +715,27 @@ class _AddAnchorFormState extends State<_AddAnchorForm> {
     'Foco',
     'Facultad',
     'Gimnasio',
+    'Cena',
     'General'
   ];
 
   @override
   void initState() {
     super.initState();
-    _startTime = widget.initialStartTime ?? '10:00';
+    final existing = widget.existingAnchor;
+    if (existing != null) {
+      _titleController.text = existing.title;
+      _startTime = existing.startTime;
+      _endTime = existing.endTime;
+      _category =
+          _categories.contains(existing.category) ? existing.category : 'General';
+      _selectedDays = existing.daysOfWeek.isEmpty
+          ? [1, 2, 3, 4, 5, 6, 7]
+          : (List<int>.from(existing.daysOfWeek)..sort());
+    } else {
+      _startTime = widget.initialStartTime ?? '10:00';
+      _selectedDays = {1, 2, 3, 4, 5, widget.initialWeekday}.toList()..sort();
+    }
   }
 
   @override
@@ -681,21 +745,43 @@ class _AddAnchorFormState extends State<_AddAnchorForm> {
   }
 
   void _onSave() {
+    setState(() => _validationError = null);
+
     if (!_formKey.currentState!.validate()) {
       HapticHelper.warning();
       return;
     }
 
+    if (_selectedDays.isEmpty) {
+      HapticHelper.warning();
+      setState(() {
+        _validationError = 'Seleccioná al menos un día de la semana';
+      });
+      return;
+    }
+
+    final startMins = TimeAnchor.parseTimeToMinutes(_startTime);
+    final endMins = TimeAnchor.parseTimeToMinutes(_endTime);
+    if (endMins <= startMins) {
+      HapticHelper.warning();
+      setState(() {
+        _validationError =
+            'La hora de fin debe ser posterior a la hora de inicio';
+      });
+      return;
+    }
+
+    final existing = widget.existingAnchor;
     final title = _titleController.text.trim();
     final anchor = TimeAnchor.withId(
-      id: 'anchor_${DateTime.now().millisecondsSinceEpoch}',
+      id: existing?.id ?? 'anchor_${DateTime.now().millisecondsSinceEpoch}',
       title: title,
       startTime: _startTime,
       endTime: _endTime,
       category: _category,
-      daysOfWeek: _selectedDays,
-      isRecurring: true,
-      isActive: true,
+      daysOfWeek: List<int>.from(_selectedDays)..sort(),
+      isRecurring: existing?.isRecurring ?? true,
+      isActive: existing?.isActive ?? true,
     );
     HapticHelper.success();
     widget.onSave(anchor);
@@ -766,44 +852,98 @@ class _AddAnchorFormState extends State<_AddAnchorForm> {
             // Horas de Inicio y Fin
             Row(
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Hora Inicio (HH:mm):',
-                          style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: context.textSecondary)),
-                      const SizedBox(height: 6),
-                      _TimeSelectorPill(
-                        time: _startTime,
-                        onChanged: (newVal) =>
-                            setState(() => _startTime = newVal),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Hora Inicio (HH:mm):',
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: context.textSecondary)),
+                          const SizedBox(height: 6),
+                          _TimeSelectorPill(
+                            time: _startTime,
+                            onChanged: (newVal) => setState(() {
+                              _startTime = newVal;
+                              _validationError = null;
+                            }),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Hora Fin (HH:mm):',
-                          style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: context.textSecondary)),
-                      const SizedBox(height: 6),
-                      _TimeSelectorPill(
-                        time: _endTime,
-                        onChanged: (newVal) =>
-                            setState(() => _endTime = newVal),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Hora Fin (HH:mm):',
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: context.textSecondary)),
+                          const SizedBox(height: 6),
+                          _TimeSelectorPill(
+                            time: _endTime,
+                            onChanged: (newVal) => setState(() {
+                              _endTime = newVal;
+                              _validationError = null;
+                            }),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
+            const SizedBox(height: 16),
+
+            // Selector de Días de la semana
+            Text('Días de la semana:',
+                style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: context.textSecondary)),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: List.generate(7, (idx) {
+                final dayNum = idx + 1;
+                final isDaySelected = _selectedDays.contains(dayNum);
+                return FilterChip(
+                  label: Text(
+                    _dayLabels[idx],
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color:
+                          isDaySelected ? Colors.white : context.textSecondary,
+                    ),
+                  ),
+                  selected: isDaySelected,
+                  showCheckmark: false,
+                  selectedColor: const Color(0xFF45A59E),
+                  backgroundColor: context.cardSurface,
+                  side: BorderSide(
+                    color: isDaySelected
+                        ? const Color(0xFF45A59E)
+                        : context.borderLight,
+                  ),
+                  onSelected: (selected) {
+                    HapticHelper.selectionClick();
+                    setState(() {
+                      _validationError = null;
+                      if (selected) {
+                        if (!_selectedDays.contains(dayNum)) {
+                          _selectedDays.add(dayNum);
+                        }
+                      } else {
+                        _selectedDays.remove(dayNum);
+                      }
+                    });
+                  },
+                );
+              }),
             ),
             const SizedBox(height: 16),
 
@@ -839,17 +979,42 @@ class _AddAnchorFormState extends State<_AddAnchorForm> {
                 }).toList(),
               ),
             ),
+            if (_validationError != null) ...[
+              const SizedBox(height: 14),
+              Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.redAccent.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                  border:
+                      Border.all(color: Colors.redAccent.withValues(alpha: 0.4)),
+                ),
+                child: Text(
+                  _validationError!,
+                  style: const TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.redAccent,
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 24),
 
-            // Botón Guardar en Malla
+            // Botón Guardar / Actualizar en Malla
             NeumorphicButton(
               variant: NeumorphicButtonVariant.primary,
               borderRadius: 18,
               height: 50,
               onPressed: _onSave,
-              child: const Center(
-                child: Text('Guardar en Malla Temporal',
-                    style: TextStyle(
+              child: Center(
+                child: Text(
+                    widget.existingAnchor != null
+                        ? 'Guardar Cambios'
+                        : 'Guardar en Malla Temporal',
+                    style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 14)),
