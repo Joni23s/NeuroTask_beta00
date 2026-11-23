@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:neurotask/main.dart';
 import 'package:neurotask/core/domain/models/task_node.dart';
 import 'package:neurotask/core/domain/models/task_graph.dart';
@@ -9,6 +10,10 @@ import 'package:neurotask/features/onboarding/onboarding_screen.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
 
   group('Model & DAG Engine Tests', () {
     test('TaskNode and TaskGraph JSON round-trip serialization', () {
