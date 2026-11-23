@@ -37,8 +37,8 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
   ];
 
   static const double _hourHeight = 94.0;
-  static const int _startHour = 9;
-  static const int _endHour = 22;
+  static const int _startHour = 7;
+  static const int _endHour = 23;
   static const double _axisX = 66.0;
 
   void _onOpenAddAnchorSheet({String? initialStartTime}) {
@@ -196,8 +196,25 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
     final userAnchors = anchorsState.anchorsForSelectedDay;
     final selectedDay = anchorsState.selectedWeekday;
 
-    // Calcular día del mes simulado para mantener consistencia con "LUNES 24 OCT"
-    final dayNumber = 24 + (selectedDay - 1);
+    // Calcular la fecha real del día seleccionado dentro de la semana en curso
+    final now = DateTime.now();
+    final selectedDate = now.add(Duration(days: selectedDay - now.weekday));
+    final dayNumber = selectedDate.day;
+    const monthsShort = [
+      'ENE',
+      'FEB',
+      'MAR',
+      'ABR',
+      'MAY',
+      'JUN',
+      'JUL',
+      'AGO',
+      'SEP',
+      'OCT',
+      'NOV',
+      'DIC',
+    ];
+    final monthName = monthsShort[(selectedDate.month - 1).clamp(0, 11)];
     final dayName = _weekdaysFull[(selectedDay - 1).clamp(0, 6)];
 
     // Unificar items dinámicos de la Malla provenientes del AnchorRepository
@@ -435,9 +452,9 @@ class _AnchorsManagerScreenState extends ConsumerState<AnchorsManagerScreen> {
                                     height: 1.1,
                                   ),
                                 ),
-                                const Text(
-                                  'OCT',
-                                  style: TextStyle(
+                                Text(
+                                  monthName,
+                                  style: const TextStyle(
                                     color: Color(0xFF7CBDB5),
                                     fontSize: 10.5,
                                     fontWeight: FontWeight.w800,
