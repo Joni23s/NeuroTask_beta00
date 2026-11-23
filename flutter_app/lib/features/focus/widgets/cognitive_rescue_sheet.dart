@@ -60,19 +60,29 @@ class CognitiveRescueSheet extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
 
-          // Option 3: Skip / Complete
+          // Option 3: Skip / Postpone to alternative branch
           _RescueOptionCard(
             badgeNumber: '3',
             badgeColor: AppColors.successEmerald,
             title: 'Saltar a rama independiente',
             subtitle: 'Avanzá por otra tarea desbloqueada sin bloquear el flujo.',
-            onTap: () {
-              ref.read(focusProvider.notifier).completeCurrentTask();
+            onTap: () async {
+              final skipped = await ref
+                  .read(focusProvider.notifier)
+                  .skipCurrentTaskToAlternativeBranch();
+              if (skipped) {
+                ref.read(achievementsProvider.notifier).recordRescueUsed();
+              }
+              if (!context.mounted) return;
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('🔀 Saltando a rama alternativa'),
-                  duration: Duration(seconds: 2),
+                SnackBar(
+                  content: Text(
+                    skipped
+                        ? '🔀 Tarea pospuesta al final: avanzando por rama alternativa'
+                        : 'ℹ️ Es la única tarea pendiente; podés dividirla en micro-pasos de 3 min',
+                  ),
+                  duration: const Duration(seconds: 2),
                 ),
               );
             },

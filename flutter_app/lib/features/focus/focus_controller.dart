@@ -206,6 +206,23 @@ class FocusNotifier extends Notifier<FocusState> {
     await ref.read(taskRepositoryProvider).saveActiveSession(state);
   }
 
+  /// Pospone la tarea actual al final de la cola pendiente sin marcarla como completada,
+  /// permitiendo avanzar por una rama alternativa del camino lógico.
+  Future<bool> skipCurrentTaskToAlternativeBranch() async {
+    if (state.currentIndex >= state.executionQueue.length) return false;
+    final remainingCount = state.executionQueue.length - state.currentIndex;
+    if (remainingCount <= 1) return false;
+
+    final updatedQueue = List<TaskNode>.from(state.executionQueue);
+    final skippedTask =
+        updatedQueue.removeAt(state.currentIndex).copyWith(isCompleted: false);
+    updatedQueue.add(skippedTask);
+
+    state = state.copyWith(executionQueue: updatedQueue);
+    await ref.read(taskRepositoryProvider).saveActiveSession(state);
+    return true;
+  }
+
   /// Resetea la sesión actual y restaura los datos iniciales del repositorio
   Future<void> reset() async {
     final taskRepo = ref.read(taskRepositoryProvider);
