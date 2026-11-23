@@ -322,7 +322,10 @@ class ProfileScreen extends ConsumerWidget {
 
                                       await ref
                                           .read(userRepositoryProvider)
-                                          .updateProfile(updated);
+                                          .updateProfile(
+                                            updated,
+                                            previousEmail: profile.email,
+                                          );
                                       ref.invalidate(
                                           currentUserProfileProvider);
 

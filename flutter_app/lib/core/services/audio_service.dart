@@ -7,7 +7,6 @@ import 'web_audio_bridge.dart';
 enum AmbientSoundType {
   none,
   brownNoise,
-  rainForest,
 }
 
 class AudioState {

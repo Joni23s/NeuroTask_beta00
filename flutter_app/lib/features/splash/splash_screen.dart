@@ -2,7 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/theme_context.dart';
+import '../../data/repositories/user_repository.dart';
 import '../onboarding/onboarding_screen.dart';
+import '../onboarding/welcome_screen.dart';
 
 /// Splash Screen con animación del isotipo y transición automática.
 class SplashScreen extends StatefulWidget {
@@ -39,20 +41,26 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    _navigationTimer = Timer(const Duration(milliseconds: 2800), () {
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                const OnboardingScreen(),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-            transitionDuration: const Duration(milliseconds: 600),
-          ),
-        );
+    _navigationTimer = Timer(const Duration(milliseconds: 2800), () async {
+      bool loggedIn = false;
+      try {
+        loggedIn = await UserRepository().isLoggedIn();
+      } catch (_) {
+        loggedIn = false;
       }
+      if (!mounted) return;
+      final Widget nextScreen =
+          loggedIn ? const WelcomeScreen() : const OnboardingScreen();
+      Navigator.of(context).pushReplacement(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) => nextScreen,
+          transitionsBuilder:
+              (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          transitionDuration: const Duration(milliseconds: 600),
+        ),
+      );
     });
   }
 

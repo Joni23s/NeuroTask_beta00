@@ -24,6 +24,14 @@ class UserRepository {
   static const String _keyUserProfile = 'neurotask_user_profile_v1';
   static const String _keyIsLoggedIn = 'neurotask_is_logged_in_v1';
   static const String _keyAccounts = 'neurotask_registered_accounts_v1';
+  static const String _keyLastActivityDate = 'neurotask_last_activity_date_v1';
+
+  String _dateOnlyKey(DateTime dt) {
+    final y = dt.year.toString().padLeft(4, '0');
+    final m = dt.month.toString().padLeft(2, '0');
+    final d = dt.day.toString().padLeft(2, '0');
+    return '$y-$m-$d';
+  }
 
   // Cuenta base persistente inicial para evaluación académica
   static const String defaultEmail = 'estudiante.dam@itu.uncuyo.edu.ar';
@@ -102,28 +110,78 @@ class UserRepository {
     );
   }
 
-  /// Guarda y actualiza el perfil en la persistencia local.
-  Future<UserProfile> updateProfile(UserProfile profile) async {
+  /// Guarda y actualiza el perfil en la persistencia local, migrando la clave de cuenta si cambia el correo.
+  Future<UserProfile> updateProfile(
+    UserProfile profile, {
+    String? previousEmail,
+  }) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_keyUserProfile, jsonEncode(profile.toMap()));
 
-      // Sincronizar en el mapa de cuentas si corresponde
+      // Sincronizar o migrar cuenta registrada en _keyAccounts
       final accounts = await _getAccounts(prefs);
-      final emailKey = profile.email.toLowerCase().trim();
-      if (accounts.containsKey(emailKey)) {
-        accounts[emailKey]!['profile'] = profile.toMap();
+      final newEmailKey = profile.email.toLowerCase().trim();
+      final prevEmailKey = previousEmail?.toLowerCase().trim();
+
+      String? matchedKey;
+      if (prevEmailKey != null && accounts.containsKey(prevEmailKey)) {
+        matchedKey = prevEmailKey;
+      } else if (accounts.containsKey(newEmailKey)) {
+        matchedKey = newEmailKey;
+      } else if (profile.id != null) {
+        for (final entry in accounts.entries) {
+          final prof = entry.value['profile'];
+          if (prof is Map && prof['id'] == profile.id) {
+            matchedKey = entry.key;
+            break;
+          }
+        }
+      }
+
+      if (matchedKey != null) {
+        if (matchedKey != newEmailKey && !accounts.containsKey(newEmailKey)) {
+          final existingAccount = accounts.remove(matchedKey)!;
+          existingAccount['profile'] = profile.toMap();
+          accounts[newEmailKey] = existingAccount;
+        } else if (accounts.containsKey(newEmailKey)) {
+          accounts[newEmailKey]!['profile'] = profile.toMap();
+        }
         await _saveAccounts(prefs, accounts);
       }
     } catch (_) {}
     return profile;
   }
 
-  /// Incrementa métricas de productividad tras completar una tarea o sesión de foco.
-  Future<UserProfile> recordTaskCompletion({int minutes = 15}) async {
+  /// Incrementa métricas de productividad y calcula racha real tras completar una tarea.
+  Future<UserProfile> recordTaskCompletion({
+    int minutes = 15,
+    DateTime? activityDate,
+  }) async {
     final current = await getCurrentUser();
     final updatedCompleted = current.totalTasksCompleted + 1;
     final updatedMinutes = current.totalFocusMinutes + minutes;
+
+    int newStreak = current.currentStreak > 0 ? current.currentStreak : 1;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final refDate = activityDate ?? DateTime.now();
+      final todayStr = _dateOnlyKey(refDate);
+      final yesterdayStr =
+          _dateOnlyKey(refDate.subtract(const Duration(days: 1)));
+      final lastDateStr = prefs.getString(_keyLastActivityDate);
+
+      if (lastDateStr == yesterdayStr) {
+        newStreak = current.currentStreak + 1;
+      } else if (lastDateStr == todayStr) {
+        newStreak = current.currentStreak > 0 ? current.currentStreak : 1;
+      } else if (lastDateStr != null && lastDateStr.isNotEmpty) {
+        newStreak = 1;
+      } else {
+        newStreak = current.currentStreak > 0 ? current.currentStreak : 1;
+      }
+      await prefs.setString(_keyLastActivityDate, todayStr);
+    } catch (_) {}
 
     int newLevel = current.level;
     String newTitle = current.levelTitle;
@@ -141,6 +199,7 @@ class UserRepository {
     final updated = current.copyWith(
       totalTasksCompleted: updatedCompleted,
       totalFocusMinutes: updatedMinutes,
+      currentStreak: newStreak,
       level: newLevel,
       levelTitle: newTitle,
     );
