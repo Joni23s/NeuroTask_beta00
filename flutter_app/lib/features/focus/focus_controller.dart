@@ -100,11 +100,10 @@ class FocusNotifier extends Notifier<FocusState> {
   }
 
   /// Marca la tarea actual como completada, avanzando el puntero de foco
-  /// y registrando el impacto en las métricas del [UserRepository] y [AchievementRepository].
+  /// y registrando el impacto en las métricas del [UserRepository].
   Future<void> completeCurrentTask() async {
     final taskRepo = ref.read(taskRepositoryProvider);
     final userRepo = ref.read(userRepositoryProvider);
-    final achievementRepo = ref.read(achievementRepositoryProvider);
 
     int currentElapsed = state.elapsedSeconds;
     if (state.sessionStartTime != null) {
@@ -119,6 +118,7 @@ class FocusNotifier extends Notifier<FocusState> {
 
     // Actualizar métricas dinámicas del perfil de usuario en el UserRepository
     await userRepo.recordTaskCompletion(minutes: taskMinutes);
+    ref.invalidate(currentUserProfileProvider);
 
     if (state.currentIndex < state.executionQueue.length - 1) {
       // Marcar actual completada y avanzar
@@ -132,7 +132,7 @@ class FocusNotifier extends Notifier<FocusState> {
         elapsedSeconds: currentElapsed,
       );
     } else {
-      // Flujo completado en su totalidad
+      // Flujo completado en su totalidad (el conteo único de flujo lo registra AchievementsNotifier)
       final updatedQueue = List<TaskNode>.from(state.executionQueue);
       if (updatedQueue.isNotEmpty) {
         updatedQueue[state.currentIndex] =
@@ -143,9 +143,6 @@ class FocusNotifier extends Notifier<FocusState> {
         isCompletedAll: true,
         elapsedSeconds: currentElapsed > 0 ? currentElapsed : 1,
       );
-
-      // Registrar finalización en logros
-      await achievementRepo.recordFlowCompleted();
     }
 
     await taskRepo.saveActiveSession(state);

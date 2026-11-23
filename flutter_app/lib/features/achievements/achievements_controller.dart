@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/domain/models/achievement.dart';
 import '../../core/services/achievements_storage_service.dart';
+import '../../data/repositories/providers.dart';
 
 class AchievementsState {
   final List<Achievement> achievements;
@@ -89,6 +90,7 @@ class AchievementsNotifier extends Notifier<AchievementsState> {
       }
     }
     await AchievementsStorageService.saveUnlockedAchievements(mapToSave);
+    ref.invalidate(userAchievementsListProvider);
     return true;
   }
 
@@ -137,6 +139,8 @@ class AchievementsNotifier extends Notifier<AchievementsState> {
     if (usedRescue) {
       await unlock('rescue_master');
     }
+
+    ref.invalidate(userAchievementsListProvider);
   }
 
   void clearLatestUnlocked() {
