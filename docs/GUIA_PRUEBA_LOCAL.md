@@ -128,7 +128,16 @@ Si eres un agente de IA (como Antigravity u otro asistente automatizado) trabaja
 
 ## 7. Empaquetado Final para Teléfono Móvil (Creación del APK)
 
-Cuando el flujo ya fue probado, validado y se desea instalar la versión compilada en un smartphone Android físico:
+### Opción Rápida sin Compilar: Descargar el último APK desde GitHub
+Si solo quieres instalar **NeuroTask** en tu teléfono Android sin instalar Flutter ni Android SDK:
+1. Descarga el último APK generado automáticamente por GitHub Actions desde:
+   👉 **[Descargar Último APK (`NeuroTask.apk`)](https://github.com/Joni23s/NeuroTask_beta00/releases/latest/download/NeuroTask.apk)**
+2. Si deseas verificar la suma SHA-256 o consultar versiones anteriores, abre **[GitHub Releases](https://github.com/Joni23s/NeuroTask_beta00/releases/latest)**.
+3. Abre `NeuroTask.apk` en tu Android para instalarlo (si Google Play Protect muestra aviso por firma académica, toca *Más detalles → Instalar de todas formas*).
+
+---
+
+Cuando el flujo ya fue probado, validado y se desea compilar manualmente la versión local para un smartphone Android físico:
 
 ### Compilar APK en Modo Release (Producción Optimizada)
 Desde `flutter_app/`:

@@ -6,6 +6,19 @@
 > **Equipo:** Araujo Jonathan, Batiatto Juan Martín, Belardinelli Agustín, Ortega Mateo  
 > **Repositorio GitHub:** [https://github.com/Joni23s/NeuroTask_beta00](https://github.com/Joni23s/NeuroTask_beta00)
 
+## 📲 Descarga Directa (Android APK) y Demo Web
+
+[![⬇️ Descargar Último APK (Android)](https://img.shields.io/badge/Descargar_APK-Última_Versión_(Android)-0F2E49?style=for-the-badge&logo=android&logoColor=white)](https://github.com/Joni23s/NeuroTask_beta00/releases/latest/download/NeuroTask.apk)
+[![📦 GitHub Releases (Historial y SHA-256)](https://img.shields.io/github/v/release/Joni23s/NeuroTask_beta00?style=for-the-badge&label=Versión%20APK&color=2A6F97)](https://github.com/Joni23s/NeuroTask_beta00/releases/latest)
+[![🌐 Probar Web App en Vivo](https://img.shields.io/badge/Web_App-GitHub_Pages-3B82F6?style=for-the-badge&logo=googlechrome&logoColor=white)](https://joni23s.github.io/NeuroTask_beta00/)
+[![⚙️ Build Android APK](https://img.shields.io/github/actions/workflow/status/Joni23s/NeuroTask_beta00/release-apk.yml?branch=main&style=for-the-badge&label=APK%20Build)](https://github.com/Joni23s/NeuroTask_beta00/actions/workflows/release-apk.yml)
+
+- [⬇️ Descargar Último APK (Android)](https://github.com/Joni23s/NeuroTask_beta00/releases/latest/download/NeuroTask.apk) · [📦 GitHub Releases (Historial y SHA-256)](https://github.com/Joni23s/NeuroTask_beta00/releases/latest) · [🌐 Probar Web App en Vivo](https://joni23s.github.io/NeuroTask_beta00/) · [⚙️ Build Android APK](https://github.com/Joni23s/NeuroTask_beta00/actions/workflows/release-apk.yml)
+
+| Escaneá desde tu Android | Instalación rápida en 3 pasos (sin compilar) |
+| :---: | :--- |
+| <img src="docs/egi_assets/qr_apk_download.svg" alt="QR Descarga Directa NeuroTask APK" width="170" /> | 1. **Descargá `NeuroTask.apk`** tocando el botón superior o escaneando el QR con tu teléfono.<br/>2. **Abrí el archivo e instalá** (habilitá *"Instalar apps desconocidas"* si tu navegador lo solicita).<br/>3. Si **Google Play Protect** muestra un aviso por firma académica, tocá ***Más detalles → Instalar de todas formas***. |
+
 ### 📑 Documentación Principal EGI
 * **[Documento Único Integrador EGI (4 Secciones)](docs/DOCUMENTO_EGI_NEUROTASK.md)**
 * **[Guía de Defensa Oral EGI](docs/GUIA_DEFENSA_ORAL_EGI.md)**
@@ -90,6 +103,10 @@ NeuroTask_beta00/
 ├── README.md                                                # Documentación general y arquitectura del proyecto
 ├── LICENSE                                                  # Licencia MIT
 │
+├── .github/
+│   └── workflows/
+│       └── release-apk.yml                                  # Pipeline CI/CD de compilación y liberación automática de Android APK
+│
 ├── web_prototype/                                           # Prototipo DCU Inicial (HTML/CSS/JS — antecedente de diseño)
 │   ├── index.html                                           # Simulador smartphone inicial
 │   ├── css/style.css                                        # Design System Soft Paper & Neumorphic Tokens
@@ -152,11 +169,13 @@ NeuroTask_beta00/
 └── docs/
     ├── DOCUMENTO_EGI_NEUROTASK.md                           # Documento Único Integrador EGI (4 Secciones)
     ├── GUIA_DEFENSA_ORAL_EGI.md                             # Guion de demo en vivo y banco de preguntas técnicas
-    ├── egi_assets/                                          # Capturas reales verificadas de la app Flutter (7 PNG)
+    ├── egi_assets/                                          # Capturas reales verificadas (7 PNG) y QR de descarga directa (SVG)
+    │   └── qr_apk_download.svg                              # Código QR vectorial para descargar NeuroTask.apk
     ├── ADR-006-ARQUITECTURA-Y-CAPA-DE-DATOS-FLUTTER.md      # Persistencia, Singleton DbHelper y Capa de Datos (Unidad 3.1.1)
     ├── ADR-005-MAQUETADO-FLUTTER-Y-USABILIDAD-UN-SOLO-USUARIO.md # Maquetado, Restricciones y Usabilidad (Unidad 2.2.1)
     ├── PROTOCOLO_PRUEBA_USABILIDAD_1_USUARIO.md             # Protocolo y Guion de Prueba de Guerrilla (Steve Krug)
     ├── ADR-004-ALINEACION-PROGRAMA-DAM-FLUTTER.md           # Decisiones de Arquitectura y Alineación Rúbrica DAM
+    ├── NT-SPEC-CI-004-ANDROID-APK-CONTINUOUS-RELEASE.md     # Especificación CI/CD de Liberación Continua de Android APK
     ├── NT-SPEC-ARCH-003-TIME-ANCHORS-AND-PERSISTENCE.md     # Especificación de Anclas Temporales y Scheduler Fitter
     ├── GUIA_PRUEBA_LOCAL.md                                 # Guía de prueba local en celular vía QR
     └── FIGMA_BLUEPRINT_AND_WIREFRAMES.md                    # Blueprint para Figma y Diapositiva 6
@@ -199,9 +218,14 @@ flutter run -d chrome
 
 O simplemente abrí el proyecto y presioná **`F5`** en VS Code.
 
+> **¿Solo querés instalar la app en Android sin compilar?**  
+> Descargá el binario compilado automáticamente en cada `push` a `main` desde **[Último `NeuroTask.apk`](https://github.com/Joni23s/NeuroTask_beta00/releases/latest/download/NeuroTask.apk)** o consultá la especificación técnica en **[NT-SPEC-CI-004](docs/NT-SPEC-CI-004-ANDROID-APK-CONTINUOUS-RELEASE.md)**.
+
 ---
 
 ## 🎨 6. Documentación Adicional y Enlaces
+* **Descarga Directa de Android APK (Último Release):** [NeuroTask.apk](https://github.com/Joni23s/NeuroTask_beta00/releases/latest/download/NeuroTask.apk) · [Historial de Releases y SHA-256](https://github.com/Joni23s/NeuroTask_beta00/releases/latest)
+* **Especificación CI/CD de Liberación Continua APK (SDD):** [docs/NT-SPEC-CI-004-ANDROID-APK-CONTINUOUS-RELEASE.md](docs/NT-SPEC-CI-004-ANDROID-APK-CONTINUOUS-RELEASE.md)
 * **Documento Único Integrador EGI (4 Secciones):** [docs/DOCUMENTO_EGI_NEUROTASK.md](docs/DOCUMENTO_EGI_NEUROTASK.md)
 * **Guía de Defensa Oral EGI:** [docs/GUIA_DEFENSA_ORAL_EGI.md](docs/GUIA_DEFENSA_ORAL_EGI.md)
 * **Master Prompt & Catálogo para Google Stitch:** [STITCH_MASTER_PROMPT.md](STITCH_MASTER_PROMPT.md) · [.stitch/SCREEN_CATALOG.md](.stitch/SCREEN_CATALOG.md)

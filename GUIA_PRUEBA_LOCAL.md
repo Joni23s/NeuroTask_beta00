@@ -1,6 +1,6 @@
 # Guía de Ejecución y Prueba Local — NeuroTask Mobile
 
-> El documento maestro detallado se encuentra en [docs/GUIA_PRUEBA_LOCAL.md](file:///c:/Users/jonat/Downloads/Codigos/NeuroTask_beta00/docs/GUIA_PRUEBA_LOCAL.md).
+> El documento maestro detallado se encuentra en [docs/GUIA_PRUEBA_LOCAL.md](docs/GUIA_PRUEBA_LOCAL.md).
 
 ---
 
@@ -29,7 +29,15 @@ flutter run -d chrome
 - **`q`**: Salir.
 
 ### 4. Empaquetar APK para Teléfono
-Cuando desees generar el archivo para instalar en tu celular físico:
+
+#### Opción Rápida sin Compilar: Descargar el último APK desde GitHub
+Si solo deseas instalar **NeuroTask** en tu celular Android sin configurar Flutter ni Android SDK:
+- Descarga directa: **[NeuroTask.apk (Última Versión)](https://github.com/Joni23s/NeuroTask_beta00/releases/latest/download/NeuroTask.apk)**
+- Historial y suma SHA-256: **[GitHub Releases](https://github.com/Joni23s/NeuroTask_beta00/releases/latest)**
+- Abre el archivo en tu teléfono e instala (si **Google Play Protect** muestra aviso por firma académica, toca *Más detalles → Instalar de todas formas*).
+
+#### Compilación Manual Local
+Cuando desees generar el archivo localmente para instalar en tu celular físico:
 ```bash
 cd flutter_app
 flutter build apk --release
@@ -38,4 +46,4 @@ El archivo final queda en:
 `flutter_app/build/app/outputs/flutter-apk/app-release.apk`
 
 ---
-*Para ver la guía completa con instrucciones para agentes de IA y resolución de problemas, consulta [docs/GUIA_PRUEBA_LOCAL.md](file:///c:/Users/jonat/Downloads/Codigos/NeuroTask_beta00/docs/GUIA_PRUEBA_LOCAL.md).*
+*Para ver la guía completa con instrucciones para agentes de IA y resolución de problemas, consulta [docs/GUIA_PRUEBA_LOCAL.md](docs/GUIA_PRUEBA_LOCAL.md).*
