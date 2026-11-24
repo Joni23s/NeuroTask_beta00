@@ -4,13 +4,16 @@ on:
   push:
     branches: [ main ]
     paths: ['flutter_app/**', '.github/workflows/release-apk.yml']
+  pull_request:
+    branches: [ main ]
+    paths: ['flutter_app/**', '.github/workflows/release-apk.yml']
   workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: "android-apk-release"
+  group: "android-apk-release-${{ github.ref }}"
   cancel-in-progress: true
 
 jobs:
@@ -26,6 +29,61 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
           cache: 'gradle'
+
+      - name: Configure Maven Central GCS mirror
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.gradle/init.d"
+          cat << 'EOF' > "$HOME/.gradle/init.d/maven-mirror.init.gradle.kts"
+          val gcsMavenCentral = java.net.URI("https://maven-central.storage-download.googleapis.com/maven2/")
+
+          fun RepositoryHandler.useGcsMavenCentralFirst(includePluginPortal: Boolean = false) {
+              val existing = toList()
+              clear()
+              maven {
+                  name = "GCSMavenCentral"
+                  url = gcsMavenCentral
+              }
+              google()
+              existing.forEach { repo ->
+                  if (repo is MavenArtifactRepository &&
+                      (repo.url.host == "repo.maven.apache.org" || repo.url == gcsMavenCentral)
+                  ) {
+                      // Replaced by GCSMavenCentral above to prevent HTTP 429 on shared CI runners
+                  } else {
+                      add(repo)
+                  }
+              }
+              if (includePluginPortal && none { it is MavenArtifactRepository && it.url.host == "plugins.gradle.org" }) {
+                  gradlePluginPortal()
+              }
+          }
+
+          beforeSettings {
+              buildscript.repositories.useGcsMavenCentralFirst(includePluginPortal = true)
+              pluginManagement.repositories.useGcsMavenCentralFirst(includePluginPortal = true)
+              dependencyResolutionManagement.repositories.useGcsMavenCentralFirst(includePluginPortal = false)
+          }
+
+          settingsEvaluated {
+              pluginManagement.repositories.useGcsMavenCentralFirst(includePluginPortal = true)
+              dependencyResolutionManagement.repositories.useGcsMavenCentralFirst(includePluginPortal = false)
+          }
+
+          beforeProject {
+              buildscript.repositories.useGcsMavenCentralFirst(includePluginPortal = true)
+          }
+
+          projectsEvaluated {
+              allprojects {
+                  buildscript.repositories.useGcsMavenCentralFirst(includePluginPortal = true)
+                  if (repositories.isNotEmpty()) {
+                      repositories.useGcsMavenCentralFirst(includePluginPortal = false)
+                  }
+              }
+          }
+          EOF
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -75,13 +133,24 @@ jobs:
         working-directory: ./flutter_app
         run: flutter build apk --release --build-name="${{ steps.meta.outputs.base_version }}" --build-number="${{ steps.meta.outputs.build_num }}"
 
-      - name: Stage APK and SHA-256 checksum
+      - name: Stage and verify APK and SHA-256 checksum
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p release_dist
           cp ./flutter_app/build/app/outputs/flutter-apk/app-release.apk release_dist/NeuroTask.apk
-          (cd release_dist && sha256sum NeuroTask.apk > NeuroTask.apk.sha256)
+          (cd release_dist && sha256sum NeuroTask.apk > NeuroTask.apk.sha256 && sha256sum -c NeuroTask.apk.sha256)
+          python3 - << 'PY'
+          import zipfile, sys
+          required = ["AndroidManifest.xml", "classes.dex", "lib/arm64-v8a/libapp.so"]
+          with zipfile.ZipFile("release_dist/NeuroTask.apk") as zf:
+              entries = set(zf.namelist())
+          missing = [item for item in required if item not in entries]
+          if missing:
+              print(f"Error: APK missing required entries: {missing}", file=sys.stderr)
+              sys.exit(1)
+          print("Verified Android APK internal structure:", required)
+          PY
 
       - name: Upload APK build artifacts
         uses: actions/upload-artifact@v4
@@ -93,6 +162,7 @@ jobs:
           retention-days: 30
 
       - name: Publish GitHub Release
+        if: github.event_name != 'pull_request'
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -125,13 +195,42 @@ jobs:
             printf '3. Si aparece el aviso de **Google Play Protect** (por firma académica de desarrollo), toca **Más detalles -> Instalar de todas formas**.\n'
           } > release_notes.md
 
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" release_dist/NeuroTask.apk release_dist/NeuroTask.apk.sha256 --clobber
-            gh release edit "$TAG" --title "NeuroTask ${TAG}" --notes-file release_notes.md --latest
+          if gh release view "$TAG" -R "$REPO" >/dev/null 2>&1; then
+            gh release upload "$TAG" release_dist/NeuroTask.apk release_dist/NeuroTask.apk.sha256 --clobber -R "$REPO"
+            gh release edit "$TAG" --title "NeuroTask ${TAG}" --notes-file release_notes.md --latest -R "$REPO"
           else
             gh release create "$TAG" release_dist/NeuroTask.apk release_dist/NeuroTask.apk.sha256 \
               --target "${{ github.sha }}" \
               --title "NeuroTask ${TAG}" \
               --notes-file release_notes.md \
-              --latest
+              --latest \
+              -R "$REPO"
+          fi
+
+      - name: Verify Latest Release APK download and SHA-256
+        if: github.event_name != 'pull_request'
+        shell: bash
+        env:
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          LATEST_APK_URL="https://github.com/${REPO}/releases/latest/download/NeuroTask.apk"
+          EXPECTED_SHA256=$(cut -d' ' -f1 release_dist/NeuroTask.apk.sha256)
+          VERIFIED=false
+          for attempt in 1 2 3 4 5 6; do
+            if curl -fsSL -o /tmp/NeuroTask_latest_check.apk "$LATEST_APK_URL"; then
+              ACTUAL_SHA256=$(sha256sum /tmp/NeuroTask_latest_check.apk | cut -d' ' -f1)
+              if [ "$ACTUAL_SHA256" = "$EXPECTED_SHA256" ]; then
+                echo "Verified Latest Release APK download (attempt ${attempt}): SHA-256=${ACTUAL_SHA256}"
+                VERIFIED=true
+                break
+              fi
+            fi
+            echo "Waiting for GitHub Releases propagation (attempt ${attempt}/6)..."
+            sleep 5
+          done
+          rm -f /tmp/NeuroTask_latest_check.apk
+          if [ "$VERIFIED" != "true" ]; then
+            echo "Error: Could not verify Latest Release APK at ${LATEST_APK_URL}" >&2
+            exit 1
           fi

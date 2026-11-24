@@ -29,18 +29,23 @@ Esta fricción técnica impedía que evaluadores externos o usuarios finales ins
 
 ## 2. Plan de Ejecución Incremental
 
-### Fase 1: Pipeline CI/CD en GitHub Actions (`.github/workflows/release-apk.yml`)
+### Fase 1: Alineación de Toolchain Android y Pipeline CI/CD en GitHub Actions (`flutter_app/android/` y `.github/workflows/release-apk.yml`)
+- **Compatibilidad de Toolchain Android (Flutter 3.50+):**
+  - **Gradle Wrapper (`gradle-wrapper.properties`):** `9.5.0` (elimina advertencias de deprecación de `9.3.1` y cumple el mínimo requerido por AGP `9.3.x`).
+  - **Android Gradle Plugin (`settings.gradle.kts`):** `com.android.application` `9.3.1` (resuelve el bloqueo en CI por AGP `9.1.0 < 9.1.1`).
+  - **Kotlin Gradle Plugin (`settings.gradle.kts`):** `org.jetbrains.kotlin.android` `2.4.20` (cumple el umbral requerido `>= 2.4.10` / recomendado `2.4.20` de Flutter 3.50).
+  - **Memoria JVM (`gradle.properties`) y Espejo Maven Central (GCS):** `-Xmx4G -XX:MaxMetaspaceSize=2G` para R8 en modo release y resolución prioritaria contra `https://maven-central.storage-download.googleapis.com/maven2/` en CI para evitar límites de tasa (`HTTP 429`) en runners compartidos.
 - **Disparadores:**
-  - `push` sobre la rama `main` (ignorando cambios exclusivos en documentación si corresponde o asegurando consistencia en código/workflow), además de `workflow_dispatch` para ejecuciones manuales bajo demanda.
+  - `push` y `pull_request` sobre la rama `main` (rutas `flutter_app/**` y `.github/workflows/release-apk.yml`), además de `workflow_dispatch` para ejecuciones manuales bajo demanda.
 - **Permisos:** `contents: write` para crear etiquetas/releases y adjuntar los artefactos compilados.
 - **Pasos del Job:**
   1. `actions/checkout` del repositorio.
-  2. Configuración de **Java (JDK 17)** y **Flutter SDK** estable con caché de dependencias.
+  2. Configuración de **Java (JDK 17)**, espejo GCS de Maven Central y **Flutter SDK** estable con caché de dependencias.
   3. Instalación de dependencias (`flutter pub get` dentro de `flutter_app/`).
   4. Puerta de calidad estática y pruebas unitarias/widget (`dart analyze lib/ test/` y `flutter test`).
-  5. **Versionado Incremental (`--build-number`):** Compilación mediante `flutter build apk --release --build-number=${{ github.run_number }}` para garantizar que cada release posea un `versionCode` estrictamente creciente compatible con actualizaciones in-place en Android.
-  6. Normalización del artefacto de salida a `NeuroTask.apk` y generación de huella `NeuroTask.apk.sha256`.
-  7. **Publicación en GitHub Releases (`Latest Release`):** Creación/actualización de Release no borrador (`draft: false`, `prerelease: false`) con tag versionado (ej. `v1.0.<run_number>`) adjuntando `NeuroTask.apk` y `NeuroTask.apk.sha256`, habilitando la URL permanente `releases/latest/download/NeuroTask.apk`.
+  5. **Versionado Incremental (`--build-number`):** Compilación mediante `flutter build apk --release --build-name=<base_version> --build-number=${{ github.run_number }}` para garantizar que cada release posea un `versionCode` estrictamente creciente compatible con actualizaciones in-place en Android.
+  6. Normalización del artefacto de salida a `NeuroTask.apk`, generación/validación de huella `NeuroTask.apk.sha256` y verificación estructural del paquete (`AndroidManifest.xml`, `classes.dex`, `lib/arm64-v8a/libapp.so`).
+  7. **Publicación en GitHub Releases (`Latest Release`) y Verificación End-to-End:** En eventos distintos a `pull_request`, creación/actualización de Release no borrador (`draft: false`, `prerelease: false`) con tag versionado (`v<base_version>-b<run_number>`) adjuntando `NeuroTask.apk` y `NeuroTask.apk.sha256`, seguida de comprobación automática de descarga `HTTP 200` y coincidencia `SHA-256` desde `releases/latest/download/NeuroTask.apk`.
 
 ### Fase 2: Artefacto Visual QR Vectorial (`docs/egi_assets/qr_apk_download.svg`)
 - Generar un código QR vectorial determinista en formato SVG limpio (`viewBox` explícito, zona de silencio `quiet zone >= 4`, módulos Deep Navy `#0F2E49` sobre fondo `#FFFFFF`) que codifique exactamente:
